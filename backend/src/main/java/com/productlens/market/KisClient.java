@@ -2,6 +2,7 @@ package com.productlens.market;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.productlens.market.KisTokenStore.Token;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -16,6 +17,7 @@ import java.util.Map;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -29,17 +31,18 @@ class KisClient {
     private static final Duration TIMEOUT = Duration.ofSeconds(5);
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(TIMEOUT).version(HttpClient.Version.HTTP_1_1).build();
     private final ObjectMapper json;
+    private final KisTokenStore tokens;
     private final String key;
     private final String secret;
     private Token cached;
     private Instant nextAuthentication = Instant.EPOCH;
     private Instant nextRequest = Instant.EPOCH;
 
-    private record Token(String value, Instant expiresAt) {}
-
-    KisClient(ObjectMapper json, @Value("${KIS_APP_KEY:}") String key, @Value("${KIS_APP_SECRET:}") String secret) {
+    KisClient(ObjectMapper json, KisTokenStore tokens, @Value("${KIS_APP_KEY:}") String key,
+              @Value("${KIS_APP_SECRET:}") String secret) {
         if (key.isBlank() || secret.isBlank()) throw new IllegalStateException("KIS 시세 인증 설정 누락");
         this.json = json;
+        this.tokens = tokens;
         this.key = key;
         this.secret = secret;
     }
@@ -62,9 +65,17 @@ class KisClient {
 
     private synchronized String token() {
         var now = Instant.now();
-        if (cached != null && now.isBefore(cached.expiresAt().minusSeconds(60))) return cached.value();
+        if (cached != null && now.isBefore(cached.expiresAt())) return cached.value();
         if (now.isBefore(nextAuthentication)) throw new Unavailable();
         nextAuthentication = now.plusSeconds(60);
+        try { cached = tokens.restoreOrIssue(this::issueToken); }
+        catch (DataAccessException error) { throw new Unavailable(); }
+        if (cached == null) throw new Unavailable();
+        return cached.value();
+    }
+
+    private Token issueToken() {
+        var now = Instant.now();
         try {
             String payload = json.writeValueAsString(Map.of("grant_type", "client_credentials",
                     "appkey", key, "appsecret", secret));
@@ -73,11 +84,11 @@ class KisClient {
             var access = data.path("access_token").asText();
             if (access.isBlank()) throw new Unavailable();
             var expiry = data.path("access_token_token_expired").asText();
-            Instant expiresAt = expiry.isBlank() ? now.plusSeconds(data.path("expires_in").asLong(3600))
+            Instant expiresAt = expiry.isBlank() ? now.plusSeconds(data.path("expires_in").asLong(86_400))
                     : LocalDateTime.parse(expiry, DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss"))
                             .atZone(ZoneId.of("Asia/Seoul")).toInstant();
-            cached = new Token(access, expiresAt);
-            return access;
+            if (!expiresAt.isAfter(now)) throw new Unavailable();
+            return new Token(access, expiresAt);
         } catch (IOException | java.time.DateTimeException error) {
             throw new Unavailable();
         }

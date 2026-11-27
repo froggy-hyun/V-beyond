@@ -35,7 +35,7 @@ class MarketApi {
     }
 
     private List<Stock> subscriptions(List<String> ids) {
-        if (ids.isEmpty() || ids.size() > 10) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "최대 10개 종목을 선택하세요.");
+        if (ids.isEmpty() || ids.size() > 10) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "종목을 1개 이상 10개 이하로 선택해 주세요.");
         return ids.stream().distinct().map(catalog::stock).toList();
     }
 
@@ -44,13 +44,16 @@ class MarketApi {
             @RequestParam(defaultValue = "1m") @Pattern(regexp = "1m|5m|1d") String interval,
             @RequestParam(defaultValue = "1D") @Pattern(regexp = "1D|1W|1M|3M|1Y") String range) {
         if (interval.equals("1d") == range.equals("1D")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "조회 기간과 봉 단위를 확인하세요.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "조회 기간과 봉 단위를 확인해 주세요.");
         }
         return data.candles(catalog.stock(id), interval, range);
     }
 
     @GetMapping("/mode")
     Map<String, String> mode() { return Map.of("feedMode", data.mode()); }
+
+    @GetMapping("/indices")
+    List<MarketData.IndexQuote> indices() { return data.indices(); }
 
     @GetMapping("/sessions")
     Map<String, String> session(@RequestParam @Pattern(regexp = "KR|US") String market, @RequestParam LocalDate date) {

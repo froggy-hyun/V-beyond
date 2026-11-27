@@ -7,9 +7,12 @@ from urllib.request import Request, urlopen
 BASE = "https://openapi.koreainvestment.com:9443"
 key = os.environ["KIS_APP_KEY"]
 secret = os.environ["KIS_APP_SECRET"]
+token = os.environ.get("KIS_ACCESS_TOKEN")
+if not token:
+    raise SystemExit("유효한 KIS_ACCESS_TOKEN을 환경 변수로 전달해 주세요.")
 
-def call(path, headers, body=None):
-    request = Request(BASE + path, headers=headers, data=None if body is None else json.dumps(body).encode())
+def call(path, headers):
+    request = Request(BASE + path, headers=headers)
     try:
         with urlopen(request, timeout=12) as response:
             return json.load(response)
@@ -17,13 +20,6 @@ def call(path, headers, body=None):
         raise SystemExit(f"KIS HTTP {error.code}") from None
     except (URLError, TimeoutError):
         raise SystemExit("KIS 연결 실패") from None
-
-auth = call("/oauth2/tokenP", {"Content-Type": "application/json"},
-            {"grant_type": "client_credentials", "appkey": key, "appsecret": secret})
-token = auth.get("access_token")
-if not token:
-    raise SystemExit("KIS 토큰 미발급")
-print("KIS REST 인증 성공")
 
 checks = (
     ("004370", "/uapi/domestic-stock/v1/quotations/inquire-price", "FHKST01010100",
@@ -40,8 +36,4 @@ for symbol, path, transaction, query, price_field in checks:
     print(f"{symbol} 현재가 {'확인' if ok else '미확인'}")
     failed |= not ok
 
-approval = call("/oauth2/Approval", {"Content-Type": "application/json"},
-                {"grant_type": "client_credentials", "appkey": key, "secretkey": secret})
-approved = bool(approval.get("approval_key"))
-print("KIS WebSocket 접속키 " + ("발급" if approved else "미발급"))
-raise SystemExit(failed or not approved)
+raise SystemExit(failed)

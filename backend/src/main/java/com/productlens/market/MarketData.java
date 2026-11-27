@@ -20,6 +20,9 @@ class MarketData implements MarketFeed {
                  String feedMode, String freshness, String session, String source) {}
     record Candle(Instant startAt, BigDecimal open, BigDecimal high, BigDecimal low,
                   BigDecimal close, long volume) {}
+    record IndexPoint(Instant at, BigDecimal value) {}
+    record IndexQuote(String code, BigDecimal value, BigDecimal change, BigDecimal changePercent,
+                      Instant observedAt, List<IndexPoint> points) {}
 
     static final Instant DAY = Instant.parse("2026-01-05T00:00:00Z");
     private static final Map<String, Integer> SAMPLE_PRICES = Map.of(
