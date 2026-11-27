@@ -8,7 +8,7 @@ import marketCharacter from './assets/brand/market.png'
 
 const Chart = lazy(() => import('./Chart'))
 const markets = [['KR', '국내'], ['US', '미국']] as const
-const indexLabels = { KOSPI: '코스피', KOSDAQ: '코스닥' }
+const indexLabels = { KR: [['KOSPI', '코스피'], ['KOSDAQ', '코스닥']], US: [['SPX', 'S&P 500'], ['COMP', '나스닥 종합']] } as const
 const indexFormat = new Intl.NumberFormat('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const desktopWidth = window.matchMedia('(min-width: 840px)')
 const subscribeToWidth = (update: () => void) => {
@@ -16,10 +16,10 @@ const subscribeToWidth = (update: () => void) => {
   return () => desktopWidth.removeEventListener('change', update)
 }
 
-function MarketIndices() {
-  const indices = useData<MarketIndex[]>('/market/indices', true, 12_000)
-  return <section className="market-indices" aria-label="국내 시장 지수">
-    {(Object.entries(indexLabels) as [MarketIndex['code'], string][]).map(([code, label]) => {
+function MarketIndices({ market }: { market: keyof typeof indexLabels }) {
+  const indices = useData<MarketIndex[]>('/market/indices?market=' + market, true, 12_000)
+  return <section className="market-indices" aria-label={market === 'KR' ? '국내 시장 지수' : '미국 시장 지수'}>
+    {indexLabels[market].map(([code, label]) => {
       const index = indices.data?.find(row => row.code === code)
       const direction = tone(index?.change ?? 0)
       return <div className={'index-cell ' + direction} key={code}>
@@ -100,7 +100,7 @@ export default function MarketPage() {
         <input aria-label="종목·브랜드 찾기" maxLength={100} placeholder="종목명, 티커, 브랜드 검색" value={search} onChange={event => setSearch(event.target.value)} />
       </form>
     </header>
-    {mode === 'KIS_REST' && <MarketIndices />}
+    {mode === 'KIS_REST' && <MarketIndices market={market} />}
     <div className="market-toolbar">
       <div className="market-tabs" role="group" aria-label="시장 선택">
         {markets.map(([code, label]) => <button key={code} aria-pressed={market === code} onClick={() => selectMarket(code)}>{label}주식</button>)}

@@ -39,6 +39,78 @@
     "WSM": {
       "page": "https://www.williams-sonomainc.com/",
       "image": "https://www.williams-sonomainc.com/corpimgs/i/202641/0035/images/apple-icon-144x144.png"
+    },
+    "024940": {
+      "page": "https://www.pn.co.kr/company",
+      "image": "https://www.pn.co.kr/assets/kor/img/pn_logo250220.png"
+    },
+    "192400": {
+      "page": "https://www.cuckoo.co.kr/company/cuckooGuideCiIntroduce",
+      "image": "https://cdn.cuckoo.co.kr/upload_cuckoo/pc/images/company/ci_img05.png"
+    },
+    "021240": {
+      "page": "https://company.coway.com/ko/company/coway",
+      "image": "https://company.coway.com/images/cw-company-ci-blue.png"
+    },
+    "066570": {
+      "page": "https://www.lge.co.kr/company/info/brandIdentity",
+      "image": "https://www.lge.co.kr/kr/images/nextjs/gnb/lg_logo_new.svg"
+    },
+    "005930": {
+      "page": "https://www.samsung.com/sec/about-us/brand-identity/logo/",
+      "image": "https://images.samsung.com/kdp/aboutsamsung/brand_identity/logo/300_186_1.png?$568_320_PNG$"
+    },
+    "KHC": {
+      "page": "https://www.kraftheinzcompany.com/",
+      "image": "https://www.kraftheinzcompany.com/images/logo_main.png"
+    },
+    "CAG": {
+      "page": "https://www.conagrafoodservice.com/",
+      "image": "https://cdn.cookielaw.org/logos/d6675173-9fd9-49ef-9f3d-a02fda9fddb3/6f148e31-6755-4e24-85ce-ed11e0d738b6/6112aaa0-ff48-45c0-8820-99b14975c06a/CB_Primary_Logo_RGB_Texture.png"
+    },
+    "HRL": {
+      "page": "https://www.hormelfoods.com/newsroom/media-resources/",
+      "image": "https://www.hormelfoods.com/wp-content/uploads/Newsroom_Hormel-Foods-Logo.jpg"
+    },
+    "TSN": {
+      "page": "https://www.tysonfoods.com/news/media-resources/logos",
+      "image": "https://www.tysonfoods.com/sites/default/files/inline-images/TFlogo_Full%20color_RGB.png"
+    },
+    "MDLZ": {
+      "page": "https://www.mondelezinternational.com/media/asset-library/",
+      "image": "https://assets.ctfassets.net/zo243s55pyir/6wSqM76m08pK4KW4zYJTfz/45477dedaeb56d38f4f45aee465f8bc1/MDLZ_Logo.zip"
+    },
+    "HSY": {
+      "page": "https://www.thehersheycompany.com/en_us/home/newsroom/media-contacts-and-resources.html",
+      "image": "https://www.thehersheycompany.com/content/dam/hershey-corporate/images/icons/the-hershey-company-logo-color-header.png"
+    },
+    "SJM": {
+      "page": "https://investors.jmsmucker.com/stock-info/default.aspx",
+      "image": "https://s203.q4cdn.com/703080298/files/design/svg/LOGO-smucker-mobile.svg"
+    },
+    "SN": {
+      "page": "https://ir.sharkninja.com/news/news-details/2025/SharkNinja-Reports-Fourth-Quarter-and-Full-Year-2024-Results/default.aspx",
+      "image": "https://s202.q4cdn.com/977000893/files/doc_multimedia/2025/2/1009379166/SN_Logo_RGB_Black.jpg"
+    },
+    "HELE": {
+      "page": "https://investor.helenoftroy.com/overview/",
+      "image": "https://s2.q4cdn.com/117307772/files/doc_news/Helen-of-Troy-Limited-Announces-Earnings-Release-Date-Conference-Call-and-Webcast-for-Third-Quarter-Fiscal-2024-Results-2023.pdf"
+    },
+    "CLX": {
+      "page": "https://www.thecloroxcompany.com/",
+      "image": "https://www.thecloroxcompany.com/wp-content/themes/electro/img/global/tcc-logo-2022.svg"
+    },
+    "AOS": {
+      "page": "https://www.aosmith.com/news.html",
+      "image": "https://www.aosmith.com/on/demandware.static/-/Sites-aosmith-Library/default/dw09cc9cfa/images/newsroom/aos-corp-news-investors-768x432.jpg"
+    },
+    "PNR": {
+      "page": "https://www.pentair.com/",
+      "image": "https://www.pentair.com/content/dam/extranet/enterprise/images/logos/pentair/pentair-logo-web.svg"
+    },
+    "MMM": {
+      "page": "https://investors.3m.com/financials/sec-filings/content/0000066740-26-000014/mmm-20251231.htm",
+      "image": "https://investors.3m.com/financials/sec-filings/content/0000066740-26-000014/mmm-20251231_g1.jpg"
     }
   },
   "products": {
@@ -161,6 +233,82 @@
     "ws-thermoclad": {
       "page": "https://www.williams-sonoma.com/products/ws-signature-thermo-clad-ss-nonstick-covered-fry-pan/",
       "image": "https://assets.wsimgs.com/wsimgs/ab/images/dp/wcm/202644/0355/williams-sonoma-signature-thermo-clad-stainless-steel-nons-j.jpg"
+    },
+    "pn-withus-steel-22": {
+      "page": "https://m.lotteimall.com/goods/viewGoodsDetail.lotte?goods_no=2984040213",
+      "image": "https://image2.lotteimall.com/goods/13/02/04/2984040213_1.jpg"
+    },
+    "cuckoo-twin-pressure-10": {
+      "page": "https://www.cuckoo.co.kr/mall/productView?productNo=5856",
+      "image": "https://cdn.cuckoo.co.kr/upload_cuckoo/_bo_mall/product/d507cd95-929a-4477-8297-3bc26930326a.jpg"
+    },
+    "coway-icon-2": {
+      "page": "https://www.coway.com/product/detail?optno=6&prdno=1494",
+      "image": "https://mall.cowaystatic.com/static/upload/product/product/ID0101_8323_attimg_org.png"
+    },
+    "lg-puricare-hit": {
+      "page": "https://www.lge.co.kr/product/air-purifier/as186hwwa",
+      "image": "https://www.lge.co.kr/kr/images/air-purifier/md10745831/gallery/medium01.jpg"
+    },
+    "samsung-bluesky-5500": {
+      "page": "https://www.samsung.com/sec/air-cleaner/air-purifier-ap70f06103rd-d2c/AP70F06103RVD/",
+      "image": "https://images.samsung.com/kdp/goods/2025/02/27/43740adb-b69e-4b53-89b1-8a92c9de93d0.png"
+    },
+    "banquet-original-nuggets": {
+      "page": "https://shop.foodmaxx.com/store/foodmaxx/products/1340640-banquet-chicken-nuggets-value-pack-48-oz",
+      "image": "https://www.instacart.com/assets/domains/product-image/file/large_4a9cc0f0-b023-480b-98af-1044ab164c1a.jpg"
+    },
+    "tyson-chicken-nuggets": {
+      "page": "https://www.tyson.com/products/nuggets-patties/00023700060266",
+      "image": "https://images.salsify.com/image/upload/s--smlpTPvd--/q_auto/1929644da9b950dae73ad1bb81035a4faa832546.webp"
+    },
+    "skippy-creamy-peanut-butter": {
+      "page": "https://www.peanutbutter.com/product/creamy-peanut-butter/",
+      "image": "https://www.peanutbutter.com/wp-content/uploads/Web_800_Creamy-Peanut-Butter_16.3oz.png"
+    },
+    "jif-creamy-peanut-butter": {
+      "page": "https://www.jif.com/products/creamy/creamy-peanut-butter",
+      "image": "https://www.jif.com/jif/products/creamy-peanut-butter/105471/image-thumb__105471__schema_image/creamy-peanut-butter_00051500255162_C1C1.22b301aa.jpg"
+    },
+    "toblerone-milk-chocolate": {
+      "page": "https://www.snackworks.com/products/toblerone-milk-chocolate-bar-with-honey-and-almond-nougat-126-oz/",
+      "image": "https://images.salsify.com/image/upload/s--YNnh_FjG--/c_limit,q_auto,h_329,w_329/gkitxd8ouhyzqjhwqyfd.png"
+    },
+    "hersheys-milk-chocolate": {
+      "page": "https://www.hersheyland.com/products/hersheys-milk-chocolate-candy-bar-1-55-oz.html",
+      "image": "https://s7d1.scene7.com/is/image/hersheyprodcloud/0_34000_00240_5_701_24000_114_Item_Front?fmt=webp-alpha&hei=908&qlt=75"
+    },
+    "kraft-original-mac-cup": {
+      "page": "https://www.kraftheinz.com/kraft-mac-and-cheese/products/00021000010875/original-cup-2.05-oz",
+      "image": "https://res.cloudinary.com/kraft-heinz-whats-cooking-ca/image/upload/f_auto/q_auto/r_8/c_limit,w_600/v1/dxp-images/brands/products/00021000010875-original-mac--cheese-macaroni-and-cheese-dinner/marketing-view-color-front_content-hub-10776870_baab12f36f937f9b43f7ce1c2693235c"
+    },
+    "ninja-neverquit": {
+      "page": "https://www.sharkninja.com/ninja-neverquit-10-25-ceramic-frying-pan/CQ10026IV2.html",
+      "image": "https://assets.sharkninja.com/image/upload/w_600,q_auto/v1792506253/storefront/products/CQ10026/CQ13000IV2_Hero.png"
+    },
+    "oxo-ceramic-pro": {
+      "page": "https://www.oxo.com/shop/kitchenware/cooking-baking/cookware/ceramic-professional-non-stick-10-inch-frypan.html",
+      "image": "https://www.oxo.com/media/catalog/product/cache/9526abe58a368536f220458005aa0000/c/c/cc004741-001-1.jpg"
+    },
+    "brita-elite-ob06": {
+      "page": "https://www.brita.com/products/brita-elite-replacement-filters/",
+      "image": "https://images.ctfassets.net/bugnyha6so6z/5u5MVArRf116sdRObWJY4M/5cbb4aff64cc1abcd4ef643187781db9/PDP_-_filter_-_elite_-_1x_1x.webp?fm=webp&q=85&w=480"
+    },
+    "ao-smith-ro-mb4000": {
+      "page": "https://www.aosmithatlowes.com/products/water-filters/drinking-water/ao-us-ro-mb-4000/",
+      "image": "https://www.aosmithatlowes.com/media/1126/ao-us-ro-4000mb-main.png"
+    },
+    "pentair-everpure-4fc-ps": {
+      "page": "https://flowandfiltrationsolutions.pentair.com/en-us/commercial-filtration/products/filtration-systems/pfoa-pfos-reduction-systems.html",
+      "image": "https://flowandfiltrationsolutions.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/images/product-images/evp---pfas-reduction-water-solutions/ev929830-ql3b-4fc-ps-system.png"
+    },
+    "filtrete-1900": {
+      "page": "https://www.supplyhouse.com/3M-7100250953-16-x-25-x-1-3M-Filtrete-High-Performance-Air-Filter-1900-MPR-UA01-4",
+      "image": "https://d3501hjdis3g5w.cloudfront.net/images/products/zoom/7100250953-1.jpg"
+    },
+    "pur-plus-ppf951k": {
+      "page": "https://www.pur.com/shop/replacement-filters/pur-plus-pitcher-filter/",
+      "image": "https://www.pur.com/wp-content/uploads/PPF951K1-product-pitcher-filter-1pk.png"
     }
   }
 }

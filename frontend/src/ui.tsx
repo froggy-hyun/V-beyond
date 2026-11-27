@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Building2, CookingPot, CupSoda, Soup, Utensils, ChevronRight } from 'lucide-react'
+import { Building2, CookingPot, CupSoda, Soup, Utensils, ChevronRight, Droplet, Wind, Drumstick, Sandwich } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { categories, currency, pathFor, percent, relations, tone } from './api'
 import type { Category, Product, Quote, Stock } from './api'
@@ -10,7 +10,11 @@ const productImages = import.meta.glob<string>('./assets/products/*.webp', { eag
 const productSources: Record<string, { page: string; image: string }> = imageSources.products
 export const productPhotoSource = (id: string) => productSources[id]?.page
 
-const icons = { RAMEN: Soup, FRYING_PAN: Utensils, CHICKEN_NOODLE_SOUP: CookingPot, COLA: CupSoda }
+const icons = {
+  RAMEN: Soup, FRYING_PAN: Utensils, CHICKEN_NOODLE_SOUP: CookingPot, COLA: CupSoda,
+  RICE_COOKER: CookingPot, WATER_FILTER: Droplet, AIR_PURIFIER: Wind,
+  FROZEN_CHICKEN_NUGGETS: Drumstick, PEANUT_BUTTER: Sandwich, CHOCOLATE: Sandwich, MAC_AND_CHEESE: Soup,
+}
 export function ProductIcon({ category }: { category: Category }) {
   const Icon = icons[category]
   return <div className={'product-icon ' + category.toLowerCase()}><Icon aria-hidden size={27} strokeWidth={1.55} /></div>

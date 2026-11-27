@@ -1675,5 +1675,948 @@
     ],
     "material": null,
     "description": "미국에서 판매하는 12 fl oz 캔에 표시된 값입니다. 100 mL 수치는 1 미국 액량온스 = 29.5735295625 mL로 환산했습니다."
+  },
+  {
+    "id": "pn-withus-steel-22",
+    "symbol": "024940",
+    "name": "위더스 통3중 스텐우드 IH 프라이팬",
+    "brand": "PN풍년",
+    "category": "FRYING_PAN",
+    "market": "KR",
+    "relation": "MANUFACTURER",
+    "size": "22 cm · WSFP-22(IH)",
+    "prep": "조리 표면",
+    "source": "https://m.lotteimall.com/goods/viewGoodsDetail.lotte?goods_no=2984040213",
+    "status": "VERIFIED",
+    "facts": [],
+    "evidence": [
+      {
+        "title": "스테인리스 몸체 사양",
+        "summary": "판매처에 몸체는 통3중 스테인리스 스틸, 손잡이는 스테인리스와 비치우드라고 기재되어 있습니다. 코팅 성분은 공개 사양에서 확인되지 않습니다.",
+        "source": "https://m.lotteimall.com/goods/viewGoodsDetail.lotte?goods_no=2984040213"
+      }
+    ],
+    "material": "통3중 스테인리스 스틸 몸체",
+    "description": "PN풍년이 제조한 22 cm 인덕션용 프라이팬입니다."
+  },
+  {
+    "id": "cuckoo-twin-pressure-10",
+    "symbol": "192400",
+    "name": "트윈프레셔 올스테인리스 내솥 밥솥",
+    "brand": "쿠쿠전자",
+    "category": "RICE_COOKER",
+    "market": "KR",
+    "relation": "OWNER",
+    "size": "10인용 · 1.8 L · CRP-KHTAS1010FWM",
+    "prep": "취사 내솥",
+    "source": "https://www.cuckoo.co.kr/mall/productView?productNo=5856",
+    "status": "VERIFIED",
+    "facts": [],
+    "evidence": [
+      {
+        "title": "내솥 소재",
+        "summary": "공식 제품 페이지와 사용설명서에 올스테인리스 내솥을 사용하는 10인용 IH 전기압력밥솥으로 안내되어 있습니다.",
+        "source": "https://cdn.cuckoo.co.kr/upload_cuckoo/_bo_rep/manual/file_45591d28-7e07-4238-b4b1-037d5a9713c4.pdf"
+      },
+      {
+        "title": "제조사와 상장사 관계",
+        "summary": "쿠쿠전자가 제조하며, 쿠쿠홀딩스 사업보고서에 쿠쿠전자 보유 지분이 100%로 기재되어 있습니다.",
+        "source": "https://kind.krx.co.kr/external/2026/03/16/002187/20260316006221/11011.htm"
+      }
+    ],
+    "material": "올스테인리스 내솥",
+    "description": "쿠쿠홀딩스의 자회사 쿠쿠전자에서 판매하는 10인용 트윈프레셔 밥솥입니다."
+  },
+  {
+    "id": "coway-icon-2",
+    "symbol": "021240",
+    "name": "아이콘 정수기 2",
+    "brand": "코웨이",
+    "category": "WATER_FILTER",
+    "market": "KR",
+    "relation": "MANUFACTURER",
+    "size": "CHP-7211N · 냉온정수기",
+    "prep": "가정용 직수 정수기",
+    "source": "https://www.coway.com/product/detail?optno=6&prdno=1494",
+    "status": "VERIFIED",
+    "facts": [],
+    "evidence": [
+      {
+        "title": "정수 필터 구성",
+        "summary": "이 모델의 공식 자료에 나노트랩 필터와 이노센스 필터가 기재되어 있습니다.",
+        "source": "https://www.coway.com/product/detail?optno=6&prdno=1494"
+      },
+      {
+        "title": "음용수 PFAS 저감 확인 기준",
+        "summary": "미국 환경보호청은 제품과 필터 모델별 인증 정보를 확인하라고 안내합니다. 이 모델의 PFAS 저감 인증은 아래 제조사 자료에서 확인되지 않습니다.",
+        "source": "https://www.epa.gov/water-research/identifying-drinking-water-filters-certified-reduce-pfas"
+      }
+    ],
+    "material": "나노트랩 필터와 이노센스 필터",
+    "description": "나노트랩 필터와 이노센스 필터를 사용하는 코웨이의 가정용 냉온정수기입니다."
+  },
+  {
+    "id": "lg-puricare-hit",
+    "symbol": "066570",
+    "name": "퓨리케어 360° 공기청정기 Hit",
+    "brand": "LG전자",
+    "category": "AIR_PURIFIER",
+    "market": "KR",
+    "relation": "MANUFACTURER",
+    "size": "62 m² · AS186HWWA",
+    "prep": "가정용 실내 공기청정기",
+    "source": "https://www.lge.co.kr/product/air-purifier/as186hwwa",
+    "status": "VERIFIED",
+    "facts": [],
+    "evidence": [
+      {
+        "title": "청정 사용 면적과 입자 여과",
+        "summary": "제조사가 청정 사용 면적을 62 m²로 표기합니다. 공기 중 입자 여과 시험은 별도로 명시된 시험 조건에서 진행되었습니다.",
+        "source": "https://www.lge.co.kr/product/air-purifier/as186hwwa"
+      },
+      {
+        "title": "실내 공기 여과",
+        "summary": "미국 환경보호청은 공기청정기를 선택할 때 공간 크기에 맞는 입자 여과 성능을 확인하라고 안내합니다.",
+        "source": "https://www.epa.gov/indoor-air-quality-iaq/air-cleaners-and-air-filters-home"
+      }
+    ],
+    "material": "입자 여과 필터",
+    "description": "LG전자가 청정 사용 면적을 62 m²로 안내한 가정용 공기청정기입니다."
+  },
+  {
+    "id": "samsung-bluesky-5500",
+    "symbol": "005930",
+    "name": "블루스카이 5500",
+    "brand": "삼성전자",
+    "category": "AIR_PURIFIER",
+    "market": "KR",
+    "relation": "MANUFACTURER",
+    "size": "60 m² · AP70F06103RVD",
+    "prep": "가정용 실내 공기청정기",
+    "source": "https://www.samsung.com/sec/air-cleaner/air-purifier-ap70f06103rd-d2c/AP70F06103RVD/",
+    "status": "VERIFIED",
+    "facts": [],
+    "evidence": [
+      {
+        "title": "청정 사용 면적과 입자 여과",
+        "summary": "제조사가 청정 사용 면적을 60 m²로 표기합니다. 센서에 표시되는 먼지 농도는 사용 환경과 계측 방법에 따라 달라질 수 있습니다.",
+        "source": "https://www.samsung.com/sec/air-cleaner/air-purifier-ap70f06103rd-d2c/AP70F06103RVD/"
+      },
+      {
+        "title": "실내 공기 여과",
+        "summary": "미국 환경보호청은 공기청정기를 선택할 때 공간 크기에 맞는 입자 여과 성능을 확인하라고 안내합니다.",
+        "source": "https://www.epa.gov/indoor-air-quality-iaq/air-cleaners-and-air-filters-home"
+      }
+    ],
+    "material": "미세먼지 집진필터",
+    "description": "삼성전자가 청정 사용 면적을 60 m²로 안내한 가정용 공기청정기입니다."
+  },
+  {
+    "id": "banquet-original-nuggets",
+    "symbol": "CAG",
+    "name": "뱅킷 오리지널 치킨너겟 패밀리팩",
+    "brand": "Banquet",
+    "category": "FROZEN_CHICKEN_NUGGETS",
+    "market": "US",
+    "status": "VERIFIED",
+    "relation": "OWNER",
+    "size": "48 oz (1.36 kg)",
+    "prep": "빵가루를 입힌 냉동 치킨너겟",
+    "source": "https://www.banquet.com/nuggets/original-chicken-nuggets-family-pack",
+    "facts": [
+      {
+        "criterion": "CALORIES",
+        "value": 230,
+        "unit": "kcal",
+        "basis": "PER_SERVING",
+        "source": "https://fdc.nal.usda.gov/food-details/2754295/nutrients"
+      },
+      {
+        "criterion": "CALORIES",
+        "value": 250.0,
+        "unit": "kcal",
+        "basis": "PER_100G",
+        "source": "https://fdc.nal.usda.gov/food-details/2754295/nutrients"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 490,
+        "unit": "mg",
+        "basis": "PER_SERVING",
+        "source": "https://fdc.nal.usda.gov/food-details/2754295/nutrients"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 532.61,
+        "unit": "mg",
+        "basis": "PER_100G",
+        "source": "https://fdc.nal.usda.gov/food-details/2754295/nutrients"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 3,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://fdc.nal.usda.gov/food-details/2754295/nutrients"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 3.26,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://fdc.nal.usda.gov/food-details/2754295/nutrients"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 1,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://fdc.nal.usda.gov/food-details/2754295/nutrients"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 1.09,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://fdc.nal.usda.gov/food-details/2754295/nutrients"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 0,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://fdc.nal.usda.gov/food-details/2754295/nutrients"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 0.0,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://fdc.nal.usda.gov/food-details/2754295/nutrients"
+      }
+    ],
+    "evidence": [
+      {
+        "title": "미국 제품 영양 표시",
+        "summary": "미국 판매 제품의 포장 표시를 사용했습니다. 100 g 수치는 표시된 1회 제공량 92 g의 값을 환산했습니다.",
+        "source": "https://fdc.nal.usda.gov/food-details/2754295/nutrients"
+      }
+    ],
+    "material": null,
+    "description": "미국 판매 냉동 치킨너겟 패밀리팩입니다. 제품 표시의 1회 제공량은 너겟 5개(92 g)입니다."
+  },
+  {
+    "id": "tyson-chicken-nuggets",
+    "symbol": "TSN",
+    "name": "타이슨 치킨너겟",
+    "brand": "Tyson",
+    "category": "FROZEN_CHICKEN_NUGGETS",
+    "market": "US",
+    "status": "VERIFIED",
+    "relation": "MANUFACTURER",
+    "size": "29 oz (약 822 g)",
+    "prep": "빵가루를 입힌 냉동 치킨너겟",
+    "source": "https://www.tyson.com/products/nuggets-patties/00023700060266",
+    "facts": [
+      {
+        "criterion": "CALORIES",
+        "value": 210,
+        "unit": "kcal",
+        "basis": "PER_SERVING",
+        "source": "https://www.tyson.com/products/nuggets-patties/00023700060266"
+      },
+      {
+        "criterion": "CALORIES",
+        "value": 233.33,
+        "unit": "kcal",
+        "basis": "PER_100G",
+        "source": "https://www.tyson.com/products/nuggets-patties/00023700060266"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 450,
+        "unit": "mg",
+        "basis": "PER_SERVING",
+        "source": "https://www.tyson.com/products/nuggets-patties/00023700060266"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 500.0,
+        "unit": "mg",
+        "basis": "PER_100G",
+        "source": "https://www.tyson.com/products/nuggets-patties/00023700060266"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 3,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.tyson.com/products/nuggets-patties/00023700060266"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 3.33,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.tyson.com/products/nuggets-patties/00023700060266"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 0,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.tyson.com/products/nuggets-patties/00023700060266"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 0.0,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.tyson.com/products/nuggets-patties/00023700060266"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 0,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.tyson.com/products/nuggets-patties/00023700060266"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 0.0,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.tyson.com/products/nuggets-patties/00023700060266"
+      }
+    ],
+    "evidence": [
+      {
+        "title": "미국 제품 영양 표시",
+        "summary": "미국 판매 제품의 포장 표시를 사용했습니다. 100 g 수치는 표시된 1회 제공량 90 g의 값을 환산했습니다.",
+        "source": "https://www.tyson.com/products/nuggets-patties/00023700060266"
+      }
+    ],
+    "material": null,
+    "description": "미국 판매 냉동 치킨너겟입니다. 제품 표시의 1회 제공량은 너겟 5개(90 g)입니다."
+  },
+  {
+    "id": "skippy-creamy-peanut-butter",
+    "symbol": "HRL",
+    "name": "스키피 크리미 땅콩버터",
+    "brand": "Skippy",
+    "category": "PEANUT_BUTTER",
+    "market": "US",
+    "status": "VERIFIED",
+    "relation": "OWNER",
+    "size": "16.3 oz (462 g)",
+    "prep": "크리미 땅콩버터 · 판매 상태",
+    "source": "https://www.peanutbutter.com/product/creamy-peanut-butter/",
+    "facts": [
+      {
+        "criterion": "CALORIES",
+        "value": 190,
+        "unit": "kcal",
+        "basis": "PER_SERVING",
+        "source": "https://www.peanutbutter.com/product/creamy-peanut-butter/"
+      },
+      {
+        "criterion": "CALORIES",
+        "value": 593.75,
+        "unit": "kcal",
+        "basis": "PER_100G",
+        "source": "https://www.peanutbutter.com/product/creamy-peanut-butter/"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 150,
+        "unit": "mg",
+        "basis": "PER_SERVING",
+        "source": "https://www.peanutbutter.com/product/creamy-peanut-butter/"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 468.75,
+        "unit": "mg",
+        "basis": "PER_100G",
+        "source": "https://www.peanutbutter.com/product/creamy-peanut-butter/"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 3,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.peanutbutter.com/product/creamy-peanut-butter/"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 9.38,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.peanutbutter.com/product/creamy-peanut-butter/"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 3,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.peanutbutter.com/product/creamy-peanut-butter/"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 9.38,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.peanutbutter.com/product/creamy-peanut-butter/"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 2,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.peanutbutter.com/product/creamy-peanut-butter/"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 6.25,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.peanutbutter.com/product/creamy-peanut-butter/"
+      }
+    ],
+    "evidence": [
+      {
+        "title": "미국 제품 영양 표시",
+        "summary": "미국 판매 제품의 포장 표시를 사용했습니다. 100 g 수치는 표시된 1회 제공량 32 g의 값을 환산했습니다.",
+        "source": "https://www.peanutbutter.com/product/creamy-peanut-butter/"
+      }
+    ],
+    "material": null,
+    "description": "미국 판매 크리미 땅콩버터입니다. 제품 표시의 1회 제공량은 2큰술(32 g)입니다."
+  },
+  {
+    "id": "jif-creamy-peanut-butter",
+    "symbol": "SJM",
+    "name": "지프 크리미 땅콩버터",
+    "brand": "Jif",
+    "category": "PEANUT_BUTTER",
+    "market": "US",
+    "status": "VERIFIED",
+    "relation": "OWNER",
+    "size": "16 oz (454 g)",
+    "prep": "크리미 땅콩버터 · 판매 상태",
+    "source": "https://www.jif.com/products/creamy/creamy-peanut-butter",
+    "facts": [
+      {
+        "criterion": "CALORIES",
+        "value": 190,
+        "unit": "kcal",
+        "basis": "PER_SERVING",
+        "source": "https://www.jif.com/products/creamy/creamy-peanut-butter"
+      },
+      {
+        "criterion": "CALORIES",
+        "value": 575.76,
+        "unit": "kcal",
+        "basis": "PER_100G",
+        "source": "https://www.jif.com/products/creamy/creamy-peanut-butter"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 140,
+        "unit": "mg",
+        "basis": "PER_SERVING",
+        "source": "https://www.jif.com/products/creamy/creamy-peanut-butter"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 424.24,
+        "unit": "mg",
+        "basis": "PER_100G",
+        "source": "https://www.jif.com/products/creamy/creamy-peanut-butter"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 3.5,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.jif.com/products/creamy/creamy-peanut-butter"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 10.61,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.jif.com/products/creamy/creamy-peanut-butter"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 3,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.jif.com/products/creamy/creamy-peanut-butter"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 9.09,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.jif.com/products/creamy/creamy-peanut-butter"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 2,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.jif.com/products/creamy/creamy-peanut-butter"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 6.06,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.jif.com/products/creamy/creamy-peanut-butter"
+      }
+    ],
+    "evidence": [
+      {
+        "title": "미국 제품 영양 표시",
+        "summary": "미국 판매 제품의 포장 표시를 사용했습니다. 100 g 수치는 표시된 1회 제공량 33 g의 값을 환산했습니다.",
+        "source": "https://www.jif.com/products/creamy/creamy-peanut-butter"
+      }
+    ],
+    "material": null,
+    "description": "미국 판매 크리미 땅콩버터입니다. 제품 표시의 1회 제공량은 2큰술(33 g)입니다."
+  },
+  {
+    "id": "toblerone-milk-chocolate",
+    "symbol": "MDLZ",
+    "name": "토블론 밀크 초콜릿 허니 아몬드 누가",
+    "brand": "Toblerone",
+    "category": "CHOCOLATE",
+    "market": "US",
+    "status": "VERIFIED",
+    "relation": "OWNER",
+    "size": "12.6 oz (약 357 g)",
+    "prep": "밀크 초콜릿 바 · 판매 상태",
+    "source": "https://www.snackworks.com/products/toblerone-milk-chocolate-bar-with-honey-and-almond-nougat-126-oz/",
+    "facts": [
+      {
+        "criterion": "CALORIES",
+        "value": 180,
+        "unit": "kcal",
+        "basis": "PER_SERVING",
+        "source": "https://images.salsify.com/image/upload/s--MY4VBpIM--/c_limit,q_auto,w_429/a5ab99f5b792fef8a92aa43b9d330befab683641.jpg"
+      },
+      {
+        "criterion": "CALORIES",
+        "value": 545.45,
+        "unit": "kcal",
+        "basis": "PER_100G",
+        "source": "https://images.salsify.com/image/upload/s--MY4VBpIM--/c_limit,q_auto,w_429/a5ab99f5b792fef8a92aa43b9d330befab683641.jpg"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 15,
+        "unit": "mg",
+        "basis": "PER_SERVING",
+        "source": "https://images.salsify.com/image/upload/s--MY4VBpIM--/c_limit,q_auto,w_429/a5ab99f5b792fef8a92aa43b9d330befab683641.jpg"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 45.45,
+        "unit": "mg",
+        "basis": "PER_100G",
+        "source": "https://images.salsify.com/image/upload/s--MY4VBpIM--/c_limit,q_auto,w_429/a5ab99f5b792fef8a92aa43b9d330befab683641.jpg"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 6,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://images.salsify.com/image/upload/s--MY4VBpIM--/c_limit,q_auto,w_429/a5ab99f5b792fef8a92aa43b9d330befab683641.jpg"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 18.18,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://images.salsify.com/image/upload/s--MY4VBpIM--/c_limit,q_auto,w_429/a5ab99f5b792fef8a92aa43b9d330befab683641.jpg"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 20,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://images.salsify.com/image/upload/s--MY4VBpIM--/c_limit,q_auto,w_429/a5ab99f5b792fef8a92aa43b9d330befab683641.jpg"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 60.61,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://images.salsify.com/image/upload/s--MY4VBpIM--/c_limit,q_auto,w_429/a5ab99f5b792fef8a92aa43b9d330befab683641.jpg"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 18,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://images.salsify.com/image/upload/s--MY4VBpIM--/c_limit,q_auto,w_429/a5ab99f5b792fef8a92aa43b9d330befab683641.jpg"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 54.55,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://images.salsify.com/image/upload/s--MY4VBpIM--/c_limit,q_auto,w_429/a5ab99f5b792fef8a92aa43b9d330befab683641.jpg"
+      }
+    ],
+    "evidence": [
+      {
+        "title": "미국 제품 영양 표시",
+        "summary": "미국 판매 제품의 포장 표시를 사용했습니다. 100 g 수치는 표시된 1회 제공량 33 g의 값을 환산했습니다.",
+        "source": "https://images.salsify.com/image/upload/s--MY4VBpIM--/c_limit,q_auto,w_429/a5ab99f5b792fef8a92aa43b9d330befab683641.jpg"
+      }
+    ],
+    "material": null,
+    "description": "미국 판매 허니 아몬드 누가 밀크 초콜릿입니다. 제품 표시의 1회 제공량은 한 조각(33 g)입니다."
+  },
+  {
+    "id": "hersheys-milk-chocolate",
+    "symbol": "HSY",
+    "name": "허쉬 밀크 초콜릿 바",
+    "brand": "Hershey’s",
+    "category": "CHOCOLATE",
+    "market": "US",
+    "status": "VERIFIED",
+    "relation": "MANUFACTURER",
+    "size": "1.55 oz (43 g)",
+    "prep": "밀크 초콜릿 바 · 판매 상태",
+    "source": "https://www.hersheyland.com/products/hersheys-milk-chocolate-candy-bar-1-55-oz.html",
+    "facts": [
+      {
+        "criterion": "CALORIES",
+        "value": 210,
+        "unit": "kcal",
+        "basis": "PER_SERVING",
+        "source": "https://www.hersheyland.com/products/hersheys-milk-chocolate-candy-bar-1-55-oz.html"
+      },
+      {
+        "criterion": "CALORIES",
+        "value": 488.37,
+        "unit": "kcal",
+        "basis": "PER_100G",
+        "source": "https://www.hersheyland.com/products/hersheys-milk-chocolate-candy-bar-1-55-oz.html"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 35,
+        "unit": "mg",
+        "basis": "PER_SERVING",
+        "source": "https://www.hersheyland.com/products/hersheys-milk-chocolate-candy-bar-1-55-oz.html"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 81.4,
+        "unit": "mg",
+        "basis": "PER_100G",
+        "source": "https://www.hersheyland.com/products/hersheys-milk-chocolate-candy-bar-1-55-oz.html"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 8,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.hersheyland.com/products/hersheys-milk-chocolate-candy-bar-1-55-oz.html"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 18.6,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.hersheyland.com/products/hersheys-milk-chocolate-candy-bar-1-55-oz.html"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 25,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.hersheyland.com/products/hersheys-milk-chocolate-candy-bar-1-55-oz.html"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 58.14,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.hersheyland.com/products/hersheys-milk-chocolate-candy-bar-1-55-oz.html"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 21,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.hersheyland.com/products/hersheys-milk-chocolate-candy-bar-1-55-oz.html"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 48.84,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.hersheyland.com/products/hersheys-milk-chocolate-candy-bar-1-55-oz.html"
+      }
+    ],
+    "evidence": [
+      {
+        "title": "미국 제품 영양 표시",
+        "summary": "미국 판매 제품의 포장 표시를 사용했습니다. 100 g 수치는 표시된 1회 제공량 43 g의 값을 환산했습니다.",
+        "source": "https://www.hersheyland.com/products/hersheys-milk-chocolate-candy-bar-1-55-oz.html"
+      }
+    ],
+    "material": null,
+    "description": "미국 판매 밀크 초콜릿입니다. 제조사 영양 표시에는 바 한 개(43 g)가 1회 제공량으로 기재되어 있습니다."
+  },
+  {
+    "id": "kraft-original-mac-cup",
+    "symbol": "KHC",
+    "name": "크래프트 오리지널 맥앤치즈 컵",
+    "brand": "Kraft Mac & Cheese",
+    "category": "MAC_AND_CHEESE",
+    "market": "US",
+    "status": "VERIFIED",
+    "relation": "OWNER",
+    "size": "2.05 oz (약 58 g)",
+    "prep": "컵 맥앤치즈 · 물 추가 전 내용물",
+    "source": "https://www.kraftheinz.com/kraft-mac-and-cheese/products/00021000010875/original-cup-2.05-oz",
+    "facts": [
+      {
+        "criterion": "SODIUM",
+        "value": 500,
+        "unit": "mg",
+        "basis": "PER_SERVING",
+        "source": "https://smartlabel.kraftheinz.com/KRAFT/product/00021000010875"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 862.07,
+        "unit": "mg",
+        "basis": "PER_100G",
+        "source": "https://smartlabel.kraftheinz.com/KRAFT/product/00021000010875"
+      }
+    ],
+    "evidence": [
+      {
+        "title": "미국 제품 영양 표시",
+        "summary": "미국 판매 제품의 포장 표시를 사용했습니다. 100 g 수치는 표시된 1회 제공량 58 g의 값을 환산했습니다.",
+        "source": "https://smartlabel.kraftheinz.com/KRAFT/product/00021000010875"
+      }
+    ],
+    "material": null,
+    "description": "물을 넣어 전자레인지로 조리하는 미국 판매 컵 맥앤치즈입니다. 나트륨은 한 컵에 들어 있는 내용물 1회분을 기준으로 합니다."
+  },
+  {
+    "id": "ninja-neverquit",
+    "symbol": "SN",
+    "name": "네버퀴트 세라믹 프라이팬",
+    "brand": "Ninja",
+    "category": "FRYING_PAN",
+    "market": "US",
+    "relation": "OWNER",
+    "status": "VERIFIED",
+    "size": "10.25인치",
+    "prep": "조리 표면",
+    "source": "https://www.sharkninja.com/ninja-neverquit-10-25-ceramic-frying-pan/CQ10026IV2.html",
+    "facts": [
+      {
+        "criterion": "AVOID_PTFE",
+        "value": 0,
+        "unit": "flag",
+        "basis": "SURFACE",
+        "source": "https://www.sharkninja.com/ninja-neverquit-10-25-ceramic-frying-pan/CQ10026IV2.html"
+      },
+      {
+        "criterion": "AVOID_PFAS",
+        "value": 0,
+        "unit": "flag",
+        "basis": "SURFACE",
+        "source": "https://www.sharkninja.com/ninja-neverquit-10-25-ceramic-frying-pan/CQ10026IV2.html"
+      }
+    ],
+    "evidence": [
+      {
+        "title": "조리면 PTFE·PFAS 표기",
+        "summary": "제조사가 이 모델의 조리면 코팅에 PTFE와 PFAS를 사용하지 않도록 설계했다고 명시합니다. 완제품 전체나 실제 사용 중의 노출을 측정한 결과는 아닙니다.",
+        "source": "https://www.sharkninja.com/ninja-neverquit-10-25-ceramic-frying-pan/CQ10026IV2.html"
+      }
+    ],
+    "material": "세라믹 코팅 · 알루미늄 몸체 · 스테인리스 손잡이",
+    "description": "미국 판매 모델 CQ10026IV2입니다. 세라믹 조리면을 적용한 알루미늄 프라이팬입니다."
+  },
+  {
+    "id": "oxo-ceramic-pro",
+    "symbol": "HELE",
+    "name": "세라믹 프로페셔널 논스틱 프라이팬",
+    "brand": "OXO",
+    "category": "FRYING_PAN",
+    "market": "US",
+    "relation": "OWNER",
+    "status": "VERIFIED",
+    "size": "10인치",
+    "prep": "조리 표면",
+    "source": "https://www.oxo.com/shop/kitchenware/cooking-baking/cookware/ceramic-professional-non-stick-10-inch-frypan.html",
+    "facts": [],
+    "evidence": [
+      {
+        "title": "제조사 코팅 표기의 범위",
+        "summary": "미국 판매 페이지는 코팅에 PFOA, 납, 카드뮴을 사용하지 않았다고 명시합니다. 이 표기로 전체 PFAS 또는 PTFE 미사용 여부를 판단할 수 없습니다.",
+        "source": "https://www.oxo.com/shop/kitchenware/cooking-baking/cookware/ceramic-professional-non-stick-10-inch-frypan.html"
+      },
+      {
+        "title": "브랜드 보유 관계",
+        "summary": "상장사 Helen of Troy는 OXO를 주요 브랜드로 공시합니다.",
+        "source": "https://www.helenoftroy.com/our-brands/"
+      }
+    ],
+    "material": "세라믹 논스틱 코팅 · 경질 양극산화 알루미늄 몸체",
+    "description": "미국 판매 모델 CC004741-001입니다. 다이아몬드 보강 세라믹 조리면을 적용했습니다."
+  },
+  {
+    "id": "brita-elite-ob06",
+    "symbol": "CLX",
+    "name": "브리타 엘리트 교체 필터",
+    "brand": "Brita",
+    "category": "WATER_FILTER",
+    "market": "US",
+    "relation": "OWNER",
+    "status": "VERIFIED",
+    "size": "1개 · OB06",
+    "prep": "물병·디스펜서 교체형 필터",
+    "source": "https://www.brita.com/products/brita-elite-replacement-filters/",
+    "facts": [],
+    "evidence": [
+      {
+        "title": "미세플라스틱·납 저감 시험",
+        "summary": "공식 성능표는 지정된 호환 시스템에서 입경 0.5~1 μm의 미세플라스틱 99.6% 저감과 납 저감 인증 범위를 공개합니다. 표준 실험실 시험 결과입니다.",
+        "source": "https://www.brita.com/support/performance-data/brita-elite/"
+      },
+      {
+        "title": "브랜드 보유 관계",
+        "summary": "미국 사업의 Brita 브랜드는 The Clorox Company가 공개한 브랜드에 포함됩니다.",
+        "source": "https://www.thecloroxcompany.com/brands/clorox-family-of-brands/"
+      }
+    ],
+    "material": "활성 여과 매체 · 교체식 필터",
+    "description": "미국 판매 모델 OB06입니다. 공식 자료에 명시된 Brita 물병·디스펜서 모델과 함께 사용하는 교체 필터입니다."
+  },
+  {
+    "id": "pur-plus-ppf951k",
+    "symbol": "HELE",
+    "name": "PUR 플러스 교체 필터",
+    "brand": "PUR",
+    "category": "WATER_FILTER",
+    "market": "US",
+    "relation": "OWNER",
+    "status": "VERIFIED",
+    "size": "1개 · PPF951K",
+    "prep": "물병·디스펜서 교체형 필터",
+    "source": "https://www.pur.com/shop/replacement-filters/pur-plus-pitcher-filter/",
+    "facts": [],
+    "evidence": [
+      {
+        "title": "PFAS 혼합물·미세플라스틱 시험",
+        "summary": "공식 성능표는 지정된 7종 PFAS 혼합물의 저감률을 99.75%, 미세플라스틱 저감률을 99.8%로 제시합니다. 호환 모델과 표준 시험 조건에 한정됩니다.",
+        "source": "https://www.pur.com/wp-content/uploads/PUR_PDS_Pitcher_Filters_PPF951K.pdf"
+      },
+      {
+        "title": "브랜드와 미국 유통 법인",
+        "summary": "상장사 Helen of Troy는 PUR를 주요 브랜드로 공개합니다. 미국 제품 성능표에는 자회사 Kaz USA가 유통 주체로 기재됩니다.",
+        "source": "https://www.helenoftroy.com/our-brands/"
+      }
+    ],
+    "material": "입상 활성탄 · 이온 교환 소재",
+    "description": "미국 판매 모델 PPF951K입니다. 지정된 PUR 및 Beautiful by PUR 물병·디스펜서와 함께 사용하는 교체 필터입니다."
+  },
+  {
+    "id": "ao-smith-ro-mb4000",
+    "symbol": "AOS",
+    "name": "A. O. 스미스 싱크대 하부 역삼투 정수기",
+    "brand": "A. O. Smith",
+    "category": "WATER_FILTER",
+    "market": "US",
+    "relation": "MANUFACTURER",
+    "status": "VERIFIED",
+    "size": "AO-US-RO-MB-4000",
+    "prep": "싱크대 하부 설치형 역삼투 장치",
+    "source": "https://www.aosmithatlowes.com/products/water-filters/drinking-water/ao-us-ro-mb-4000/",
+    "facts": [],
+    "evidence": [
+      {
+        "title": "저감 성능 시험 조건",
+        "summary": "제조사가 PFOA·PFOS 저감과 IAPMO의 지정 표준 인증을 공개합니다. 성능표에 표시된 시험 조건과 항목별 결과를 확인할 수 있습니다.",
+        "source": "https://www.aosmithatlowes.com/media/1234/ao-us-ro-mb-4000_pds.pdf"
+      },
+      {
+        "title": "미국 EPA의 정수 필터 인증 안내",
+        "summary": "EPA는 해당 물질의 저감 인증과 제품별 성능표를 확인하도록 안내합니다.",
+        "source": "https://www.epa.gov/water-research/identifying-drinking-water-filters-certified-reduce-pfas"
+      }
+    ],
+    "material": "역삼투 막 · 카본·Claryum 필터",
+    "description": "미국 판매 모델 AO-US-RO-MB-4000입니다. 역삼투 막, 카본·Claryum 필터와 미네랄 보충 단계를 포함합니다."
+  },
+  {
+    "id": "pentair-everpure-4fc-ps",
+    "symbol": "PNR",
+    "name": "에버퓨어 QL3B 4FC-PS 여과 시스템",
+    "brand": "Everpure",
+    "category": "WATER_FILTER",
+    "market": "US",
+    "relation": "MANUFACTURER",
+    "status": "VERIFIED",
+    "size": "EV929830 · 4,000갤런 정격",
+    "prep": "상업용 식수 설비 설치형 필터",
+    "source": "https://flowandfiltrationsolutions.pentair.com/en-us/commercial-filtration/products/filtration-systems/pfoa-pfos-reduction-systems.html",
+    "facts": [],
+    "evidence": [
+      {
+        "title": "PFOA·PFOS 저감 인증",
+        "summary": "이 모델의 공식 사양서에 PFOA·PFOS 저감에 대한 IAPMO의 NSF/ANSI 53 인증과 별도 미세플라스틱 저감 인증이 기재됩니다.",
+        "source": "https://flowandfiltrationsolutions.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/pfas-reduction-spec-sheets/ev929830-ql3b-4fc-ps-spec.pdf"
+      },
+      {
+        "title": "미국 EPA의 정수 필터 인증 안내",
+        "summary": "EPA는 해당 물질의 저감 인증과 제품별 성능표를 확인하도록 안내합니다.",
+        "source": "https://www.epa.gov/water-research/identifying-drinking-water-filters-certified-reduce-pfas"
+      }
+    ],
+    "material": "Fibredyne 여과 매체 · 일체형 카트리지",
+    "description": "미국 판매 모델 EV929830입니다. 상업용 식수·음료 설비에 연결하는 Pentair Everpure 필터 시스템입니다."
+  },
+  {
+    "id": "filtrete-1900",
+    "symbol": "MMM",
+    "name": "필트리트 MPR 1900 공조 필터",
+    "brand": "Filtrete",
+    "category": "AIR_PURIFIER",
+    "market": "US",
+    "relation": "MANUFACTURER",
+    "status": "VERIFIED",
+    "size": "16 × 25 × 1인치",
+    "prep": "HVAC 공조 설비용 교체형 필터",
+    "source": "https://www.3m.com/3M/en_US/p/d/b00039899/?preselect=7580431",
+    "facts": [],
+    "evidence": [
+      {
+        "title": "제조사 여과 등급",
+        "summary": "제조사는 1인치 MPR 1900 필터 계열을 MERV 13 등급으로 공개합니다. 공조 장치에서 사용하는 필터의 등급입니다.",
+        "source": "https://www.3m.com/3M/en_US/p/d/b00039899/?preselect=7580431"
+      },
+      {
+        "title": "미국 EPA의 실내 공기 여과 안내",
+        "summary": "EPA는 공조 필터와 이동형 공기청정기의 적용 방식이 다르며, 공조 팬·필터 슬롯과의 호환성을 확인하도록 안내합니다.",
+        "source": "https://www.epa.gov/wildfires/indoor-air-filtration"
+      }
+    ],
+    "material": "주름형 여과 매체",
+    "description": "미국 판매 16 × 25 × 1인치 규격입니다. 호환 공조 설비에 삽입하는 교체 필터로, 제조사 등급은 MPR 1900 및 MERV 13입니다."
   }
 ]

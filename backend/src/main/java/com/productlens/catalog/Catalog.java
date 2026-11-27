@@ -16,7 +16,18 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class Catalog {
-    public enum Category { RAMEN, FRYING_PAN, CHICKEN_NOODLE_SOUP, COLA }
+    public enum Category {
+        RAMEN, FRYING_PAN, CHICKEN_NOODLE_SOUP, COLA, RICE_COOKER, WATER_FILTER, AIR_PURIFIER,
+        FROZEN_CHICKEN_NUGGETS, PEANUT_BUTTER, CHOCOLATE, MAC_AND_CHEESE;
+
+        public String nutritionBasis() {
+            return switch (this) {
+                case COLA -> "PER_100ML";
+                case FROZEN_CHICKEN_NUGGETS, PEANUT_BUTTER, CHOCOLATE, MAC_AND_CHEESE -> "PER_100G";
+                default -> "PER_SERVING";
+            };
+        }
+    }
     public enum Criterion {
         SODIUM, TOTAL_SUGAR, ADDED_SUGAR, SATURATED_FAT, CALORIES,
         AVOID_PTFE, AVOID_PFAS, AVOID_ASPARTAME;
@@ -107,9 +118,11 @@ public class Catalog {
             var competitors = groups.computeIfAbsent(origin.category(), category -> group(category, origin.market()).stream()
                     .filter(candidate -> !candidate.symbol().equals(origin.symbol())).toList());
             var criteria = switch (origin.category()) {
-                case RAMEN, CHICKEN_NOODLE_SOUP -> List.of(Criterion.SODIUM);
+                case RAMEN, CHICKEN_NOODLE_SOUP, FROZEN_CHICKEN_NUGGETS, MAC_AND_CHEESE -> List.of(Criterion.SODIUM);
                 case COLA -> List.of(Criterion.TOTAL_SUGAR, Criterion.AVOID_ASPARTAME);
                 case FRYING_PAN -> List.of(Criterion.AVOID_PTFE, Criterion.AVOID_PFAS);
+                case PEANUT_BUTTER, CHOCOLATE -> List.of(Criterion.ADDED_SUGAR, Criterion.SATURATED_FAT);
+                case RICE_COOKER, WATER_FILTER, AIR_PURIFIER -> List.<Criterion>of();
             };
             return new HealthComparison(origin, criteria.stream().map(criterion -> healthIssue(origin, competitors, criterion)).toList());
         }).toList();
@@ -119,8 +132,7 @@ public class Catalog {
         var basis = switch (criterion) {
             case AVOID_ASPARTAME -> "INGREDIENTS";
             case AVOID_PTFE, AVOID_PFAS -> "SURFACE";
-            case TOTAL_SUGAR -> "PER_100ML";
-            default -> "PER_SERVING";
+            default -> origin.category().nutritionBasis();
         };
         var baseline = origin.facts().stream().filter(fact -> fact.criterion() == criterion && fact.basis().equals(basis))
                 .findFirst().orElse(null);

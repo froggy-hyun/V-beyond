@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -53,8 +54,7 @@ class KisMarketFeed implements MarketFeed {
     private final Map<String, Instant> chartInterest = new ConcurrentHashMap<>();
     private final Map<ChartKey, Instant> chartAttempts = new HashMap<>();
     private List<Stock> chartUniverse = List.of();
-    private Instant nextIndexRefresh = Instant.EPOCH;
-    private boolean previousIndexTrading;
+    private final Map<String, IndexRefresh> indexRefresh = new HashMap<>();
     private volatile LocalDate krCalendarDate;
     private volatile boolean krTradingDay;
     private Instant nextCalendarAttempt = Instant.EPOCH;
@@ -65,7 +65,10 @@ class KisMarketFeed implements MarketFeed {
     private record Chart(List<Candle> bars, Instant refreshedAt) {}
     private record ChartTarget(ChartKey key, Stock stock, Instant due, boolean active, boolean trading) {}
     private record Index(String code, String symbol) {}
-    private static final List<Index> INDICES = List.of(new Index("KOSPI", "0001"), new Index("KOSDAQ", "1001"));
+    private record IndexRefresh(Instant due, boolean trading) {}
+    private static final Map<String, List<Index>> INDICES = Map.of(
+            "KR", List.of(new Index("KOSPI", "0001"), new Index("KOSDAQ", "1001")),
+            "US", List.of(new Index("SPX", "SPX"), new Index("COMP", "COMP")));
     private record Fields(String date, String time, String open, String high, String low, String close, String volume) {}
     private static final Fields KR_MINUTE = new Fields("stck_bsop_date", "stck_cntg_hour", "stck_oprc", "stck_hgpr", "stck_lwpr", "stck_prpr", "cntg_vol");
     private static final Fields KR_DAILY = new Fields("stck_bsop_date", "", "stck_oprc", "stck_hgpr", "stck_lwpr", "stck_clpr", "acml_vol");
@@ -96,7 +99,7 @@ class KisMarketFeed implements MarketFeed {
             } catch (IllegalArgumentException error) { log.warn("저장된 시세 형식 확인 필요 {}", snapshot.instrument()); }
         }
         poller.scheduleWithFixedDelay(this::refreshQuotes, 0, 10, TimeUnit.SECONDS);
-        poller.scheduleWithFixedDelay(this::refreshIndices, 1, 8, TimeUnit.SECONDS);
+        poller.scheduleWithFixedDelay(this::refreshIndices, 1, 4, TimeUnit.SECONDS);
         poller.scheduleWithFixedDelay(this::refreshCharts, 2, 1, TimeUnit.SECONDS);
     }
 
@@ -119,17 +122,46 @@ class KisMarketFeed implements MarketFeed {
 
     private void refreshQuotes() {
         if (Instant.now().isAfter(refreshUntil)) return;
-        try {
-            refreshKoreanHoliday();
-            for (var stock : catalog.stocks("")) {
-                try { quotes.put(stock.id(), fetchQuote(stock)); }
-                catch (KisClient.Unavailable | IllegalArgumentException error) {
-                    log.debug("KIS 현재가 조회 실패 {} {}", stock.id(), error.getClass().getSimpleName());
-                }
+        refreshKoreanHoliday();
+        var domesticStocks = chartUniverse.stream().filter(stock -> stock.market().equals("KR")).toList();
+        var updated = refreshDomesticQuotes(domesticStocks);
+        for (var stock : chartUniverse) {
+            if (updated.contains(stock.id())) continue;
+            try { quotes.put(stock.id(), fetchQuote(stock)); }
+            catch (KisClient.Unavailable | IllegalArgumentException error) {
+                log.debug("KIS 현재가 조회 실패 {} {}", stock.id(), error.getClass().getSimpleName());
             }
-        } catch (org.springframework.dao.DataAccessException ignored) {
-            // 카탈로그 연결이 회복되면 다음 조회 주기에서 재시도
         }
+    }
+
+    private Set<String> refreshDomesticQuotes(List<Stock> stocks) {
+        var updated = new java.util.HashSet<String>();
+        for (int offset = 0; offset < stocks.size(); offset += 30) {
+            var batch = stocks.subList(offset, Math.min(offset + 30, stocks.size()));
+            var params = new HashMap<String, String>();
+            var bySymbol = new HashMap<String, Stock>();
+            for (int i = 0; i < batch.size(); i++) {
+                var stock = batch.get(i);
+                params.put("FID_COND_MRKT_DIV_CODE_" + (i + 1), "J");
+                params.put("FID_INPUT_ISCD_" + (i + 1), stock.symbol());
+                bySymbol.put(stock.symbol(), stock);
+            }
+            try {
+                var data = kis.query(KisClient.DOMESTIC + "intstock-multprice", "FHKST11300006", params);
+                for (var row : data.path("output")) {
+                    var stock = bySymbol.get(row.path("inter_shrn_iscd").asText());
+                    if (stock == null) continue;
+                    try {
+                        var quote = quoteSnapshot(stock, decimal(row, "inter2_prpr"), decimal(row, "inter2_prdy_clpr"), row.path("acml_vol").asLong());
+                        quotes.put(stock.id(), quote);
+                        updated.add(stock.id());
+                    } catch (KisClient.Unavailable | IllegalArgumentException error) {
+                        log.debug("KIS 일괄 현재가 항목 누락 {}", stock.id());
+                    }
+                }
+            } catch (KisClient.Unavailable error) { log.debug("KIS 국내 일괄 현재가 조회 실패"); }
+        }
+        return updated;
     }
 
     private void refreshKoreanHoliday() {
@@ -184,9 +216,13 @@ class KisMarketFeed implements MarketFeed {
                 previous = price.subtract(new BigDecimal(rawChange.trim()).abs().multiply(BigDecimal.valueOf(direction)));
             }
         }
+        return quoteSnapshot(stock, price, previous, data.path(domestic ? "acml_vol" : "tvol").asLong());
+    }
+
+    private Quote quoteSnapshot(Stock stock, BigDecimal price, BigDecimal previous, long volume) {
+        if (price.signum() <= 0) throw new KisClient.Unavailable();
         var change = previous != null && previous.signum() > 0 ? price.subtract(previous) : null;
         var rate = change != null ? change.movePointRight(2).divide(previous, 2, RoundingMode.HALF_UP) : null;
-        long volume = data.path(domestic ? "acml_vol" : "tvol").asLong();
         // 현재가 REST 응답의 조회 시각과 실제 체결 시각 구분
         return new Quote(stock.id(), price, previous, change, rate, volume, stock.currency(), null, Instant.now(),
                 mode(), "FRESH", "UNKNOWN", "한국투자증권");
@@ -209,8 +245,9 @@ class KisMarketFeed implements MarketFeed {
                 .filter(bar -> !bar.startAt().isBefore(first.atStartOfDay(ZoneOffset.UTC).toInstant())).toList();
     }
 
-    @Override public List<IndexQuote> indices() {
-        return INDICES.stream().map(index -> indices.get(index.code())).filter(java.util.Objects::nonNull).toList();
+    @Override public List<IndexQuote> indices(String market) {
+        return INDICES.getOrDefault(market, List.of()).stream().map(index -> indices.get(index.code()))
+                .filter(java.util.Objects::nonNull).toList();
     }
 
     private void refreshCharts() {
@@ -255,14 +292,19 @@ class KisMarketFeed implements MarketFeed {
     }
 
     private void refreshIndices() {
+        INDICES.forEach(this::refreshIndexMarket);
+    }
+
+    private void refreshIndexMarket(String market, List<Index> symbols) {
         var now = Instant.now();
-        var trading = session("KR", now).equals("REGULAR");
-        if (now.isBefore(nextIndexRefresh) && trading == previousIndexTrading) return;
-        previousIndexTrading = trading;
-        nextIndexRefresh = now.plusSeconds(trading || indices.size() < INDICES.size() ? 12 : 180);
-        for (var index : INDICES) {
+        var trading = session(market, now).equals("REGULAR");
+        var previous = indexRefresh.get(market);
+        if (previous != null && now.isBefore(previous.due()) && trading == previous.trading()) return;
+        var missing = symbols.stream().anyMatch(symbol -> !indices.containsKey(symbol.code()));
+        indexRefresh.put(market, new IndexRefresh(now.plusSeconds(trading || missing ? 12 : 180), trading));
+        for (var index : symbols) {
             try {
-                var quote = fetchIndex(index);
+                var quote = fetchIndex(market, index);
                 indices.put(index.code(), quote);
                 snapshots.save(index.code(), "INDEX", quote.observedAt(), quote);
             } catch (KisClient.Unavailable | IllegalArgumentException | DateTimeException | DataAccessException error) {
@@ -271,30 +313,37 @@ class KisMarketFeed implements MarketFeed {
         }
     }
 
-    private IndexQuote fetchIndex(Index index) {
-        var reply = kis.query(KisClient.DOMESTIC + "inquire-time-indexchartprice", "FHKUP03500200",
+    private IndexQuote fetchIndex(String market, Index index) {
+        boolean domestic = market.equals("KR");
+        var reply = domestic ? kis.query(KisClient.DOMESTIC + "inquire-time-indexchartprice", "FHKUP03500200",
                 Map.of("FID_COND_MRKT_DIV_CODE", "U", "FID_ETC_CLS_CODE", "1", "FID_INPUT_ISCD", index.symbol(),
-                        "FID_INPUT_HOUR_1", "300", "FID_PW_DATA_INCU_YN", "Y"));
+                        "FID_INPUT_HOUR_1", "300", "FID_PW_DATA_INCU_YN", "Y"))
+                : kis.query(KisClient.OVERSEAS + "inquire-time-indexchartprice", "FHKST03030200",
+                Map.of("FID_COND_MRKT_DIV_CODE", "N", "FID_INPUT_ISCD", index.symbol(),
+                        "FID_HOUR_CLS_CODE", "0", "FID_PW_DATA_INCU_YN", "Y"));
         var now = Instant.now();
+        var zone = MarketHours.zone(market);
         var head = reply.path("output1");
-        var value = decimal(head, "bstp_nmix_prpr");
-        var prior = decimal(head, "prdy_nmix");
+        var value = decimal(head, domestic ? "bstp_nmix_prpr" : "ovrs_nmix_prpr");
+        var prior = decimal(head, domestic ? "prdy_nmix" : "ovrs_nmix_prdy_clpr");
         if (value.signum() <= 0 || prior.signum() <= 0) throw new KisClient.Unavailable();
         var change = value.subtract(prior);
         var rate = change.movePointRight(2).divide(prior, 2, RoundingMode.HALF_UP);
 
-        // 최신 정규장 한 세션만 유지해 전 거래일 분봉이 연결되는 구간을 제거
         var points = new TreeMap<Instant, IndexPoint>();
+        var cached = indices.get(index.code());
+        // 해외 분봉의 반환 개수 제한을 보완하기 위해 같은 정규장의 이전 분봉을 병합
+        if (cached != null) cached.points().forEach(point -> points.put(point.at(), point));
         for (var row : reply.path("output2")) {
             if (row.path("stck_bsop_date").asText().isBlank() || row.path("stck_cntg_hour").asText().isBlank()) continue;
             var time = LocalDateTime.parse(row.path("stck_bsop_date").asText() + row.path("stck_cntg_hour").asText(), CURSOR);
-            var pointAt = time.atZone(SEOUL).toInstant();
-            var window = MarketHours.window("KR", time.toLocalDate());
+            var pointAt = time.atZone(zone).toInstant();
+            var window = MarketHours.window(market, time.toLocalDate());
             if (window == null || !window.includesBar(pointAt) || pointAt.isAfter(now)) continue;
-            var price = decimal(row, "bstp_nmix_prpr");
+            var price = decimal(row, domestic ? "bstp_nmix_prpr" : "optn_prpr");
             if (price.signum() > 0) points.put(pointAt, new IndexPoint(pointAt, price));
         }
-        var latest = points.isEmpty() ? null : points.lastKey().atZone(SEOUL).toLocalDate().atStartOfDay(SEOUL).toInstant();
+        var latest = points.isEmpty() ? null : points.lastKey().atZone(zone).toLocalDate().atStartOfDay(zone).toInstant();
         var sessionPoints = latest == null ? List.<IndexPoint>of() : List.copyOf(points.tailMap(latest).values());
         return new IndexQuote(index.code(), value, change, rate, now, sessionPoints);
     }

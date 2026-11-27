@@ -71,6 +71,13 @@ test('종목 비교에서 소재와 성분 기준별 검증 결과 표시', asyn
   await cola.getByRole('button', { name: '아스파탐', exact: true }).click()
   await expect(cola.getByRole('link', { name: /종목 바로가기/ })).toHaveCount(0)
   await expect(cola.getByText(/같은 기준에서/)).toBeVisible()
+
+  const nuggets = await request.get('/api/v1/stocks/US:NYSE:CAG/health-comparisons')
+  expect(nuggets.ok()).toBe(true)
+  expect(await nuggets.json()).toEqual([expect.objectContaining({ issues: [expect.objectContaining({
+    baseline: expect.objectContaining({ criterion: 'SODIUM', basis: 'PER_100G' }),
+    alternative: expect.objectContaining({ stock: expect.objectContaining({ symbol: 'TSN' }), fact: expect.objectContaining({ basis: 'PER_100G' }) }),
+  })] })])
 })
 
 test('검색, 관심종목 및 자연어 조건 수정', async ({ page }) => {

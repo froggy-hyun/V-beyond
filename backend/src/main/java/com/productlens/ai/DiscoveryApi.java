@@ -35,7 +35,8 @@ class DiscoveryApi {
 
     private static final String SCHEMA = """
             {"type":"object","additionalProperties":false,"properties":{
-                "category":{"enum":["RAMEN","FRYING_PAN","CHICKEN_NOODLE_SOUP","COLA","UNSUPPORTED"],"type":"string"},
+                "category":{"enum":["RAMEN","FRYING_PAN","CHICKEN_NOODLE_SOUP","COLA","FROZEN_CHICKEN_NUGGETS",
+                "PEANUT_BUTTER","CHOCOLATE","MAC_AND_CHEESE","UNSUPPORTED"],"type":"string"},
                 "criterion":{"enum":["SODIUM","TOTAL_SUGAR","ADDED_SUGAR","SATURATED_FAT","CALORIES",
                 "AVOID_PTFE","AVOID_PFAS","AVOID_ASPARTAME","UNSUPPORTED"],"type":"string"}},
              "required":["category","criterion"]}
@@ -104,7 +105,7 @@ class DiscoveryApi {
     private Result lookup(Filters filters, String method) {
         var basis = filters.criterion().absence()
                 ? (filters.criterion() == Criterion.AVOID_ASPARTAME ? "INGREDIENTS" : "SURFACE")
-                : filters.category() == Category.COLA ? "PER_100ML" : "PER_SERVING";
+                : filters.category().nutritionBasis();
         var matches = catalog.group(filters.category(), "").stream()
                 .flatMap(p -> p.facts().stream()
                         .filter(f -> f.criterion() == filters.criterion() && f.basis().equals(basis))
@@ -124,6 +125,10 @@ class DiscoveryApi {
     private Filters parseLocally(String q) {
         Category group = q.matches(".*(라면|불닭|라멘).*") ? Category.RAMEN
                 : q.matches(".*(프라이팬|후라이팬|팬).*") ? Category.FRYING_PAN
+                : q.contains("너겟") ? Category.FROZEN_CHICKEN_NUGGETS
+                : q.contains("땅콩") ? Category.PEANUT_BUTTER
+                : q.matches(".*(초콜릿|초콜렛).*") ? Category.CHOCOLATE
+                : q.matches(".*맥\\s*앤\\s*치즈.*") ? Category.MAC_AND_CHEESE
                 : q.matches(".*(수프|스프).*") ? Category.CHICKEN_NOODLE_SOUP
                 : q.matches(".*(콜라|음료).*") ? Category.COLA : null;
         Criterion criterion = q.matches(".*(나트륨|저염|짠).*") ? Criterion.SODIUM

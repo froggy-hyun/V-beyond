@@ -6,14 +6,23 @@ export const categories = {
   FRYING_PAN: '프라이팬',
   CHICKEN_NOODLE_SOUP: '치킨 누들 수프',
   COLA: '콜라',
+  RICE_COOKER: '전기밥솥',
+  WATER_FILTER: '정수기·필터',
+  AIR_PURIFIER: '공기청정기·필터',
+  FROZEN_CHICKEN_NUGGETS: '냉동 치킨너겟',
+  PEANUT_BUTTER: '땅콩버터',
+  CHOCOLATE: '초콜릿',
+  MAC_AND_CHEESE: '맥앤치즈',
 } as const
 export const criteria = {
   SODIUM: '나트륨', TOTAL_SUGAR: '당류', ADDED_SUGAR: '첨가당', SATURATED_FAT: '포화지방', CALORIES: '열량',
   AVOID_PTFE: 'PTFE 미사용', AVOID_PFAS: 'PFAS 미사용', AVOID_ASPARTAME: '아스파탐 미사용',
 } as const
-export const bases: Record<string, string> = { PER_SERVING: '1회 제공량', PER_100ML: '100 mL', SURFACE: '조리 접촉면', INGREDIENTS: '원재료' }
+export const bases: Record<string, string> = { PER_SERVING: '1회 제공량', PER_100ML: '100 mL', PER_100G: '100 g', SURFACE: '조리 접촉면', INGREDIENTS: '원재료' }
 export const relations: Record<string, string> = { OWNER: '브랜드 소유', DISTRIBUTOR: '판매·유통', MANUFACTURER: '제조', LICENSEE: '라이선스' }
 export type Category = keyof typeof categories
+const standardizedFood = new Set<Category>(['FROZEN_CHICKEN_NUGGETS', 'PEANUT_BUTTER', 'CHOCOLATE', 'MAC_AND_CHEESE'])
+export const nutritionBasis = (category: Category) => category === 'COLA' ? 'PER_100ML' : standardizedFood.has(category) ? 'PER_100G' : 'PER_SERVING'
 export type Criterion = keyof typeof criteria
 export type Stock = { id: string; symbol: string; name: string; english: string; market: string; exchange: string; currency: string; overview: string; source: string }
 export type Fact = { criterion: Criterion; value: number; unit: string; basis: string; source: string }
@@ -24,7 +33,7 @@ export type Product = {
 }
 export type Quote = { listingId: string; price: number | null; change: number | null; changePercent: number | null; cumulativeVolume: number; currency: string; exchangeTimestamp: string | null; receivedAt: string | null; feedMode: string; freshness: string; session: string }
 export type Candle = { startAt: string; open: number; high: number; low: number; close: number; volume: number }
-export type MarketIndex = { code: 'KOSPI' | 'KOSDAQ'; value: number; change: number; changePercent: number; observedAt: string; points: { at: string; value: number }[] }
+export type MarketIndex = { code: 'KOSPI' | 'KOSDAQ' | 'SPX' | 'COMP'; value: number; change: number; changePercent: number; observedAt: string; points: { at: string; value: number }[] }
 export type Comparison = { stock: Stock; products: Product[] }
 export type Match = { product: Product; stock: Stock; fact: Fact; reductionPercent?: number | null }
 

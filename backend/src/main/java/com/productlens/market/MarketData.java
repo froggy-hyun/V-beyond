@@ -107,7 +107,7 @@ class MarketData implements MarketFeed {
 
     private BigDecimal previousClose(Stock stock) { return price(stock, opening(stock) * 0.997); }
 
-    private double opening(Stock stock) { return SAMPLE_PRICES.get(stock.symbol()); }
+    private double opening(Stock stock) { return SAMPLE_PRICES.getOrDefault(stock.symbol(), stock.market().equals("KR") ? 20_000 : 50); }
     private BigDecimal price(Stock stock, double value) {
         return BigDecimal.valueOf(value).setScale(stock.currency().equals("KRW") ? 0 : 2, RoundingMode.HALF_UP);
     }

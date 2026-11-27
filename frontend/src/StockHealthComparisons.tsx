@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { bases, criteria, formatFact, pathFor, relations, useData } from './api'
+import { bases, categories, criteria, formatFact, pathFor, relations, useData } from './api'
 import type { Criterion, Fact, Match, Product, Stock } from './api'
 import { Empty, ProductPhoto, Source, Wait } from './ui'
 
@@ -17,6 +17,13 @@ const contexts: Partial<Record<Criterion, { title: string; text: string; source?
   TOTAL_SUGAR: {
     title: '당류', text: '제품 표시에 있는 총당류를 100 mL 기준으로 비교합니다. WHO의 섭취 권고는 유리당을 기준으로 합니다.',
     source: 'https://www.who.int/tools/elena/interventions/free-sugars-adults-ncds',
+  },
+  ADDED_SUGAR: {
+    title: '첨가당', text: '제품에 표시된 첨가당을 100 g 기준으로 비교합니다. 제공량이 다르면 섭취하는 양에 따라 실제 섭취량이 달라집니다.',
+  },
+  SATURATED_FAT: {
+    title: '포화지방', text: 'WHO는 포화지방 섭취량을 하루 총 에너지의 10% 이하로 줄일 것을 권고합니다.',
+    source: 'https://www.who.int/publications/i/item/9789240073630',
   },
   AVOID_ASPARTAME: {
     title: '아스파탐', text: 'IARC는 제한적 근거로 아스파탐을 2B군으로 분류했습니다. JECFA는 일일섭취허용량을 체중 1 kg당 40 mg으로 유지했습니다.',
@@ -36,10 +43,23 @@ export default function StockHealthComparisons({ stock }: { stock: Stock }) {
   return <section className="panel health-comparisons" aria-labelledby="stock-health-heading">
     <h2 id="stock-health-heading">판매 상품 건강 이슈 비교</h2>
     <p>성분·소재별로 {stock.name} 판매 상품과 다른 상장사의 대안을 비교합니다.</p>
-    {comparison.data ? comparison.data.length ? comparison.data.map(row =>
-      <ComparisonRow key={row.product.id} row={row} stock={stock} />
+    {comparison.data ? comparison.data.length ? comparison.data.map(row => row.issues.length
+      ? <ComparisonRow key={row.product.id} row={row} stock={stock} />
+      : <ProductEvidence key={row.product.id} product={row.product} />
     ) : <Empty>비교할 판매 상품이 아직 없습니다.</Empty> : <Wait error={comparison.error} kind="products" />}
   </section>
+}
+
+function ProductEvidence({ product }: { product: Product }) {
+  return <article className="health-item" aria-label={product.name + ' 건강 이슈 자료'}>
+    <div className="health-product"><ProductPhoto product={product} /><div>
+      <h3><Link to={'/products/' + product.id}>{product.name}</Link></h3><small>{categories[product.category]} · {product.size}</small>
+    </div></div>
+    {product.evidence.map(evidence => <p className="health-context" key={evidence.title}>
+      {evidence.summary} <Source href={evidence.source}>{evidence.title}</Source>
+    </p>)}
+    <p className="health-context">같은 시험 조건의 타 기업 자료가 확인되면 비교할 수 있습니다.</p>
+  </article>
 }
 
 function ComparisonRow({ row, stock }: { row: HealthComparison; stock: Stock }) {
@@ -51,7 +71,8 @@ function ComparisonRow({ row, stock }: { row: HealthComparison; stock: Stock }) 
   const alternative = issue.alternative
   return <article className="health-item" aria-label={row.product.name + ' 건강 이슈 비교'}>
     <div className="section-heading health-criteria">
-      <div><strong>{issueLabel(issue)}</strong><small>{row.product.prep}{issue.baseline?.basis === 'PER_100ML' && ' · 100 mL 기준'}</small></div>
+      <div><strong>{issueLabel(issue)}</strong><small>{row.product.prep}
+        {issue.baseline?.basis.startsWith('PER_100') && ' · ' + bases[issue.baseline.basis] + ' 기준'}</small></div>
       {row.issues.length > 1 && <div className="segmented" role="group" aria-label={row.product.name + ' 비교 항목'}>{row.issues.map(item =>
         <button key={item.criterion} type="button" className={item.criterion === selected ? 'selected' : ''} aria-pressed={item.criterion === selected}
           onClick={() => setSelected(item.criterion)}>{issueLabel(item)}</button>)}</div>}
@@ -84,6 +105,7 @@ function HealthProduct({ product, stock, fact, criterion, reduction, competitor 
       {reduction != null && <span className="status">{reduction}% 낮음</span>}
     </div>
     {sodium != null && <small>WHO 성인 하루 기준의 {sodium}%</small>}
+    {!fact && product.material && <small>{product.material}</small>}
     {secondary && <small>{secondary.criterion === 'TOTAL_SUGAR' ? '당류' : '아스파탐'} {formatFact(secondary)}
       {secondary.basis === 'PER_100ML' && ' / ' + bases[secondary.basis]}</small>}
     <div className="health-links">

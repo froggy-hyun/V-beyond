@@ -5,7 +5,7 @@ import StockHealthComparisons from './StockHealthComparisons'
 import { useMutation } from '@tanstack/react-query'
 import { ArrowLeft, ChartNoAxesCombined, ChevronLeft, ChevronRight, FlaskConical, GitCompareArrows, Heart, Home as HomeIcon, Menu, Search as SearchIcon, Sparkles, X } from 'lucide-react'
 import { Link, NavLink, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom'
-import { api, bases, categories, criteria, currency, formatFact, pathFor, percent, quoteStatus, quoteTime, relations, tone, useData, useMarketMode, useQuotes } from './api'
+import { api, bases, categories, criteria, currency, formatFact, nutritionBasis, pathFor, percent, quoteStatus, quoteTime, relations, tone, useData, useMarketMode, useQuotes } from './api'
 import type { Candle, Category, Comparison, Criterion, Fact, Match, Product, Stock } from './api'
 import { Empty, ProductCard, ProductPhoto, productPhotoSource, Skeleton, Source, StockMark, StockRow, Wait } from './ui'
 import wordmark from './assets/brand/wordmark.png'
@@ -216,7 +216,7 @@ function ProductPage() {
     {company && <Link className="back" to={pathFor(company.id)}><ArrowLeft size={16} /> {company.name}</Link>}
     <section className="panel product-heading"><ProductPhoto product={item} detail /><div><p className="eyebrow">{categories[item.category]} · {item.market === 'KR' ? '국내' : '미국'}</p><h1>{item.name}</h1><p>{item.brand} · {relations[item.relation]} · {item.size}</p>{photoSource && <Source href={photoSource}>사진 출처</Source>}</div></section>
     <section className="panel"><div className="section-heading"><h2>영양·소재 정보</h2><Source href={item.source}>제품 출처</Source></div><p>{item.description}</p><p className="muted">{item.prep}</p>
-      {item.material && <div className="fact-row"><strong>공개 소재</strong><span>{item.material}</span></div>}
+      {item.material && <div className="fact-row"><strong>공개 사양</strong><span>{item.material}</span></div>}
       {item.facts.map(fact => <div className="fact-row" key={fact.criterion + fact.basis}><div><strong>{criteria[fact.criterion]}</strong><small>{bases[fact.basis]}</small></div><strong>{formatFact(fact)}</strong><Source href={fact.source} /></div>)}
       <Link className="primary" to={'/products/' + item.id + '/alternatives'}>대안 상품 탐색</Link>
     </section>
@@ -230,10 +230,11 @@ function AlternativePage() {
   const [params, setParams] = useSearchParams()
   const origin = useData<Product>('/products/' + id)
   const item = origin.data
-  const defaultCriterion = item?.category === 'FRYING_PAN' ? 'AVOID_PTFE' : item?.category === 'COLA' ? 'TOTAL_SUGAR' : 'SODIUM'
+  const defaultCriterion = item?.category === 'FRYING_PAN' ? 'AVOID_PTFE' : item?.category === 'COLA' ? 'TOTAL_SUGAR'
+    : item?.category === 'CHOCOLATE' || item?.category === 'PEANUT_BUTTER' ? 'ADDED_SUGAR' : 'SODIUM'
   const criterion = (params.get('criterion') || defaultCriterion) as Criterion
   const scope = params.get('scope') || 'OTHER_COMPANY'
-  const basis = item?.category === 'COLA' && !criterion.startsWith('AVOID_') ? 'PER_100ML' : ''
+  const basis = item && !criterion.startsWith('AVOID_') ? nutritionBasis(item.category) : ''
   const result = useData<{ baseline: Fact | null; matches: Match[]; excluded: number }>(
     '/products/' + id + '/alternatives?' + new URLSearchParams({ criterion, basis, scope }), Boolean(item))
   const { getQuote } = useQuotes([...new Set(result.data?.matches.map(row => row.stock.id) ?? [])])

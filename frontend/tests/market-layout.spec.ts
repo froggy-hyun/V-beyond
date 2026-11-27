@@ -14,20 +14,20 @@ test('시장 로딩 스켈레톤과 종목 로고 표시', async ({ page }) => {
 
   release()
   await expect(page.getByRole('status', { name: '종목 목록을 불러오고 있습니다' })).toHaveCount(0)
-  await expect(page.locator('.market-list-row .stock-mark img')).toHaveCount(4)
+  await expect(page.locator('.market-list-row .stock-mark img')).toHaveCount(9)
   await expect.poll(() => page.locator('.market-list-row .stock-mark img').evaluateAll(images => images.every(img => (img as HTMLImageElement).naturalWidth > 0))).toBe(true)
 })
 
 test('시장 구분, 종목 검색 및 화면별 차트 이동', async ({ page }, info) => {
   await page.goto('/')
   await expect(page.getByRole('button', { name: '국내주식' })).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.locator('.market-list-row')).toHaveCount(4)
+  await expect(page.locator('.market-list-row')).toHaveCount(9)
   await page.getByRole('button', { name: '프로', exact: true }).click()
   await expect(page.locator('.market-list-row').first().getByText(/^거래량/)).toBeVisible()
   await page.getByRole('button', { name: '간편', exact: true }).click()
   await page.getByRole('button', { name: '미국주식' }).click()
   await expect(page.getByRole('button', { name: '미국주식' })).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.locator('.market-list-row')).toHaveCount(6)
+  await expect(page.locator('.market-list-row')).toHaveCount(19)
   await page.getByRole('combobox', { name: '종목 정렬' }).selectOption('volume')
   if (info.project.name === 'desktop') {
     await page.getByRole('button', { name: '코카콜라 차트 미리보기' }).click()
@@ -66,17 +66,28 @@ test('작은 모바일 화면의 좌우 넘침 방지', async ({ page }, info) =
 test('홈 지수 그래프와 종목 화면 메뉴 전환', async ({ page }) => {
   const observedAt = '2026-11-27T06:30:00Z'
   await page.route('**/api/v1/market/mode', route => route.fulfill({ json: { feedMode: 'KIS_REST' } }))
-  await page.route('**/api/v1/market/indices', route => route.fulfill({ json: [
+  await page.route('**/api/v1/market/indices?market=KR', route => route.fulfill({ json: [
     { code: 'KOSPI', value: 4800, change: 20, changePercent: .42, observedAt,
       points: [{ at: '2026-11-27T00:00:00Z', value: 4790 }, { at: observedAt, value: 4800 }] },
     { code: 'KOSDAQ', value: 700, change: -2, changePercent: -.28, observedAt,
       points: [{ at: '2026-11-27T00:00:00Z', value: 703 }, { at: observedAt, value: 700 }] },
+  ] }))
+  await page.route('**/api/v1/market/indices?market=US', route => route.fulfill({ json: [
+    { code: 'SPX', value: 7100, change: 12, changePercent: .17, observedAt,
+      points: [{ at: '2026-11-27T00:00:00Z', value: 7088 }, { at: observedAt, value: 7100 }] },
+    { code: 'COMP', value: 23000, change: -77, changePercent: -.34, observedAt,
+      points: [{ at: '2026-11-27T00:00:00Z', value: 23077 }, { at: observedAt, value: 23000 }] },
   ] }))
   await page.goto('/')
   const indices = page.getByRole('region', { name: '국내 시장 지수' })
   await expect(indices.getByText('4,800.00')).toBeVisible()
   await expect(indices.getByRole('img', { name: '코스닥 정규장 지수 그래프' })).toBeVisible()
   await expect(page.getByText(/비공식 서비스|시세 제공:|한국투자증권 시세/)).toHaveCount(0)
+  await page.getByRole('button', { name: '미국주식' }).click()
+  const usIndices = page.getByRole('region', { name: '미국 시장 지수' })
+  await expect(usIndices.getByText('7,100.00', { exact: true })).toBeVisible()
+  await expect(usIndices.getByRole('img', { name: '나스닥 종합 정규장 지수 그래프' })).toBeVisible()
+  await expect(indices).toHaveCount(0)
 
   await page.getByRole('navigation').getByRole('link', { name: '현재가', exact: true }).click()
   await expect(page.getByRole('heading', { name: '시세 정보' })).toBeVisible()
