@@ -32,11 +32,11 @@ export function StockMark({ stock }: { stock: Stock }) {
   return <span className="stock-mark" aria-hidden>{logo ? <img src={logo} alt="" decoding="async" /> : <Building2 size={17} />}</span>
 }
 export function QuoteValue({ quote }: { quote?: Quote | null }) {
-  if (quote === undefined) return <Skeleton kind="quote" label="시세 불러오는 중" />
+  if (quote === undefined) return <Skeleton kind="quote" label="시세를 불러오고 있습니다" />
   return quote?.price != null ? <span className="quote-value">
     <strong>{currency(quote.price, quote.currency)}</strong>
     <span className={'change ' + tone(quote.changePercent ?? 0)}>{quote.changePercent == null ? '–' : percent(quote.changePercent)}</span>
-  </span> : <span className="muted">시세 확인 불가</span>
+  </span> : <span className="muted" aria-label="시세를 불러오지 못했습니다">—</span>
 }
 export function StockRow({ stock, quote, showVolume = false }: { stock: Stock; quote?: Quote | null; showVolume?: boolean }) {
   return <Link className="stock-row" to={pathFor(stock.id)}>
@@ -51,16 +51,16 @@ export function Source({ href, children = '원문 보기' }: { href: string; chi
   return <a className="source" href={href} target="_blank" rel="noreferrer">{children} <span aria-hidden>↗</span></a>
 }
 export function Empty({ children }: { children: ReactNode }) { return <p className="empty">{children}</p> }
-type LoadShape = 'rows' | 'products' | 'chart' | 'stock' | 'product' | 'highlights' | 'quote'
+type LoadShape = 'rows' | 'products' | 'chart' | 'stock' | 'product' | 'quote'
 
 function SkeletonRow() {
   return <span className="skeleton-row"><i /><span><i /><i /></span><i /></span>
 }
 
-export function Skeleton({ kind, label = '불러오는 중' }: { kind: LoadShape; label?: string }) {
+export function Skeleton({ kind, label = '불러오고 있습니다' }: { kind: LoadShape; label?: string }) {
   return <span className={`skeleton skeleton-${kind}`} role="status" aria-label={label}>
     <span className="skeleton-content" aria-hidden>
-      {kind === 'rows' || kind === 'products' || kind === 'highlights'
+      {kind === 'rows' || kind === 'products'
         ? <><SkeletonRow /><SkeletonRow /><SkeletonRow /></>
         : kind === 'stock' || kind === 'product' ? <><SkeletonRow /><i className="skeleton-body" /></>
           : <><i /><i /></>}

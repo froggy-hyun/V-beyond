@@ -1,20 +1,52 @@
 import { lazy, Suspense, useState, useSyncExternalStore } from 'react'
-import { ArrowDownUp, CalendarDays, ChartNoAxesCombined, ChevronRight, ScanSearch, Search, Star } from 'lucide-react'
+import { ArrowDownUp, ChartNoAxesCombined, ChevronRight, Heart, ScanSearch, Search } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { categories, currency, pathFor, percent, tone, useData, useMarketMode, useQuotes } from './api'
-import type { Candle, Category, Quote, Stock } from './api'
+import type { Candle, Category, MarketIndex, Quote, Stock } from './api'
 import { Empty, ProductIcon, QuoteValue, Skeleton, StockMark, StockRow, Wait } from './ui'
 import marketCharacter from './assets/brand/market.png'
 
 const Chart = lazy(() => import('./Chart'))
-const dateFormat = new Intl.DateTimeFormat('ko-KR', {
-  timeZone: 'Asia/Seoul', month: 'long', day: 'numeric', weekday: 'long',
-})
 const markets = [['KR', '국내'], ['US', '미국']] as const
+const indexLabels = { KOSPI: '코스피', KOSDAQ: '코스닥' }
+const indexFormat = new Intl.NumberFormat('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const desktopWidth = window.matchMedia('(min-width: 840px)')
 const subscribeToWidth = (update: () => void) => {
   desktopWidth.addEventListener('change', update)
   return () => desktopWidth.removeEventListener('change', update)
+}
+
+function MarketIndices() {
+  const indices = useData<MarketIndex[]>('/market/indices', true, 12_000)
+  return <section className="market-indices" aria-label="국내 시장 지수">
+    {(Object.entries(indexLabels) as [MarketIndex['code'], string][]).map(([code, label]) => {
+      const index = indices.data?.find(row => row.code === code)
+      const direction = tone(index?.change ?? 0)
+      return <div className={'index-cell ' + direction} key={code}>
+        <div><h2>{label}</h2>{index ? <>
+          <strong>{indexFormat.format(index.value)}</strong>
+          <span className="index-change">{percent(index.changePercent)}</span>
+        </> : indices.isPending ? <Skeleton kind="quote" label={`${label} 지수를 불러오고 있습니다`} /> : <span className="muted" aria-label={`${label} 지수를 불러오지 못했습니다`}>—</span>}</div>
+        {index && <IndexSparkline label={label} points={index.points} />}
+      </div>
+    })}
+  </section>
+}
+
+function IndexSparkline({ label, points }: { label: string; points: MarketIndex['points'] }) {
+  if (points.length < 2) return null
+  const lowest = Math.min(...points.map(point => point.value))
+  const highest = Math.max(...points.map(point => point.value))
+  const start = Date.parse(points[0].at)
+  const span = Date.parse(points[points.length - 1].at) - start
+  const coordinates = points.map((point, index) => {
+    const x = 2 + 92 * (span > 0 ? (Date.parse(point.at) - start) / span : index / (points.length - 1))
+    const y = 32 - 28 * (highest > lowest ? (point.value - lowest) / (highest - lowest) : .5)
+    return x.toFixed(1) + ',' + y.toFixed(1)
+  }).join(' ')
+  return <svg className="index-chart" viewBox="0 0 96 36" role="img" aria-label={`${label} 정규장 지수 그래프`}>
+    <polyline points={coordinates} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" />
+  </svg>
 }
 const isDesktop = () => desktopWidth.matches
 
@@ -44,8 +76,7 @@ export default function MarketPage() {
   }
   const stocks = useData<Stock[]>('/stocks?market=' + market)
   const rows = stocks.data ?? []
-  const { quotes, getQuote } = useQuotes(rows.map(stock => stock.id))
-  const delayed = quotes.some(quote => quote.freshness === 'STALE')
+  const { getQuote } = useQuotes(rows.map(stock => stock.id))
   const rank = (stock: Stock) => {
     const quote = getQuote(stock.id)
     return (sort === 'volume' ? quote?.cumulativeVolume : quote?.changePercent) ?? Number.NEGATIVE_INFINITY
@@ -55,15 +86,11 @@ export default function MarketPage() {
     return sort === 'name' ? byName : rank(right) - rank(left) || byName
   })
   const preview = rows.find(stock => stock.id === previewId) ?? ordered[0]
-  const highlights = rows.filter(stock => (market === 'KR' ? ['004370', '007310', '003230'] : ['KO', 'PEP', 'CPB']).includes(stock.symbol))
   const [search, setSearch] = useState('')
 
   return <div className="market-page">
     <header className="market-heading">
-      <div>
-        <p className="date"><CalendarDays size={15} aria-hidden /> {dateFormat.format(new Date())}</p>
-        <h1>오늘의 주식시장</h1>
-      </div>
+      <h1>주식</h1>
       <form className="market-search" onSubmit={event => {
         event.preventDefault()
         const query = search.trim()
@@ -73,15 +100,13 @@ export default function MarketPage() {
         <input aria-label="종목·브랜드 찾기" maxLength={100} placeholder="종목명, 티커, 브랜드 검색" value={search} onChange={event => setSearch(event.target.value)} />
       </form>
     </header>
+    {mode === 'KIS_REST' && <MarketIndices />}
     <div className="market-toolbar">
       <div className="market-tabs" role="group" aria-label="시장 선택">
         {markets.map(([code, label]) => <button key={code} aria-pressed={market === code} onClick={() => selectMarket(code)}>{label}주식</button>)}
       </div>
-      <span className="market-feed">{mode === 'KIS_REST' ? delayed ? 'KIS 시세 · 갱신 지연' : '한국투자증권 시세' : mode === 'REPLAY' ? '데모 시세' : '시세 확인 중'}</span>
+      {mode === 'REPLAY' && <span className="market-feed">시연용 시세입니다</span>}
     </div>
-    {stocks.isPending ? <Skeleton kind="highlights" label="주요 종목 불러오는 중" /> : <section className="market-highlights" aria-label="주요 종목">
-      {highlights.map(stock => <Highlight key={stock.id} stock={stock} quote={getQuote(stock.id)} />)}
-    </section>}
 
     <div className="dashboard">
       <section className="panel market-panel">
@@ -90,7 +115,7 @@ export default function MarketPage() {
           <div className="market-list-tools">
             <div className="density-toggle" role="group" aria-label="시세 표시 방식">
               <button aria-pressed={!detailed} onClick={() => selectView(false)}>간편</button>
-              <button aria-pressed={detailed} onClick={() => selectView(true)}>상세</button>
+              <button aria-pressed={detailed} onClick={() => selectView(true)}>프로</button>
             </div>
             <label className="market-sort">
               <ArrowDownUp size={14} aria-hidden />
@@ -108,7 +133,7 @@ export default function MarketPage() {
           <button type="button" className="stock-preview-action" aria-label={stock.name + ' 차트 미리보기'} aria-pressed={preview?.id === stock.id} onClick={() => setPreviewId(stock.id)}>
             <ChartNoAxesCombined size={18} aria-hidden />
           </button>
-        </div>) : <Wait error={stocks.error} />}
+        </div>) : stocks.error ? <Wait error={stocks.error} /> : <Skeleton kind="rows" label="종목 목록을 불러오고 있습니다" />}
       </section>
 
       <aside className="market-aside">
@@ -123,19 +148,12 @@ export default function MarketPage() {
           </div>
           <div className="market-shortcut-links">
             <Link to="/ai"><ScanSearch size={17} aria-hidden /> 자연어로 탐색 <ChevronRight size={15} aria-hidden /></Link>
-            <Link to="/watchlist"><Star size={17} aria-hidden /> 관심종목 <ChevronRight size={15} aria-hidden /></Link>
+            <Link to="/watchlist"><Heart size={17} aria-hidden /> 관심종목 <ChevronRight size={15} aria-hidden /></Link>
           </div>
         </section>
       </aside>
     </div>
   </div>
-}
-
-function Highlight({ stock, quote }: { stock: Stock; quote?: Quote | null }) {
-  return <Link className="market-highlight" to={pathFor(stock.id)}>
-    <div className="highlight-label"><StockMark stock={stock} /><span>{stock.name}<small>{stock.symbol}</small></span></div>
-    <QuoteValue quote={quote} />
-  </Link>
 }
 
 function Preview({ stock, quote }: { stock: Stock; quote?: Quote | null }) {

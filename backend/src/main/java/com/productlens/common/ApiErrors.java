@@ -25,7 +25,7 @@ class ApiErrors {
     @ExceptionHandler({MethodArgumentNotValidException.class, HandlerMethodValidationException.class,
             MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class,
             HttpMessageNotReadableException.class})
-    Map<String, String> invalid() { return body("INVALID_INPUT", "요청 형식을 확인하세요."); }
+    Map<String, String> invalid() { return body("INVALID_INPUT", "입력하신 내용을 확인해 주세요."); }
 
     private Map<String, String> body(String code, String message) {
         return Map.of("code", code, "message", message == null ? "요청을 처리할 수 없습니다." : message,

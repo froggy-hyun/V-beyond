@@ -8,12 +8,12 @@ test('시장 로딩 스켈레톤과 종목 로고 표시', async ({ page }) => {
   await page.route(catalog, async route => { await ready; await route.continue() })
   await page.goto('/')
   await expect(page).toHaveTitle('V beyond')
-  await expect(page.getByRole('status', { name: '주요 종목 불러오는 중' })).toBeVisible()
+  await expect(page.getByRole('status', { name: '종목 목록을 불러오고 있습니다' })).toBeVisible()
   await expect(page.locator('.route-content')).toHaveCSS('animation-name', 'none')
   await expect.poll(() => page.getByRole('link', { name: 'V beyond' }).locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0)
 
   release()
-  await expect(page.getByRole('status', { name: '주요 종목 불러오는 중' })).toHaveCount(0)
+  await expect(page.getByRole('status', { name: '종목 목록을 불러오고 있습니다' })).toHaveCount(0)
   await expect(page.locator('.market-list-row .stock-mark img')).toHaveCount(4)
   await expect.poll(() => page.locator('.market-list-row .stock-mark img').evaluateAll(images => images.every(img => (img as HTMLImageElement).naturalWidth > 0))).toBe(true)
 })
@@ -22,7 +22,7 @@ test('시장 구분, 종목 검색 및 화면별 차트 이동', async ({ page }
   await page.goto('/')
   await expect(page.getByRole('button', { name: '국내주식' })).toHaveAttribute('aria-pressed', 'true')
   await expect(page.locator('.market-list-row')).toHaveCount(4)
-  await page.getByRole('button', { name: '상세', exact: true }).click()
+  await page.getByRole('button', { name: '프로', exact: true }).click()
   await expect(page.locator('.market-list-row').first().getByText(/^거래량/)).toBeVisible()
   await page.getByRole('button', { name: '간편', exact: true }).click()
   await page.getByRole('button', { name: '미국주식' }).click()
@@ -55,12 +55,36 @@ test('시장 구분, 종목 검색 및 화면별 차트 이동', async ({ page }
 test('작은 모바일 화면의 좌우 넘침 방지', async ({ page }, info) => {
   test.skip(info.project.name !== 'mobile', '모바일 화면만 검증')
   await page.setViewportSize({ width: 320, height: 720 })
-  for (const route of ['/', '/?market=US', '/stocks/US:NYSE:KO', '/products/coke-original', '/ai', '/compare']) {
+  for (const route of ['/', '/?market=US', '/stocks/US:NYSE:KO', '/products/coke-original', '/ai', '/compare', '/watchlist', '/menu']) {
     await page.goto(route)
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBe(320)
     await expect(page.getByRole('navigation', { name: '주 메뉴' })).toBeVisible()
   }
+})
+
+test('홈 지수 그래프와 종목 화면 메뉴 전환', async ({ page }) => {
+  const observedAt = '2026-11-27T06:30:00Z'
+  await page.route('**/api/v1/market/mode', route => route.fulfill({ json: { feedMode: 'KIS_REST' } }))
+  await page.route('**/api/v1/market/indices', route => route.fulfill({ json: [
+    { code: 'KOSPI', value: 4800, change: 20, changePercent: .42, observedAt,
+      points: [{ at: '2026-11-27T00:00:00Z', value: 4790 }, { at: observedAt, value: 4800 }] },
+    { code: 'KOSDAQ', value: 700, change: -2, changePercent: -.28, observedAt,
+      points: [{ at: '2026-11-27T00:00:00Z', value: 703 }, { at: observedAt, value: 700 }] },
+  ] }))
+  await page.goto('/')
+  const indices = page.getByRole('region', { name: '국내 시장 지수' })
+  await expect(indices.getByText('4,800.00')).toBeVisible()
+  await expect(indices.getByRole('img', { name: '코스닥 정규장 지수 그래프' })).toBeVisible()
+  await expect(page.getByText(/비공식 서비스|시세 제공:|한국투자증권 시세/)).toHaveCount(0)
+
+  await page.getByRole('navigation').getByRole('link', { name: '현재가', exact: true }).click()
+  await expect(page.getByRole('heading', { name: '시세 정보' })).toBeVisible()
+  const tabs = page.getByRole('group', { name: '종목 상세 탭' })
+  await tabs.getByRole('button', { name: '차트', exact: true }).click()
+  await expect(page.getByRole('img', { name: '시세 및 거래량 차트' })).toBeVisible()
+  await tabs.getByRole('button', { name: '판매상품' }).click()
+  await expect(page.locator('.stock-products .product-card').first()).toBeVisible()
 })
 
 test('종목 차트 구간과 분봉 선택', async ({ page }) => {

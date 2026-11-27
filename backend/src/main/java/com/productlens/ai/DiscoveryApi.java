@@ -113,11 +113,12 @@ class DiscoveryApi {
                 .sorted(Comparator.comparing((Match m) -> m.product().prep()).thenComparing(m -> m.fact().value()))
                 .limit(10).toList();
         return new Result(filters, matches, method,
-                matches.isEmpty() ? "이 조건을 확인할 수 있는 상품이 없습니다." : "공개 자료에서 확인한 상품입니다. 제품별 비교 기준과 출처를 확인하세요.");
+                matches.isEmpty() ? "조건에 맞는 상품을 찾지 못했습니다. 다른 기준을 선택해 주세요."
+                        : "공개 자료에서 조건에 맞는 상품을 찾았습니다. 상품별 비교 기준과 출처를 확인해 주세요.");
     }
 
     private Result unsupported() {
-        return new Result(null, List.of(), "RULES", "아래 상품군과 비교 기준으로 탐색할 수 있습니다.");
+        return new Result(null, List.of(), "RULES", "상품군과 비교 기준을 선택해 다시 찾아보실 수 있습니다.");
     }
 
     private Filters parseLocally(String q) {

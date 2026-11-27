@@ -24,6 +24,7 @@ export type Product = {
 }
 export type Quote = { listingId: string; price: number | null; change: number | null; changePercent: number | null; cumulativeVolume: number; currency: string; exchangeTimestamp: string | null; receivedAt: string | null; feedMode: string; freshness: string; session: string }
 export type Candle = { startAt: string; open: number; high: number; low: number; close: number; volume: number }
+export type MarketIndex = { code: 'KOSPI' | 'KOSDAQ'; value: number; change: number; changePercent: number; observedAt: string; points: { at: string; value: number }[] }
 export type Comparison = { stock: Stock; products: Product[] }
 export type Match = { product: Product; stock: Stock; fact: Fact; reductionPercent?: number | null }
 
@@ -32,12 +33,17 @@ class ApiError extends Error {
 }
 
 export async function api<T>(path: string, options?: RequestInit): Promise<T> {
-  const result = await fetch('/api/v1' + path, options)
+  let result: Response
+  try { result = await fetch('/api/v1' + path, options) }
+  catch (error) {
+    if (options?.signal?.aborted) throw error
+    throw new ApiError('연결이 원활하지 않습니다. 잠시 후 다시 확인해 주세요.', 503)
+  }
   if (!result.ok) {
     const error = await result.json().catch(() => null)
-    throw new ApiError(error?.message || '데이터를 불러올 수 없습니다.', result.status)
+    throw new ApiError(typeof error?.message === 'string' ? error.message : '정보를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.', result.status)
   }
-  return result.json()
+  return result.json().catch(() => { throw new ApiError('정보를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.', 502) })
 }
 export const pathFor = (id: string) => '/stocks/' + encodeURIComponent(id)
 export function useData<T>(path: string, enabled = true, refetchInterval?: number) {
@@ -54,11 +60,10 @@ export function useMarketMode() {
 }
 export const quoteTime = (quote: Quote) => quote.exchangeTimestamp ?? quote.receivedAt
 export function quoteStatus(quote: Quote) {
-  if (quote.feedMode === 'REPLAY') return '데모 · 장 마감'
-  if (quote.freshness === 'UNAVAILABLE') return '시세 확인 불가'
-  if (quote.freshness === 'STALE') return '갱신 지연'
-  if (quote.session === 'REGULAR') return '정규장 · 주기 갱신'
-  return quote.session === 'CLOSED' ? '정규장 마감' : 'KIS 조회'
+  if (quote.feedMode === 'REPLAY') return '시연용 시세'
+  if (quote.freshness === 'STALE') return '시세 지연'
+  if (quote.session === 'REGULAR') return '정규장'
+  return quote.session === 'CLOSED' ? '장 마감' : '시세 기준'
 }
 export function useQuotes(ids: string[]) {
   const queryClient = useQueryClient()
@@ -81,11 +86,12 @@ export function useQuotes(ids: string[]) {
   }, [selection, path, queryClient])
   const quotes = result.data ?? []
   const pending = Boolean(selection) && (result.isPending || result.isFetching)
-  return { quotes, getQuote: (id: string) => quotes.find(quote => quote.listingId === id) ?? (pending ? undefined : null) }
+  return { getQuote: (id: string) => quotes.find(quote => quote.listingId === id) ?? (pending ? undefined : null) }
 }
 
 export const currency = (value: number, code: string) =>
-  new Intl.NumberFormat('ko-KR', { style: 'currency', currency: code }).format(value)
+  code === 'KRW' ? new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 0 }).format(value) + '원'
+    : new Intl.NumberFormat('ko-KR', { style: 'currency', currency: code }).format(value)
 export const percent = (value: number) => (value > 0 ? '+' : '') + value.toFixed(2) + '%'
 export const tone = (value: number) => value > 0 ? 'positive' : value < 0 ? 'negative' : 'neutral'
 export const formatFact = (fact: Fact) => fact.criterion.startsWith('AVOID_')
