@@ -119,13 +119,14 @@ function ComparisonRow({ row, stock, getQuote }: ComparisonRowProps) {
     {context && <p className="health-context"><strong>건강 쟁점</strong> {context.text} {context.source && <Source href={context.source}>기관 근거</Source>}</p>}
     {row.topics?.map(topic => {
       const evidence = row.product.evidence.find(item => item.topic === topic.id)
-      return <details key={topic.id} className="health-topic-detail">
-        <summary>{topic.name} 건강 이슈 <small>{topic.category}</small></summary>
+      const title = topic.name + ' 건강 이슈'
+      return <section key={topic.id} className="health-topic" aria-label={title}>
+        <header><h3>{title}</h3><small>{topic.category}</small></header>
         {evidence && <p>{evidence.summary} <Source href={evidence.source}>상품 근거</Source></p>}
         <p>{topic.assessment}</p>
         <div className="topic-links">{topic.sources.map(source => <Source key={source.url} href={source.url}>{source.title}</Source>)}
           <Link className="plain-link" to={'/health?topic=' + topic.id}>관련 종목</Link></div>
-      </details>
+      </section>
     })}
   </article>
 }

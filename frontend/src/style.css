@@ -470,10 +470,9 @@ footer img { width: 95px; height: auto }
 .topic-choices button[aria-pressed="true"], .icon-choices button[aria-pressed="true"] { border-color: #25282f; background: var(--surface); color: #202329 }
 .topic-assessment p { margin-top: 6px }
 .topic-links { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 8px }
-.health-topic-detail { margin-top: 7px; padding: 0 9px; border: 1px solid var(--line); border-radius: 7px; font-size: .82rem }
-.health-topic-detail summary { padding-block: 8px; cursor: pointer; font-weight: 700 }
-.health-topic-detail summary small { display: inline; margin-left: 4px }
-.health-topic-detail p, .health-topic-detail .topic-links { margin-block: 0 8px }
+.health-topic { margin-top: 8px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 7px }
+.health-topic header { display: flex; align-items: baseline; flex-wrap: wrap; gap: 3px 8px }
+.health-topic p { font-size: .82rem }
 .topic-company { padding: 10px 0; border-bottom: 1px solid var(--line) }
 .topic-company:last-child { border-bottom: 0 }
 .topic-stock { display: flex; align-items: center; gap: 8px; width: max-content; max-width: 100%; min-height: 44px }

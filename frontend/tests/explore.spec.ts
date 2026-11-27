@@ -107,6 +107,11 @@ test('종목 비교에서 소재와 성분 기준별 검증 결과 표시', asyn
   await cola.getByRole('button', { name: '아스파탐', exact: true }).click()
   await expect(cola.locator('.health-peers .stock-row')).toHaveCount(3)
   await expect(cola.getByText(/IARC.*JECFA/)).toBeVisible()
+  const zero = page.getByRole('article', { name: '코카콜라 제로 슈거 건강 이슈 비교' })
+  const preservative = zero.getByRole('region', { name: '안식향산칼륨 건강 이슈' })
+  await expect(preservative.getByText(/미국 제조사 성분표에 안식향산칼륨/)).toBeVisible()
+  await expect(preservative.getByRole('link', { name: 'FDA 음료의 벤젠 자료' })).toBeVisible()
+  await expect(zero.locator('details')).toHaveCount(0)
 
   const nuggets = await request.get('/api/v1/stocks/US:NYSE:CAG/health-comparisons')
   expect(nuggets.ok()).toBe(true)
