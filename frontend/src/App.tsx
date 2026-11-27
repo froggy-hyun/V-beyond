@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import MarketPage from './MarketPage'
+import StockHealthComparisons from './StockHealthComparisons'
 import { useMutation } from '@tanstack/react-query'
 import { ArrowLeft, ChartNoAxesCombined, ChevronLeft, ChevronRight, FlaskConical, GitCompareArrows, Heart, Home as HomeIcon, Menu, Search as SearchIcon, Sparkles, X } from 'lucide-react'
 import { Link, NavLink, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom'
@@ -182,7 +183,7 @@ function StockPage() {
     </section>}
     {tab === 'company' && companySection}
     {tab === 'products' && productSection}
-    {tab === 'chart' && <section className="panel stock-detail">
+    {tab === 'chart' && <div className="stock-main"><section className="panel stock-detail">
       <div className="chart-controls">
         <div className="segmented" role="group" aria-label="차트 조회 구간">{chartRanges.map(([value, label]) => <button className={range === value ? 'selected' : ''} aria-pressed={range === value} key={value} onClick={() => setControl('range', value)}>{label}</button>)}</div>
         {range === '1D' && <div className="segmented" role="group" aria-label="차트 표시 방식">{[['line', '선'], ['1m', '1분 봉'], ['5m', '5분 봉']].map(([value, label]) => <button key={value} className={(params.get('interval') ?? 'line') === value ? 'selected' : ''} aria-pressed={(params.get('interval') ?? 'line') === value} onClick={() => setControl('interval', value)}>{label}</button>)}</div>}
@@ -198,7 +199,7 @@ function StockPage() {
         {([['시가', lastBar.open], ['고가', lastBar.high], ['저가', lastBar.low], ['종가', lastBar.close]] as const).map(([label, price]) =>
           <div key={label}><dt>{label}</dt><dd>{currency(price, info.currency)}</dd></div>)}
       </dl>}
-    </section>}
+    </section><StockHealthComparisons stock={info} /></div>}
     {(tab === 'chart' || tab === 'price') && <aside className="stock-side" aria-label="기업과 판매 상품">{companySection}{productSection}</aside>}
   </div>
 }

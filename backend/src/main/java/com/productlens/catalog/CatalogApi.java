@@ -27,6 +27,9 @@ class CatalogApi {
     @GetMapping("/stocks/{id}/products")
     List<Product> products(@PathVariable String id) { return catalog.products(id); }
 
+    @GetMapping("/stocks/{id}/health-comparisons")
+    List<HealthComparison> healthComparisons(@PathVariable String id) { return catalog.healthComparisons(id); }
+
     @GetMapping("/stocks/{id}/competitors")
     List<Stock> competitors(@PathVariable String id) { return catalog.competitors(id); }
 

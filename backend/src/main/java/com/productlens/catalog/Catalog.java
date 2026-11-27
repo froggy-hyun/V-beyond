@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,8 @@ public class Catalog {
     public record Alternative(Product product, Stock stock, Fact fact, BigDecimal reductionPercent) {}
     public record Comparison(Stock stock, List<Product> products) {}
     public record Alternatives(Fact baseline, List<Alternative> matches, int excluded) {}
+    public record HealthIssue(Criterion criterion, Fact baseline, Alternative alternative) {}
+    public record HealthComparison(Product product, List<HealthIssue> issues) {}
     private final JdbcClient db;
     private final ObjectMapper json;
 
@@ -95,6 +98,43 @@ public class Catalog {
     public List<Stock> competitors(String id) {
         return products(id).stream().flatMap(p -> group(p.category(), p.market()).stream())
                 .map(this::stockFor).filter(s -> !s.id().equals(id)).distinct().toList();
+    }
+
+    public List<HealthComparison> healthComparisons(String id) {
+        var products = products(id);
+        var groups = new EnumMap<Category, List<Product>>(Category.class);
+        return products.stream().map(origin -> {
+            var competitors = groups.computeIfAbsent(origin.category(), category -> group(category, origin.market()).stream()
+                    .filter(candidate -> !candidate.symbol().equals(origin.symbol())).toList());
+            var criteria = switch (origin.category()) {
+                case RAMEN, CHICKEN_NOODLE_SOUP -> List.of(Criterion.SODIUM);
+                case COLA -> List.of(Criterion.TOTAL_SUGAR, Criterion.AVOID_ASPARTAME);
+                case FRYING_PAN -> List.of(Criterion.AVOID_PTFE, Criterion.AVOID_PFAS);
+            };
+            return new HealthComparison(origin, criteria.stream().map(criterion -> healthIssue(origin, competitors, criterion)).toList());
+        }).toList();
+    }
+
+    private HealthIssue healthIssue(Product origin, List<Product> competitors, Criterion criterion) {
+        var basis = switch (criterion) {
+            case AVOID_ASPARTAME -> "INGREDIENTS";
+            case AVOID_PTFE, AVOID_PFAS -> "SURFACE";
+            case TOTAL_SUGAR -> "PER_100ML";
+            default -> "PER_SERVING";
+        };
+        var baseline = origin.facts().stream().filter(fact -> fact.criterion() == criterion && fact.basis().equals(basis))
+                .findFirst().orElse(null);
+        if (baseline == null || baseline.value().signum() <= 0) return new HealthIssue(criterion, baseline, null);
+
+        record Match(Product product, Fact fact) {}
+        var best = competitors.stream().flatMap(product -> product.facts().stream()
+                .filter(fact -> fact.criterion() == criterion && comparable(origin, product, baseline, fact))
+                .filter(fact -> !criterion.absence() || fact.value().signum() == 0)
+                .map(fact -> new Match(product, fact)))
+                .min(Comparator.comparing(match -> match.fact().value())).orElse(null);
+        var alternative = best == null ? null : new Alternative(best.product(), stockFor(best.product()), best.fact(),
+                reduction(baseline, best.fact(), criterion));
+        return new HealthIssue(criterion, baseline, alternative);
     }
 
     public Alternatives alternatives(String id, Criterion criterion, String basis, Scope scope) {

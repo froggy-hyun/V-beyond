@@ -190,6 +190,21 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .quote-meta, .stock-detail .chart-session { color: var(--muted); font-size: .78rem; margin: 3px 0 7px }
 .stock-tabs { margin-top: 6px }
 .stock-detail { padding-top: 10px }
+.stock-main { min-width: 0 }
+.health-item { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px }
+.health-criteria { flex-wrap: wrap; align-items: flex-start; gap: 6px 12px; margin-bottom: 9px }
+.health-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px }
+.health-side { min-width: 0; border: 1px solid var(--line); border-radius: 8px; padding: 9px; overflow-wrap: anywhere }
+.health-side > small:first-child { font-weight: 690 }
+.health-product { display: flex; align-items: center; gap: 6px; margin-block: 6px }
+.health-product .product-photo, .health-product .product-icon { width: 36px; height: 36px }
+.health-product a:hover { color: var(--accent) }
+.health-value, .health-links { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin-top: 5px }
+.health-value .status { color: var(--accent); background: var(--accent-tint) }
+.health-links a { white-space: normal; min-height: 28px; width: auto }
+.health-empty { background: var(--surface); border-color: transparent }
+.health-comparisons .health-context { font-size: .8rem; margin-top: 7px }
+.health-context .source { margin-left: 3px }
 .chart-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 8px }
 .segmented { display: flex; width: max-content; max-width: 100%; gap: 1px; padding: 3px; border-radius: 7px; background: var(--surface) }
 .segmented button { min-width: 43px; padding: 6px 8px; border-radius: 5px; color: var(--muted); font-size: .8rem; font-weight: 650; white-space: nowrap }

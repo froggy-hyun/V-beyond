@@ -22,6 +22,57 @@ for (const scenario of scenarios) {
   })
 }
 
+test('종목 차트 아래 건강 이슈 비교와 대안 종목 이동', async ({ page }) => {
+  await page.goto('/stocks/KR:KOSPI:004370')
+  const chart = page.getByRole('img', { name: '시세 및 거래량 차트' })
+  const comparison = page.getByRole('region', { name: '판매 상품 건강 이슈 비교' })
+  await expect(chart).toBeVisible()
+  await expect(comparison).toBeVisible()
+  expect((await comparison.boundingBox())!.y).toBeGreaterThan((await chart.boundingBox())!.y)
+  const red = comparison.getByRole('article', { name: '신라면 더레드 건강 이슈 비교' })
+  await expect(red.getByText('2,080 mg')).toBeVisible()
+  await expect(red.getByText('1,560 mg')).toBeVisible()
+  await expect(red.getByText('25% 낮음')).toBeVisible()
+  await expect(red.getByRole('link', { name: '기관 근거' })).toHaveAttribute('href', /who\.int/)
+  const light = comparison.getByRole('article', { name: '신라면 건면 건강 이슈 비교' })
+  await expect(light.getByText('자료 없음', { exact: true })).toBeVisible()
+  await expect(light.getByRole('link', { name: /종목 바로가기/ })).toHaveCount(0)
+
+  const tabs = page.getByRole('group', { name: '종목 상세 탭' })
+  await tabs.getByRole('button', { name: '판매상품' }).click()
+  await expect(page.getByRole('heading', { name: '판매 상품', exact: true })).toBeVisible()
+  await expect(comparison).toHaveCount(0)
+  await tabs.getByRole('button', { name: '차트', exact: true }).click()
+  await red.getByRole('link', { name: '풀무원 종목 바로가기' }).click()
+  await expect(page.getByRole('heading', { name: '풀무원', exact: true })).toBeVisible()
+  await expect(chart).toBeVisible()
+})
+
+test('종목 비교에서 소재와 성분 기준별 검증 결과 표시', async ({ request, page }) => {
+  const soup = await request.get('/api/v1/stocks/US:NASDAQ:CPB/health-comparisons')
+  expect(soup.ok()).toBe(true)
+  expect(await soup.json()).toEqual(expect.arrayContaining([
+    expect.objectContaining({ product: expect.objectContaining({ id: 'campbell-original' }), issues: [
+      expect.objectContaining({ baseline: expect.objectContaining({ value: 890 }), alternative: expect.objectContaining({
+        stock: expect.objectContaining({ symbol: 'GIS' }), fact: expect.objectContaining({ value: 460 }),
+      }) }),
+    ] }),
+  ]))
+  await page.goto('/stocks/US:NASDAQ:NWL')
+  const pan = page.getByRole('article', { name: /Premier.*건강 이슈 비교/ })
+  await expect(pan.getByText('사용 확인', { exact: true })).toBeVisible()
+  await expect(pan.getByText('미사용 확인', { exact: true })).toBeVisible()
+  await expect(pan.getByRole('link', { name: '윌리엄스 소노마 종목 바로가기' })).toBeVisible()
+
+  await page.goto('/stocks/US:NYSE:KO')
+  const cola = page.getByRole('article', { name: '코카콜라 오리지널 건강 이슈 비교' })
+  await expect(cola.getByText('10.99 g')).toBeVisible()
+  await expect(cola.getByText('아스파탐 사용 확인')).toBeVisible()
+  await cola.getByRole('button', { name: '아스파탐', exact: true }).click()
+  await expect(cola.getByRole('link', { name: /종목 바로가기/ })).toHaveCount(0)
+  await expect(cola.getByText(/같은 기준에서/)).toBeVisible()
+})
+
 test('검색, 관심종목 및 자연어 조건 수정', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('heading', { name: '주식', exact: true })).toBeVisible()
