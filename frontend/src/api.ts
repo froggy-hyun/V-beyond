@@ -13,6 +13,7 @@ export const categories = {
   PEANUT_BUTTER: '땅콩버터',
   CHOCOLATE: '초콜릿',
   MAC_AND_CHEESE: '맥앤치즈', BEEF_FRANKS: '소고기 소시지',
+  CANNED_LUNCHEON_MEAT: '통조림 햄', TOMATO_KETCHUP: '토마토 케첩', BREAKFAST_CEREAL: '시리얼', TOMATO_SOUP: '토마토 수프',
 } as const
 export const criteria = {
   SODIUM: '나트륨', TOTAL_SUGAR: '당류', ADDED_SUGAR: '첨가당', SATURATED_FAT: '포화지방', CALORIES: '열량',
@@ -21,7 +22,10 @@ export const criteria = {
 export const bases: Record<string, string> = { PER_SERVING: '1회 제공량', PER_100ML: '100 mL', PER_100G: '100 g', SURFACE: '조리 접촉면', INGREDIENTS: '원재료' }
 export const relations: Record<string, string> = { OWNER: '브랜드 소유', DISTRIBUTOR: '판매·유통', MANUFACTURER: '제조', LICENSEE: '라이선스' }
 export type Category = keyof typeof categories
-const standardizedFood = new Set<Category>(['FROZEN_CHICKEN_NUGGETS', 'PEANUT_BUTTER', 'CHOCOLATE', 'MAC_AND_CHEESE', 'BEEF_FRANKS'])
+const standardizedFood = new Set<Category>([
+  'FROZEN_CHICKEN_NUGGETS', 'PEANUT_BUTTER', 'CHOCOLATE', 'MAC_AND_CHEESE', 'BEEF_FRANKS',
+  'CANNED_LUNCHEON_MEAT', 'TOMATO_KETCHUP', 'BREAKFAST_CEREAL',
+])
 export const nutritionBasis = (category: Category) => category === 'COLA' ? 'PER_100ML' : standardizedFood.has(category) ? 'PER_100G' : 'PER_SERVING'
 export type Criterion = keyof typeof criteria
 export type Stock = { id: string; symbol: string; name: string; english: string; market: string; exchange: string; currency: string; overview: string; source: string }

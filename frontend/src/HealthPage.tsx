@@ -19,7 +19,9 @@ export default function HealthPage() {
   const edit = (value: string) => setParams(value ? { q: value } : {}, { replace: true })
   const choose = (id: string) => setParams(query ? { q: query, topic: id } : { topic: id })
   return <div className="page health-page">
-    <header><h1>건강 이슈 성분으로 종목 찾기</h1><p>성분표와 제품 사양을 확인한 상품에서 관련 상장사를 찾아보세요.</p></header>
+    <header><h1>건강 이슈 성분으로 종목 찾기</h1>
+      <Link className="plain-link" to="/find-stocks">상품군으로 종목 찾기 <ChevronRight size={16} aria-hidden /></Link>
+    </header>
     <section className="panel">
       <div className="search-field"><Search size={19} aria-hidden /><input value={query} maxLength={70} onChange={event => edit(event.target.value)}
         aria-label="성분·소재 검색" placeholder="아질산나트륨, 보존료, 아스파탐 검색" /></div>

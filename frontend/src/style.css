@@ -242,6 +242,9 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .health-divider { display: grid; place-items: center }
 .vs-badge { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: #24272d; font-size: .71rem; font-weight: 800 }
 .comparison-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: 10px; margin-top: 12px }
+.finder-stocks { margin-top: 8px }
+.finder-stocks .tags { margin: 0 0 10px 42px }
+.finder-stocks .tags a { white-space: normal }
 .comparison-card { position: relative; display: flex; flex-direction: column; min-width: 0; border: 1px solid var(--line); border-radius: 9px; padding: 12px; overflow-wrap: anywhere; container-type: inline-size }
 .health-pair:has(.winner-sticker) { margin-top: 24px }
 .health-pair:has(.winner-sticker) .comparison-card { padding-top: 18px }
@@ -361,8 +364,9 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .menu-group h2 { margin-bottom: 5px }
 .menu-group a { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 47px; padding-inline: 6px; border-bottom: 1px solid var(--line); font-size: .92rem; font-weight: 650 }
 .menu-group a > :last-child { color: var(--muted) }
-footer { display: flex; align-items: center; margin-top: 22px; padding: 10px 0 18px; border-top: 1px solid var(--line) }
-footer img { width: 95px; height: auto }
+footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 22px; padding: 10px 0 18px; border-top: 1px solid var(--line) }
+footer img { flex: none; width: 95px; height: auto }
+footer p { margin: 0; color: var(--muted); font-size: .75rem; line-height: 1.5; text-align: right; word-break: keep-all }
 
 .skeleton, .skeleton-content { display: block; min-width: 0 }
 .skeleton i { display: block; height: 9px; min-width: 0; border-radius: 5px; background: #eceff1; overflow: hidden; position: relative }

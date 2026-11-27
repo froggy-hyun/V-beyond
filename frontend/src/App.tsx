@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import MarketPage from './MarketPage'
 import HealthPage from './HealthPage'
+import CatalogFinder from './CatalogFinder'
 import { ChoiceButtons } from './ChoiceButtons'
 import StockHealthComparisons from './StockHealthComparisons'
 import StockProductPerformance from './StockProductPerformance'
@@ -53,6 +54,8 @@ export default function App() {
         <Route index element={<MarketPage />} />
         <Route path="search" element={<SearchPage />} />
         <Route path="health" element={<HealthPage />} />
+        <Route path="find-stocks" element={<CatalogFinder mode="stocks" />} />
+        <Route path="find-products" element={<CatalogFinder mode="products" />} />
         <Route path="stocks/:id" element={<StockPage />} />
         <Route path="products/:id" element={<ProductPage />} />
         <Route path="products/:id/alternatives" element={<AlternativePage />} />
@@ -62,15 +65,19 @@ export default function App() {
         <Route path="menu" element={<MenuPage />} />
         <Route path="*" element={<Empty>페이지를 찾을 수 없습니다. <Link to="/">시장으로</Link></Empty>} />
       </Routes></div>
-      <footer><img src={lockup} alt="V beyond" width={626} height={282} /></footer>
+      <footer>
+        <img src={lockup} alt="V beyond" width={626} height={282} />
+        <p>제1회 하나증권 청년금융아이디어 공모전 최성현</p>
+      </footer>
     </main>
   </>
 }
 
 function MenuPage() {
   const groups = [
-    ['주식', [['/watchlist', '관심종목', Heart], ['/search', '통합 검색', SearchIcon]]],
-    ['상품', [['/ai', 'AI 상품 탐색', Sparkles], ['/health', '건강 이슈 성분 탐색', FlaskConical], ['/compare', '기업 비교', GitCompareArrows]]],
+    ['주식', [['/watchlist', '관심종목', Heart], ['/find-stocks', '종목 찾기', SearchIcon],
+      ['/health', '건강 이슈 성분으로 종목 찾기', FlaskConical], ['/compare', '기업 비교', GitCompareArrows]]],
+    ['상품', [['/find-products', '상품 찾기', SearchIcon], ['/ai', 'AI 상품 탐색', Sparkles]]],
   ] as const
   return <div className="page menu-page"><h1>전체 메뉴</h1>
     {groups.map(([group, items]) => <section className="panel menu-group" key={group} aria-label={group}>
@@ -285,7 +292,7 @@ function CompanyCompare() {
     </section>
     {result.data ? <><div className="compare-grid">{result.data.map(row => <section key={row.stock.id} className="panel"><Link className="plain-link" to={pathFor(row.stock.id)}><h2>{row.stock.name}</h2></Link>
       <p>{row.stock.overview}</p>{row.products.map(product => <article key={product.id} className="compare-product"><ProductCard product={product} />
-        <p className="muted">{product.prep}</p>{product.facts.filter(fact => fact.basis !== 'PER_100ML').slice(0, 4).map(fact => <div className="fact-row" key={fact.criterion}><span>{criteria[fact.criterion]}</span><strong>{formatFact(fact)}</strong><Source href={fact.source} /></div>)}
+        <p className="muted">{product.prep}</p>{product.facts.filter(fact => !['PER_100G', 'PER_100ML'].includes(fact.basis)).slice(0, 4).map(fact => <div className="fact-row" key={fact.criterion}><span>{criteria[fact.criterion]}</span><strong>{formatFact(fact)}</strong><Source href={fact.source} /></div>)}
         {product.material && <p>{product.material}</p>}</article>)}<Source href={row.stock.source}>기업 출처</Source></section>)}</div>
       <p className="muted">공개 자료를 확인할 수 있는 상품을 비교합니다.</p></> : result.isFetching || result.error ? <Wait error={result.error} kind="products" /> : <Empty>비교할 기업 두 곳을 선택해 주세요.</Empty>}
   </div>

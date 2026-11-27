@@ -64,6 +64,11 @@ class CatalogApi {
     @GetMapping("/products/{id}")
     Product product(@PathVariable String id) { return catalog.product(id); }
 
+    @GetMapping("/products")
+    Search browse(@RequestParam Category category, @RequestParam(defaultValue = "") @Pattern(regexp = "KR|US|") String market) {
+        return catalog.browse(category, market);
+    }
+
     @GetMapping("/products/{id}/evidence")
     List<Evidence> evidence(@PathVariable String id) { return catalog.product(id).evidence(); }
 

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState, useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
-import { ArrowDownUp, ChartNoAxesCombined, ChevronRight, Droplets, FlaskConical, Search, Shield } from 'lucide-react'
+import { ArrowDownUp, ChartNoAxesCombined, ChevronRight, Droplets, FlaskConical, LayoutGrid, Search, Shield } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { categories, currency, pathFor, percent, tone, useData, useMarketMode, useQuotes } from './api'
 import type { Candle, Category, MarketIndex, Quote, Stock } from './api'
@@ -145,14 +145,16 @@ export default function MarketPage() {
       <aside className="market-aside">
         {desktop && preview && <Preview stock={preview} quote={getQuote(preview.id)} />}
         {desktop && stocks.isPending && <section className="panel market-preview"><Skeleton kind="chart" /></section>}
-        <MarketShortcuts headingId="market-products-heading" title="상품으로 종목 찾기">
-          {(Object.keys(categories) as Category[]).map(category => <Link key={category} to={'/ai?category=' + category}>
-            <ProductIcon category={category} /><strong>{categories[category]}</strong>
-          </Link>)}
-        </MarketShortcuts>
-        <MarketShortcuts headingId="market-health-heading" title="건강 이슈 성분으로 종목 찾기" to="/health">
+        <MarketShortcuts headingId="market-stocks-heading" title="종목 찾기" to="/find-stocks">
+          <Link to="/find-stocks"><span className="product-icon"><LayoutGrid aria-hidden strokeWidth={1.55} /></span><strong>상품군으로 종목 찾기</strong></Link>
+          <Link to="/health"><span className="product-icon"><FlaskConical aria-hidden strokeWidth={1.55} /></span><strong>건강 이슈 성분으로 종목 찾기</strong></Link>
           {ingredientShortcuts.map(([id, name, Icon]) => <Link key={id} to={'/health?topic=' + id}>
             <span className="product-icon"><Icon aria-hidden strokeWidth={1.55} /></span><strong>{name}</strong>
+          </Link>)}
+        </MarketShortcuts>
+        <MarketShortcuts headingId="market-products-heading" title="상품 찾기" to="/find-products">
+          {(Object.keys(categories) as Category[]).map(category => <Link key={category} to={'/find-products?category=' + category}>
+            <ProductIcon category={category} /><strong>{categories[category]}</strong>
           </Link>)}
         </MarketShortcuts>
         <Link to="/ai" className="market-natural-link">

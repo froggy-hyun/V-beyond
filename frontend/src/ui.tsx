@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Building2, CookingPot, CupSoda, Soup, Utensils, ChevronRight, Droplet, Wind, Drumstick, Sandwich, Beef, Package } from 'lucide-react'
+import { Building2, CookingPot, CupSoda, Soup, Utensils, ChevronRight, Droplet, Wind, Drumstick, Sandwich, Beef, Package, Wheat } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { categories, currency, pathFor, percent, relations, tone } from './api'
 import type { Category, Product, Quote, Stock } from './api'
@@ -14,6 +14,7 @@ const icons = {
   RAMEN: Soup, FRYING_PAN: Utensils, CHICKEN_NOODLE_SOUP: CookingPot, COLA: CupSoda,
   RICE_COOKER: CookingPot, WATER_FILTER: Droplet, AIR_PURIFIER: Wind,
   FROZEN_CHICKEN_NUGGETS: Drumstick, PEANUT_BUTTER: Sandwich, CHOCOLATE: Sandwich, MAC_AND_CHEESE: Soup, BEEF_FRANKS: Beef,
+  CANNED_LUNCHEON_MEAT: Package, TOMATO_KETCHUP: Droplet, BREAKFAST_CEREAL: Wheat, TOMATO_SOUP: Soup,
 }
 export function ProductIcon({ category }: { category: Category }) {
   const Icon = icons[category]

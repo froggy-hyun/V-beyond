@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
@@ -20,12 +21,14 @@ import org.springframework.web.server.ResponseStatusException;
 public class Catalog {
     public enum Category {
         RAMEN, FRYING_PAN, CHICKEN_NOODLE_SOUP, COLA, RICE_COOKER, WATER_FILTER, AIR_PURIFIER,
-        FROZEN_CHICKEN_NUGGETS, PEANUT_BUTTER, CHOCOLATE, MAC_AND_CHEESE, BEEF_FRANKS;
+        FROZEN_CHICKEN_NUGGETS, PEANUT_BUTTER, CHOCOLATE, MAC_AND_CHEESE, BEEF_FRANKS,
+        CANNED_LUNCHEON_MEAT, TOMATO_KETCHUP, BREAKFAST_CEREAL, TOMATO_SOUP;
 
         public String nutritionBasis() {
             return switch (this) {
                 case COLA -> "PER_100ML";
-                case FROZEN_CHICKEN_NUGGETS, PEANUT_BUTTER, CHOCOLATE, MAC_AND_CHEESE, BEEF_FRANKS -> "PER_100G";
+                case FROZEN_CHICKEN_NUGGETS, PEANUT_BUTTER, CHOCOLATE, MAC_AND_CHEESE, BEEF_FRANKS,
+                        CANNED_LUNCHEON_MEAT, TOMATO_KETCHUP, BREAKFAST_CEREAL -> "PER_100G";
                 default -> "PER_SERVING";
             };
         }
@@ -115,6 +118,13 @@ public class Catalog {
                 .query((row, index) -> decode(row.getString(1))).list();
     }
 
+    public Search browse(Category category, String market) {
+        var products = group(category, market);
+        var issuers = products.stream().map(product -> product.market() + ":" + product.symbol()).collect(Collectors.toSet());
+        var matches = stocks(market).stream().filter(stock -> issuers.contains(stock.market() + ":" + stock.symbol())).toList();
+        return new Search(matches, products);
+    }
+
     public List<Stock> competitors(String id) {
         return products(id).stream().flatMap(p -> group(p.category(), p.market()).stream())
                 .map(this::stockFor).filter(s -> !s.id().equals(id)).distinct().toList();
@@ -127,7 +137,9 @@ public class Catalog {
             var competitors = groups.computeIfAbsent(origin.category(), category -> group(category, origin.market()).stream()
                     .filter(candidate -> !candidate.symbol().equals(origin.symbol())).toList());
             var criteria = switch (origin.category()) {
-                case RAMEN, CHICKEN_NOODLE_SOUP, FROZEN_CHICKEN_NUGGETS, MAC_AND_CHEESE, BEEF_FRANKS -> List.of(Criterion.SODIUM);
+                case RAMEN, CHICKEN_NOODLE_SOUP, FROZEN_CHICKEN_NUGGETS, MAC_AND_CHEESE, BEEF_FRANKS,
+                        CANNED_LUNCHEON_MEAT, TOMATO_SOUP -> List.of(Criterion.SODIUM);
+                case TOMATO_KETCHUP, BREAKFAST_CEREAL -> List.of(Criterion.SODIUM, Criterion.ADDED_SUGAR);
                 case COLA -> List.of(Criterion.TOTAL_SUGAR, Criterion.AVOID_ASPARTAME);
                 case FRYING_PAN -> List.of(Criterion.AVOID_PTFE, Criterion.AVOID_PFAS);
                 case PEANUT_BUTTER, CHOCOLATE -> List.of(Criterion.ADDED_SUGAR, Criterion.SATURATED_FAT);

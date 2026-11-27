@@ -45,7 +45,8 @@ class DiscoveryApi {
     private static final String SCHEMA = """
             {"type":"object","additionalProperties":false,"properties":{
                 "category":{"enum":["RAMEN","FRYING_PAN","CHICKEN_NOODLE_SOUP","COLA","FROZEN_CHICKEN_NUGGETS",
-                "PEANUT_BUTTER","CHOCOLATE","MAC_AND_CHEESE","BEEF_FRANKS","UNSUPPORTED"],"type":"string"},
+                "PEANUT_BUTTER","CHOCOLATE","MAC_AND_CHEESE","BEEF_FRANKS","CANNED_LUNCHEON_MEAT",
+                "TOMATO_KETCHUP","BREAKFAST_CEREAL","TOMATO_SOUP","UNSUPPORTED"],"type":"string"},
                 "criterion":{"enum":["SODIUM","TOTAL_SUGAR","ADDED_SUGAR","SATURATED_FAT","CALORIES",
                 "AVOID_PTFE","AVOID_PFAS","AVOID_ASPARTAME","UNSUPPORTED"],"type":"string"}},
              "required":["category","criterion"]}
@@ -79,7 +80,7 @@ class DiscoveryApi {
                 || question.matches("(?s).*(\\d{6,}|[\\w.+-]+@[\\w.-]+).*")) {
             return unsupported();
         }
-        var key = cache.key("discovery-intent:v1", question.replaceAll("\\s+", " "));
+        var key = cache.key("discovery-intent:v2", question.replaceAll("\\s+", " "));
         var saved = cache.read(key, Intent.class);
         if (saved.isPresent()) return fromIntent(saved.get().value(), false);
         return generateOnce(key, false, () -> {
@@ -220,10 +221,14 @@ class DiscoveryApi {
         Category group = q.matches(".*(라면|불닭|라멘).*") ? Category.RAMEN
                 : q.matches(".*(프라이팬|후라이팬|팬).*") ? Category.FRYING_PAN
                 : q.contains("너겟") ? Category.FROZEN_CHICKEN_NUGGETS
+                : q.matches(".*(스팸|런천미트|통조림 햄).*") ? Category.CANNED_LUNCHEON_MEAT
                 : q.matches(".*(소시지|핫도그).*") ? Category.BEEF_FRANKS
                 : q.contains("땅콩") ? Category.PEANUT_BUTTER
                 : q.matches(".*(초콜릿|초콜렛).*") ? Category.CHOCOLATE
                 : q.matches(".*맥\\s*앤\\s*치즈.*") ? Category.MAC_AND_CHEESE
+                : q.matches(".*(케첩|케찹).*") ? Category.TOMATO_KETCHUP
+                : q.matches(".*(시리얼|씨리얼).*") ? Category.BREAKFAST_CEREAL
+                : q.matches(".*토마토\\s*(수프|스프).*") ? Category.TOMATO_SOUP
                 : q.matches(".*(수프|스프).*") ? Category.CHICKEN_NOODLE_SOUP
                 : q.matches(".*(콜라|음료).*") ? Category.COLA : null;
         Criterion criterion = q.matches(".*(나트륨|저염|짠).*") ? Criterion.SODIUM
