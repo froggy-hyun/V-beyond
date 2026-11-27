@@ -1,0 +1,93 @@
+name: 검증 및 운영 배포
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    outputs:
+      app: ${{ steps.scope.outputs.app }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: 배포 구성 검증
+        id: scope
+        run: |
+          bash -n ops/deploy.sh && bash -n ops/activate.sh
+          docker compose --env-file .env.example config --quiet
+          if [[ ! -d backend && ! -d frontend ]]; then
+            echo 'app=false' >> "$GITHUB_OUTPUT"
+          else
+            test -f backend/Dockerfile && test -f frontend/Dockerfile
+            echo 'app=true' >> "$GITHUB_OUTPUT"
+          fi
+      - name: 앱 빌드 및 통합 검증
+        if: steps.scope.outputs.app == 'true'
+        run: bash ops/verify.sh
+
+  publish:
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.verify.outputs.app == 'true'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      backend: ${{ steps.images.outputs.backend }}
+      frontend: ${{ steps.images.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: ARM64 이미지 발행
+        id: images
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          trap 'docker logout ghcr.io >/dev/null' EXIT
+          for service in backend frontend; do
+            image="ghcr.io/${GITHUB_REPOSITORY,,}-$service:$GITHUB_SHA"
+            docker build --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" --tag "$image" "$service"
+            docker push "$image"
+            echo "$service=$(docker inspect --format '{{index .RepoDigests 0}}' "$image")" >> "$GITHUB_OUTPUT"
+          done
+
+  deploy:
+    needs: publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    environment: production
+    concurrency:
+      group: product-lens-production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: 운영 배포 및 상태 점검
+        env:
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          PROD_SSH_PASSWORD: ${{ secrets.PROD_SSH_PASSWORD }}
+          PROD_SSH_KNOWN_HOSTS: ${{ secrets.PROD_SSH_KNOWN_HOSTS }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+          GH_TOKEN: ${{ github.token }}
+          BACKEND_IMAGE: ${{ needs.publish.outputs.backend }}
+          FRONTEND_IMAGE: ${{ needs.publish.outputs.frontend }}
+        run: bash ops/deploy.sh

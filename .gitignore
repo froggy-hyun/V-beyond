@@ -1,0 +1,15 @@
+.idea/
+.vscode/
+.DS_Store
+.local/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+node_modules/
+dist/
+build/
+.gradle/
+test-results/
+playwright-report/
