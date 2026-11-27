@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import MarketPage from './MarketPage'
 import HealthPage from './HealthPage'
 import CatalogFinder from './CatalogFinder'
+import { ProductDiseaseEvidence } from './DiseaseEvidence'
 import { ChoiceButtons } from './ChoiceButtons'
 import StockHealthComparisons from './StockHealthComparisons'
 import StockProductPerformance from './StockProductPerformance'
@@ -11,7 +12,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { ArrowLeft, ChevronLeft, ChevronRight, Cookie, Droplets, Flame, FlaskConical, GitCompareArrows, Heart, Home as HomeIcon, Menu, Search as SearchIcon, Shield, Sparkles, X } from 'lucide-react'
 import { Link, NavLink, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { api, bases, categories, criteria, currency, formatFact, nutritionBasis, pathFor, percent, quoteStatus, quoteTime, relations, tone, useData, useMarketMode, useQuotes } from './api'
-import type { Candle, Category, Comparison, Criterion, Fact, Match, Product, Stock } from './api'
+import type { Candle, Category, Comparison, Criterion, Fact, HealthAssessment, Match, Product, Stock } from './api'
 import { Empty, ProductCard, ProductIcon, ProductPhoto, productPhotoSource, Skeleton, Source, StockMark, StockRow, Wait } from './ui'
 import wordmark from './assets/brand/wordmark.png'
 import lockup from './assets/brand/lockup.png'
@@ -225,20 +226,26 @@ function ProductPage() {
   const { id = '' } = useParams()
   const product = useData<Product>('/products/' + id)
   const owner = useData<Stock[]>('/stocks?market=' + (product.data?.market ?? ''), Boolean(product.data))
+  const health = useData<HealthAssessment[]>('/products/' + id + '/health-topics', Boolean(product.data))
+  const alternatives = useData<Criterion[]>('/products/' + id + '/alternative-criteria?scope=ALL_COMPANIES',
+    Boolean(product.data?.facts.length))
   if (!product.data) return <div className="page"><section className="panel"><Wait error={product.error} kind="product" /></section></div>
   const item = product.data
   const company = owner.data?.find(stock => stock.symbol === item.symbol)
   const photoSource = productPhotoSource(item.id)
+  const productEvidence = item.evidence.filter(evidence => !evidence.topic)
   return <div className="page">
     {company && <Link className="back" to={pathFor(company.id)}><ArrowLeft size={16} /> {company.name}</Link>}
     <section className="panel product-heading"><ProductPhoto product={item} detail /><div><p className="eyebrow">{categories[item.category]} · {item.market === 'KR' ? '국내' : '미국'}</p><h1>{item.name}</h1><p>{item.brand} · {relations[item.relation]} · {item.size}</p>{photoSource && <Source href={photoSource}>사진 출처</Source>}</div></section>
     <section className="panel"><div className="section-heading"><h2>영양·소재 정보</h2><Source href={item.source}>제품 출처</Source></div><p>{item.description}</p><p className="muted">{item.prep}</p>
       {item.material && <div className="fact-row"><strong>공개 사양</strong><span>{item.material}</span></div>}
       {item.facts.map(fact => <div className="fact-row" key={fact.criterion + fact.basis}><div><strong>{criteria[fact.criterion]}</strong><small>{bases[fact.basis]}</small></div><strong>{formatFact(fact)}</strong><Source href={fact.source} /></div>)}
-      <Link className="primary" to={'/products/' + item.id + '/alternatives'}>대안 상품 탐색</Link>
+      {Boolean(alternatives.data?.length) && <Link className="primary" to={'/products/' + item.id + '/alternatives?scope=ALL_COMPANIES'}>대안 상품 탐색</Link>}
     </section>
-    <section className="panel"><h2>건강 관련 근거</h2>{item.evidence.length ? item.evidence.map(evidence =>
-      <article className="evidence" key={evidence.title}><FlaskConical size={19} /><div><h3>{evidence.title}</h3><p>{evidence.summary}</p><Source href={evidence.source} /></div></article>) : <Empty>이 상품에 연결된 근거가 없습니다.</Empty>}</section>
+    {productEvidence.length > 0 && <section className="panel"><h2>상품 근거</h2>{productEvidence.map(evidence =>
+      <article className="evidence" key={evidence.title}><FlaskConical size={19} /><div><h3>{evidence.title}</h3><p>{evidence.summary}</p><Source href={evidence.source} /></div></article>)}</section>}
+    {Boolean(health.data?.length) && <section className="panel"><h2>건강 관련 근거</h2>{health.data?.map(assessment =>
+      <ProductDiseaseEvidence key={assessment.topic.id} assessment={assessment} />)}</section>}
   </div>
 }
 

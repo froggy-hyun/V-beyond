@@ -12,7 +12,8 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api/v1")
 class CatalogApi {
-    record StockHealth(Product product, List<HealthIssue> issues, List<ProductPeer> peers, List<HealthTopics.Topic> topics) {}
+    record StockIssue(Criterion criterion, Fact baseline, Alternative alternative, List<Alternative> comparisons, HealthTopics.Topic topic) {}
+    record StockHealth(Product product, List<StockIssue> issues, List<HealthTopics.Assessment> assessments) {}
     private final Catalog catalog;
     private final ProductMarketData productMarket;
     private final ProductOverview productOverview;
@@ -39,7 +40,9 @@ class CatalogApi {
     @GetMapping("/stocks/{id}/health-comparisons")
     List<StockHealth> healthComparisons(@PathVariable String id) {
         return catalog.healthComparisons(id).stream().map(row -> new StockHealth(
-                row.product(), row.issues(), row.peers(), healthTopics.labeledTopics(row.product()))).toList();
+                row.product(), row.issues().stream().map(issue -> new StockIssue(issue.criterion(), issue.baseline(),
+                        issue.alternative(), issue.comparisons(), healthTopics.forCriterion(issue.criterion()))).toList(),
+                healthTopics.assessments(row.product()))).toList();
     }
 
     @GetMapping("/stocks/{id}/product-overview")
@@ -71,6 +74,11 @@ class CatalogApi {
 
     @GetMapping("/products/{id}/evidence")
     List<Evidence> evidence(@PathVariable String id) { return catalog.product(id).evidence(); }
+
+    @GetMapping("/products/{id}/health-topics")
+    List<HealthTopics.Assessment> productHealth(@PathVariable String id) {
+        return healthTopics.assessments(catalog.product(id));
+    }
 
     @GetMapping("/products/{id}/alternatives")
     Alternatives alternatives(@PathVariable String id, @RequestParam Criterion criterion,

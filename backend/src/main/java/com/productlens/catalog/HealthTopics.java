@@ -17,9 +17,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 class HealthTopics {
-    record Reference(String title, String url) {}
-    record Topic(String id, String name, String category, List<String> aliases, String assessment,
+    record Reference(String title, String url, String finding) {}
+    record Topic(String id, String name, String category, List<String> aliases, String condition, String assessment, String limits,
                  List<Reference> sources, Criterion criterion) {}
+    record Support(String detail, String source, Fact fact) {}
+    record Assessment(Topic topic, Support support) {}
     record Match(Stock stock, String productId, String productName, String market, String detail, String source, Fact fact) {}
     record Results(Topic topic, List<Match> matches) {}
 
@@ -37,23 +39,31 @@ class HealthTopics {
         var stocks = catalog.stocks("").stream().collect(Collectors.toMap(
                 stock -> stock.market() + ":" + stock.symbol(), Function.identity()));
         var products = catalog.verifiedProducts();
-        return topics.stream().map(topic -> new Results(topic, products.stream().map(product ->
-                        match(topic, product, stocks.get(product.market() + ":" + product.symbol())))
-                .flatMap(Optional::stream).toList())).toList();
+        return topics.stream().map(topic -> new Results(topic, products.stream().flatMap(product ->
+                support(topic, product).map(found -> new Match(stocks.get(product.market() + ":" + product.symbol()),
+                        product.id(), product.name(), product.market(), found.detail(), found.source(), found.fact())).stream())
+                .toList())).filter(result -> !result.matches().isEmpty()).toList();
     }
 
-    List<Topic> labeledTopics(Product product) {
-        return topics.stream().filter(topic -> product.evidence().stream().anyMatch(item -> topic.id().equals(item.topic()))).toList();
+    List<Assessment> assessments(Product product) {
+        return topics.stream().flatMap(topic -> support(topic, product).map(found -> new Assessment(topic, found)).stream()).toList();
     }
 
-    private static Optional<Match> match(Topic topic, Product product, Stock stock) {
-        var evidence = product.evidence().stream().filter(item -> topic.id().equals(item.topic())).findFirst();
+    Topic forCriterion(Criterion criterion) {
+        var topicCriterion = criterion == Criterion.ADDED_SUGAR ? Criterion.TOTAL_SUGAR : criterion;
+        return topics.stream().filter(topic -> topic.criterion() == topicCriterion).findFirst().orElseThrow();
+    }
+
+    private static Optional<Support> support(Topic topic, Product product) {
+        var evidence = product.evidence().stream().filter(item -> topic.id().equals(item.topic())
+                && item.source() != null && item.source().startsWith("https://")).findFirst();
         if (evidence.isPresent()) {
             var item = evidence.get();
-            return Optional.of(new Match(stock, product.id(), product.name(), product.market(), item.summary(), item.source(), null));
+            return Optional.of(new Support(item.summary(), item.source(), null));
         }
-        return product.facts().stream().filter(fact -> fact.criterion() == topic.criterion() && fact.value().signum() > 0)
-                .min(Comparator.comparingInt(fact -> product.category().nutritionBasis().equals(fact.basis()) ? 0 : 1))
-                .map(fact -> new Match(stock, product.id(), product.name(), product.market(), null, fact.source(), fact));
+        return product.facts().stream().filter(fact -> fact.criterion() == topic.criterion()
+                        && Catalog.sourced(fact) && fact.value().signum() > 0)
+                .min(Comparator.comparingInt(fact -> Catalog.basisFor(product, fact.criterion()).equals(fact.basis()) ? 0 : 1))
+                .map(fact -> new Support(null, fact.source(), fact));
     }
 }

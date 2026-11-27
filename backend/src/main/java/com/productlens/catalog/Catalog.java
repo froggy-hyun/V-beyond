@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -54,8 +55,7 @@ public class Catalog {
     public record Comparison(Stock stock, List<Product> products) {}
     public record Alternatives(Fact baseline, List<Alternative> matches, int excluded) {}
     public record HealthIssue(Criterion criterion, Fact baseline, Alternative alternative, List<Alternative> comparisons) {}
-    public record ProductPeer(Product product, Stock stock) {}
-    public record HealthComparison(Product product, List<HealthIssue> issues, List<ProductPeer> peers) {}
+    public record HealthComparison(Product product, List<HealthIssue> issues) {}
     private final JdbcClient db;
     private final ObjectMapper json;
 
@@ -141,44 +141,38 @@ public class Catalog {
                         CANNED_LUNCHEON_MEAT, TOMATO_SOUP -> List.of(Criterion.SODIUM);
                 case TOMATO_KETCHUP, BREAKFAST_CEREAL -> List.of(Criterion.SODIUM, Criterion.ADDED_SUGAR);
                 case COLA -> List.of(Criterion.TOTAL_SUGAR, Criterion.AVOID_ASPARTAME);
-                case FRYING_PAN -> List.of(Criterion.AVOID_PTFE, Criterion.AVOID_PFAS);
+                case FRYING_PAN -> List.of(Criterion.AVOID_PTFE);
                 case PEANUT_BUTTER, CHOCOLATE -> List.of(Criterion.ADDED_SUGAR, Criterion.SATURATED_FAT);
                 case RICE_COOKER, WATER_FILTER, AIR_PURIFIER -> List.<Criterion>of();
             };
-            var issues = criteria.stream().map(criterion -> healthIssue(origin, competitors, criterion)).toList();
-            var peers = competitors.stream().filter(product -> origin.prep().equals(product.prep())).limit(3)
-                    .map(product -> new ProductPeer(product, stockFor(product))).toList();
-            return new HealthComparison(origin, issues, peers);
-        }).toList();
+            var issues = criteria.stream().flatMap(criterion -> healthIssue(origin, competitors, criterion).stream()).toList();
+            return new HealthComparison(origin, issues);
+        }).filter(row -> !row.issues().isEmpty()).toList();
     }
 
-    private HealthIssue healthIssue(Product origin, List<Product> competitors, Criterion criterion) {
-        var basis = switch (criterion) {
-            case AVOID_ASPARTAME -> "INGREDIENTS";
-            case AVOID_PTFE, AVOID_PFAS -> "SURFACE";
-            default -> origin.category().nutritionBasis();
-        };
-        var baseline = origin.facts().stream().filter(fact -> fact.criterion() == criterion && fact.basis().equals(basis))
-                .findFirst().orElse(null);
+    private Optional<HealthIssue> healthIssue(Product origin, List<Product> competitors, Criterion criterion) {
+        var baseline = baseline(origin, criterion, basisFor(origin, criterion));
+        if (baseline == null) return Optional.empty();
         record Match(Product product, Fact fact) {}
-        var comparisons = competitors.stream().filter(product -> origin.prep().equals(product.prep()))
-                .flatMap(product -> product.facts().stream().filter(fact -> fact.criterion() == criterion && fact.basis().equals(basis)
-                        && (baseline == null || baseline.unit().equals(fact.unit()))).limit(1).map(fact -> new Match(product, fact)))
+        var comparisons = competitors.stream()
+                .flatMap(product -> product.facts().stream().filter(fact -> comparable(origin, product, baseline, fact))
+                        .limit(1).map(fact -> new Match(product, fact)))
                 .sorted(Comparator.comparing(match -> match.fact().value())).limit(3)
                 .map(match -> new Alternative(match.product(), stockFor(match.product()), match.fact(),
-                        baseline != null && match.fact().value().compareTo(baseline.value()) < 0
+                        match.fact().value().compareTo(baseline.value()) < 0
                                 ? reduction(baseline, match.fact(), criterion) : null)).toList();
-        var best = comparisons.isEmpty() ? null : comparisons.getFirst();
-        var alternative = best != null && baseline != null && best.fact().value().compareTo(baseline.value()) < 0 ? best : null;
-        return new HealthIssue(criterion, baseline, alternative, comparisons);
+        if (comparisons.isEmpty()) return Optional.empty();
+        var best = comparisons.getFirst();
+        var alternative = best.fact().value().compareTo(baseline.value()) < 0 ? best : null;
+        return Optional.of(new HealthIssue(criterion, baseline, alternative, comparisons));
     }
 
     public Alternatives alternatives(String id, Criterion criterion, String basis, Scope scope) {
         Product origin = product(id);
         var candidates = alternativeCandidates(origin, scope);
-        var baseline = baseline(origin, criterion, basis);
+        var baseline = baseline(origin, criterion, basis.isBlank() ? basisFor(origin, criterion) : basis);
         var matches = candidates.stream().flatMap(p -> p.facts().stream()
-                .filter(f -> matchesAlternative(origin, p, criterion, baseline, f))
+                .filter(f -> matchesAlternative(origin, p, baseline, f))
                 .limit(1).map(f -> new Alternative(p, stockFor(p), f, reduction(baseline, f, criterion))))
                 .sorted(Comparator.comparing(row -> row.fact().value())).toList();
         return new Alternatives(baseline, matches, candidates.size() - matches.size());
@@ -188,9 +182,9 @@ public class Catalog {
         var origin = product(id);
         var candidates = alternativeCandidates(origin, scope);
         return Arrays.stream(Criterion.values()).filter(criterion -> {
-            var baseline = baseline(origin, criterion, criterion.absence() ? "" : origin.category().nutritionBasis());
+            var baseline = baseline(origin, criterion, basisFor(origin, criterion));
             return candidates.stream().anyMatch(candidate -> candidate.facts().stream()
-                    .anyMatch(fact -> matchesAlternative(origin, candidate, criterion, baseline, fact)));
+                    .anyMatch(fact -> matchesAlternative(origin, candidate, baseline, fact)));
         }).toList();
     }
 
@@ -203,19 +197,32 @@ public class Catalog {
     }
 
     private static Fact baseline(Product origin, Criterion criterion, String basis) {
-        return origin.facts().stream().filter(fact -> fact.criterion() == criterion && (basis.isBlank() || fact.basis().equals(basis)))
+        return origin.facts().stream().filter(fact -> fact.criterion() == criterion && fact.basis().equals(basis) && sourced(fact))
                 .findFirst().orElse(null);
     }
 
-    private static boolean matchesAlternative(Product origin, Product candidate, Criterion criterion, Fact baseline, Fact fact) {
-        if (fact.criterion() != criterion) return false;
-        return criterion.absence() ? fact.value().signum() == 0 : baseline != null && comparable(origin, candidate, baseline, fact);
+    static String basisFor(Product origin, Criterion criterion) {
+        return switch (criterion) {
+            case AVOID_ASPARTAME -> "INGREDIENTS";
+            case AVOID_PTFE, AVOID_PFAS -> "SURFACE";
+            default -> origin.category().nutritionBasis();
+        };
+    }
+
+    private static boolean matchesAlternative(Product origin, Product candidate, Fact baseline, Fact fact) {
+        return baseline != null && comparable(origin, candidate, baseline, fact) && (fact.criterion().absence()
+                ? fact.value().signum() == 0 : fact.value().compareTo(baseline.value()) < 0);
     }
 
     private static boolean comparable(Product origin, Product candidate, Fact baseline, Fact fact) {
         // 농축·완제품이나 식사·간식처럼 섭취 기준이 다른 제품 제외
-        return origin.prep().equals(candidate.prep()) && baseline.basis().equals(fact.basis())
-                && baseline.unit().equals(fact.unit()) && fact.value().compareTo(baseline.value()) < 0;
+        return baseline.criterion() == fact.criterion() && sourced(fact) && origin.prep().equals(candidate.prep())
+                && baseline.basis().equals(fact.basis()) && baseline.unit().equals(fact.unit());
+    }
+
+    public static boolean sourced(Fact fact) {
+        return fact.value() != null && fact.value().signum() >= 0 && fact.unit() != null && !fact.unit().isBlank()
+                && fact.source() != null && fact.source().startsWith("https://");
     }
 
     private static BigDecimal reduction(Fact baseline, Fact fact, Criterion criterion) {

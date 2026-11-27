@@ -29,6 +29,7 @@ class ProductMarketData {
     Overview overview(Catalog.Stock stock, List<Catalog.Product> products) {
         var segments = book.segments().getOrDefault(stock.id(), List.of());
         var markets = book.markets().stream().filter(market -> market.region().equals(stock.market())
+                && market.brands().stream().anyMatch(brand -> brand.stockId().equals(stock.id()))
                 && products.stream().anyMatch(product -> product.category() == market.category())).toList();
         return new Overview(segments.isEmpty() && markets.isEmpty() ? "UNAVAILABLE" : "AVAILABLE",
                 stock.source(), segments, markets);

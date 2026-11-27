@@ -207,6 +207,7 @@ class DiscoveryApi {
     }
 
     private static boolean eligibleFact(Category category, Fact fact) {
+        if (!Catalog.sourced(fact)) return false;
         var criterion = fact.criterion();
         if (!criterion.absence()) return category.nutritionBasis().equals(fact.basis());
         var basis = criterion == Criterion.AVOID_ASPARTAME ? "INGREDIENTS" : "SURFACE";

@@ -1290,14 +1290,12 @@
       {
         "title": "착색료 · 카라멜색소",
         "summary": "미국 제조사 성분표에 카라멜색소가 표시돼 있습니다. 색소 유형과 4-MEI 함량은 공개되지 않았습니다.",
-        "source": "https://www.coca-cola.com/us/en/brands/coca-cola/products/original/original-taste",
-        "topic": "caramel-color"
+        "source": "https://www.coca-cola.com/us/en/brands/coca-cola/products/original/original-taste"
       },
       {
         "title": "카페인 포장 표시",
         "summary": "제조사 성분표에 카페인이 표시됩니다.",
-        "source": "https://www.coca-cola.com/us/en/brands/coca-cola/products/original/original-taste",
-        "topic": "caffeine"
+        "source": "https://www.coca-cola.com/us/en/brands/coca-cola/products/original/original-taste"
       }
     ],
     "material": null,
@@ -1394,20 +1392,17 @@
       {
         "title": "보존료 · 안식향산칼륨",
         "summary": "미국 제조사 성분표에 안식향산칼륨이 표시돼 있습니다. 제품의 벤젠 검출 여부는 이 표시로 확인할 수 없습니다.",
-        "source": "https://www.coca-cola.com/us/en/brands/coca-cola/products/zero/zero-sugar",
-        "topic": "potassium-benzoate"
+        "source": "https://www.coca-cola.com/us/en/brands/coca-cola/products/zero/zero-sugar"
       },
       {
         "title": "착색료 · 카라멜색소",
         "summary": "미국 제조사 성분표에 카라멜색소가 표시돼 있습니다. 색소 유형과 4-MEI 함량은 공개되지 않았습니다.",
-        "source": "https://www.coca-cola.com/us/en/brands/coca-cola/products/zero/zero-sugar",
-        "topic": "caramel-color"
+        "source": "https://www.coca-cola.com/us/en/brands/coca-cola/products/zero/zero-sugar"
       },
       {
         "title": "카페인 포장 표시",
         "summary": "제조사 성분표에 카페인이 표시됩니다.",
-        "source": "https://www.coca-cola.com/us/en/brands/coca-cola/products/zero/zero-sugar",
-        "topic": "caffeine"
+        "source": "https://www.coca-cola.com/us/en/brands/coca-cola/products/zero/zero-sugar"
       }
     ],
     "material": null,
@@ -1490,20 +1485,17 @@
       {
         "title": "보존료 · 안식향산칼륨",
         "summary": "미국 제조사 성분표에 안식향산칼륨이 표시돼 있습니다. 제품의 벤젠 검출 여부는 이 표시로 확인할 수 없습니다.",
-        "source": "https://www.coca-cola.com/us/en/brands/diet-coke/products/original",
-        "topic": "potassium-benzoate"
+        "source": "https://www.coca-cola.com/us/en/brands/diet-coke/products/original"
       },
       {
         "title": "착색료 · 카라멜색소",
         "summary": "미국 제조사 성분표에 카라멜색소가 표시돼 있습니다. 색소 유형과 4-MEI 함량은 공개되지 않았습니다.",
-        "source": "https://www.coca-cola.com/us/en/brands/diet-coke/products/original",
-        "topic": "caramel-color"
+        "source": "https://www.coca-cola.com/us/en/brands/diet-coke/products/original"
       },
       {
         "title": "카페인 포장 표시",
         "summary": "제조사 성분표에 카페인이 표시됩니다.",
-        "source": "https://www.coca-cola.com/us/en/brands/diet-coke/products/original",
-        "topic": "caffeine"
+        "source": "https://www.coca-cola.com/us/en/brands/diet-coke/products/original"
       }
     ],
     "material": null,
@@ -1605,14 +1597,12 @@
       {
         "title": "착색료 · 카라멜색소",
         "summary": "미국 제조사 성분표에 카라멜색소가 표시돼 있습니다. 색소 유형과 4-MEI 함량은 공개되지 않았습니다.",
-        "source": "https://www.pepsi.com/products/pepsi",
-        "topic": "caramel-color"
+        "source": "https://www.pepsi.com/products/pepsi"
       },
       {
         "title": "카페인 포장 표시",
         "summary": "제조사 성분표에 카페인이 표시됩니다.",
-        "source": "https://www.pepsi.com/products/pepsi",
-        "topic": "caffeine"
+        "source": "https://www.pepsi.com/products/pepsi"
       }
     ],
     "material": null,
@@ -1709,20 +1699,17 @@
       {
         "title": "보존료 · 안식향산칼륨",
         "summary": "미국 제조사 성분표에 안식향산칼륨이 표시돼 있습니다. 제품의 벤젠 검출 여부는 이 표시로 확인할 수 없습니다.",
-        "source": "https://www.pepsi.com/products/pepsi-zero-sugar",
-        "topic": "potassium-benzoate"
+        "source": "https://www.pepsi.com/products/pepsi-zero-sugar"
       },
       {
         "title": "착색료 · 카라멜색소",
         "summary": "미국 제조사 성분표에 카라멜색소가 표시돼 있습니다. 색소 유형과 4-MEI 함량은 공개되지 않았습니다.",
-        "source": "https://www.pepsi.com/products/pepsi-zero-sugar",
-        "topic": "caramel-color"
+        "source": "https://www.pepsi.com/products/pepsi-zero-sugar"
       },
       {
         "title": "카페인 포장 표시",
         "summary": "제조사 성분표에 카페인이 표시됩니다.",
-        "source": "https://www.pepsi.com/products/pepsi-zero-sugar",
-        "topic": "caffeine"
+        "source": "https://www.pepsi.com/products/pepsi-zero-sugar"
       }
     ],
     "material": null,
@@ -1791,20 +1778,17 @@
       {
         "title": "보존료 · 안식향산칼륨",
         "summary": "미국 제조사 성분표에 안식향산칼륨이 표시돼 있습니다. 제품의 벤젠 검출 여부는 이 표시로 확인할 수 없습니다.",
-        "source": "https://www.pepsi.com/products/diet-pepsi",
-        "topic": "potassium-benzoate"
+        "source": "https://www.pepsi.com/products/diet-pepsi"
       },
       {
         "title": "착색료 · 카라멜색소",
         "summary": "미국 제조사 성분표에 카라멜색소가 표시돼 있습니다. 색소 유형과 4-MEI 함량은 공개되지 않았습니다.",
-        "source": "https://www.pepsi.com/products/diet-pepsi",
-        "topic": "caramel-color"
+        "source": "https://www.pepsi.com/products/diet-pepsi"
       },
       {
         "title": "카페인 포장 표시",
         "summary": "제조사 성분표에 카페인이 표시됩니다.",
-        "source": "https://www.pepsi.com/products/diet-pepsi",
-        "topic": "caffeine"
+        "source": "https://www.pepsi.com/products/diet-pepsi"
       }
     ],
     "material": null,
@@ -2688,8 +2672,7 @@
       {
         "title": "PFAS 혼합물·미세플라스틱 시험",
         "summary": "공식 성능표는 지정된 7종 PFAS 혼합물의 저감률을 99.75%, 미세플라스틱 저감률을 99.8%로 제시합니다. 호환 모델과 표준 시험 조건에 한정됩니다.",
-        "source": "https://www.pur.com/wp-content/uploads/PUR_PDS_Pitcher_Filters_PPF951K.pdf",
-        "topic": "pfas-filter"
+        "source": "https://www.pur.com/wp-content/uploads/PUR_PDS_Pitcher_Filters_PPF951K.pdf"
       },
       {
         "title": "브랜드와 미국 유통 법인",
@@ -2717,8 +2700,7 @@
       {
         "title": "저감 성능 시험 조건",
         "summary": "제조사가 PFOA·PFOS 저감과 IAPMO의 지정 표준 인증을 공개합니다. 성능표에 표시된 시험 조건과 항목별 결과를 확인할 수 있습니다.",
-        "source": "https://www.aosmithatlowes.com/media/1234/ao-us-ro-mb-4000_pds.pdf",
-        "topic": "pfas-filter"
+        "source": "https://www.aosmithatlowes.com/media/1234/ao-us-ro-mb-4000_pds.pdf"
       },
       {
         "title": "미국 EPA의 정수 필터 인증 안내",
@@ -2746,8 +2728,7 @@
       {
         "title": "PFOA·PFOS 저감 인증",
         "summary": "이 모델의 공식 사양서에 PFOA·PFOS 저감에 대한 IAPMO의 NSF/ANSI 53 인증과 별도 미세플라스틱 저감 인증이 기재됩니다.",
-        "source": "https://flowandfiltrationsolutions.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/pfas-reduction-spec-sheets/ev929830-ql3b-4fc-ps-spec.pdf",
-        "topic": "pfas-filter"
+        "source": "https://flowandfiltrationsolutions.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/pfas-reduction-spec-sheets/ev929830-ql3b-4fc-ps-spec.pdf"
       },
       {
         "title": "미국 EPA의 정수 필터 인증 안내",
@@ -3089,8 +3070,7 @@
       {
         "title": "총 PFAS 저감 인증",
         "summary": "제조사 사양서에 총 PFAS 저감에 대한 IAPMO의 NSF/ANSI 53 인증이 기재되어 있습니다. 사양서에서 시험 혼합물에 포함한 7개 물질과 농도를 확인하실 수 있습니다.",
-        "source": "https://www.pentair.com/content/dam/extranet/nam/filtration/freshpoint/marketing-collateral/spec-sheets/4006660-fp-gro-575b-spec-sheet.pdf",
-        "topic": "pfas-filter"
+        "source": "https://www.pentair.com/content/dam/extranet/nam/filtration/freshpoint/marketing-collateral/spec-sheets/4006660-fp-gro-575b-spec-sheet.pdf"
       },
       {
         "title": "미국 EPA의 정수 필터 인증 안내",
@@ -5039,14 +5019,12 @@
       {
         "title": "카페인 포장 표시",
         "summary": "제조사 성분표에 카페인이 표시됩니다.",
-        "source": "https://www.pepsi.com/products/pepsi-zero-sugar-wild-cherry",
-        "topic": "caffeine"
+        "source": "https://www.pepsi.com/products/pepsi-zero-sugar-wild-cherry"
       },
       {
         "title": "카라멜색소 포장 표시",
         "summary": "제조사 원재료 표시에 카라멜색소가 표시됩니다. 색소 유형과 4-MEI 수치는 공개되지 않았습니다.",
-        "source": "https://www.pepsi.com/products/pepsi-zero-sugar-wild-cherry",
-        "topic": "caramel-color"
+        "source": "https://www.pepsi.com/products/pepsi-zero-sugar-wild-cherry"
       },
       {
         "title": "아스파탐 포장 표시",
@@ -5057,8 +5035,7 @@
       {
         "title": "소브산칼륨 포장 표시",
         "summary": "제조사 성분표에서 보존료인 소브산칼륨을 확인할 수 있습니다. 첨가량은 공개되지 않았습니다.",
-        "source": "https://www.pepsi.com/products/pepsi-zero-sugar-wild-cherry",
-        "topic": "potassium-sorbate"
+        "source": "https://www.pepsi.com/products/pepsi-zero-sugar-wild-cherry"
       }
     ],
     "material": null,
@@ -5164,8 +5141,7 @@
       {
         "title": "카라멜색소 포장 표시",
         "summary": "제조사 원재료 표시에 카라멜색소가 표시됩니다. 색소 유형과 4-MEI 수치는 공개되지 않았습니다.",
-        "source": "https://www.coca-cola.com/us/en/brands/coca-cola/products/original/caffeine-free",
-        "topic": "caramel-color"
+        "source": "https://www.coca-cola.com/us/en/brands/coca-cola/products/original/caffeine-free"
       },
       {
         "title": "카페인과 감미료",

@@ -293,8 +293,6 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
   .stock-row-compact .quote-value { display: flex; flex-wrap: wrap }
   .stock-row-compact .row-chevron { grid-column: 3; grid-row: 1 }
 }
-.health-comparisons .health-context { font-size: .8rem; margin-top: 7px }
-.health-context .source { margin-left: 3px }
 .chart-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 8px }
 .segmented { display: flex; width: max-content; max-width: 100%; gap: 1px; padding: 3px; border-radius: 7px; background: var(--surface) }
 .segmented button { min-width: 43px; padding: 6px 8px; border-radius: 5px; color: var(--muted); font-size: .8rem; font-weight: 650; white-space: nowrap }
@@ -471,10 +469,13 @@ footer p { margin: 0; color: var(--muted); font-size: .75rem; line-height: 1.5; 
 .topic-choices button:hover, .icon-choices button:not(:disabled):hover { background: var(--surface) }
 .topic-choices button[aria-pressed="true"], .icon-choices button[aria-pressed="true"] { border-color: #25282f; background: var(--surface); color: #202329 }
 .topic-assessment p { margin-top: 6px }
-.topic-links { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 8px }
 .health-topic { margin-top: 8px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 7px }
 .health-topic header { display: flex; align-items: baseline; flex-wrap: wrap; gap: 3px 8px }
 .health-topic p { font-size: .82rem }
+.disease-evidence ul { display: grid; gap: 8px; padding: 8px 12px; margin: 8px 0; list-style: none; background: var(--surface); border-radius: 6px }
+.disease-evidence li p { margin: 0; font-size: .82rem }
+.disease-evidence li .source { margin-top: 2px }
+.health-topic > .plain-link { margin-top: 6px }
 .topic-company { padding: 10px 0; border-bottom: 1px solid var(--line) }
 .topic-company:last-child { border-bottom: 0 }
 .topic-stock { display: flex; align-items: center; gap: 8px; width: max-content; max-width: 100%; min-height: 44px }

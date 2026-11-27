@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { pathFor, useData } from './api'
 import type { Stock } from './api'
-import { Empty, Source, Wait } from './ui'
+import { Source, Wait } from './ui'
 
 type QuarterSales = { quarter: string; periodEnd: string; amount: number; source: string; note?: string }
 type Segment = { name: string; scope: string; currency: string; quarters: QuarterSales[] }
@@ -13,9 +13,14 @@ type Overview = { source: string; segments: Segment[]; markets: Market[] }
 
 const number = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 2 })
 const quarterLabel = (value: string) => value.replace(/^FY\s*/, '회계 ').replace(/\s*Q([1-4])/, '년 $1분기')
-const amounts = (amount: number | null | undefined, currency = 'KRW') => amount == null ? '자료 없음'
-  : currency === 'KRW' ? number.format(amount / 100_000_000) + '억 원' : number.format(amount / 1_000_000) + '백만 달러'
+const amounts = (amount: number, currency = 'KRW') => currency === 'KRW'
+  ? number.format(amount / 100_000_000) + '억 원' : number.format(amount / 1_000_000) + '백만 달러'
 const share = (amount: number, total: number) => total > 0 ? amount / total * 100 : 0
+const sharedPeriods = (market: Market, focus: Brand, peer: Brand) => market.quarters.flatMap((period, index) => {
+  const focusAmount = focus.amounts[index]
+  const peerAmount = peer.amounts[index]
+  return period.total > 0 && focusAmount != null && peerAmount != null ? [{ ...period, focusAmount, peerAmount }] : []
+})
 
 function useChartReveal(threshold: number) {
   const chart = useRef<HTMLDivElement>(null)
@@ -33,32 +38,36 @@ function useChartReveal(threshold: number) {
 
 export default function StockProductPerformance({ stock }: { stock: Stock }) {
   const result = useData<Overview>(pathFor(stock.id) + '/revenue-segments')
+  const markets = result.data?.markets.flatMap(market => {
+    const focus = market.brands.find(brand => brand.stockId === stock.id)
+    if (!focus) return []
+    const choices = market.brands.filter(brand => brand.stockId !== stock.id && sharedPeriods(market, focus, brand).length > 0)
+    return choices.length > 0 ? [{ market, focus, choices }] : []
+  })
+  if (result.data && !markets?.length && !result.data.segments.length) return null
   return <section className="panel stock-wide" aria-labelledby="product-finance-heading">
     <header><h2 id="product-finance-heading">상품 매출 · 시장점유율</h2>
       <p>상품이 속한 브랜드의 소매 판매액과 공시 사업군 실적을 확인할 수 있습니다.</p></header>
     {result.data ? <>
-      {result.data.markets.map(market => <RetailComparison key={market.name} market={market} stockId={stock.id} />)}
+      {markets?.map(({ market, focus, choices }) => <RetailComparison key={market.name} market={market} focus={focus} choices={choices} />)}
       {result.data.segments.map(segment => <ReportedSegment key={segment.name} segment={segment} />)}
-      {!result.data.markets.length && !result.data.segments.length && <Empty>이 종목과 연결되는 상품 매출·점유율을 공개 자료에서 확인하지 못했습니다. <Source href={result.data.source}>기업 자료</Source></Empty>}
     </> : <Wait error={result.error} kind="products" />}
   </section>
 }
 
-function RetailComparison({ market, stockId }: { market: Market; stockId: string }) {
-  const own = market.brands.find(brand => brand.stockId === stockId)
-  const focus = own ?? market.brands[0]
-  const choices = market.brands.filter(brand => brand.stockId !== focus.stockId)
+function RetailComparison({ market, focus, choices }: { market: Market; focus: Brand; choices: Brand[] }) {
   const [peerId, setPeerId] = useState(choices[0].stockId)
-  const [index, setIndex] = useState(market.quarters.length - 1)
+  const [selectedQuarter, setSelectedQuarter] = useState('')
   const [metric, setMetric] = useState<'sales' | 'share'>('sales')
   const [donut, donutInView] = useChartReveal(.4)
   const [trend, revealTrend] = useChartReveal(.25)
   const [donutFinished, setDonutFinished] = useState(false)
   const revealDonut = donutInView || revealTrend
   const peer = choices.find(brand => brand.stockId === peerId) ?? choices[0]
-  const quarter = market.quarters[index]
-  const focusShare = share(focus.amounts[index] ?? 0, quarter.total)
-  const peerShare = share(peer.amounts[index] ?? 0, quarter.total)
+  const periods = sharedPeriods(market, focus, peer)
+  const quarter = periods.find(period => period.quarter === selectedQuarter) ?? periods[periods.length - 1]
+  const focusShare = share(quarter.focusAmount, quarter.total)
+  const peerShare = share(quarter.peerAmount, quarter.total)
   const otherShare = Math.max(0, 100 - focusShare - peerShare)
   useEffect(() => {
     const element = donut.current
@@ -73,19 +82,16 @@ function RetailComparison({ market, stockId }: { market: Market; stockId: string
     return () => { active = false; cancelAnimationFrame(frame) }
   }, [donut, revealDonut, donutFinished, focusShare, peerShare])
   const slices = { '--focus-share': focusShare + '%', '--combined-share': (focusShare + peerShare) + '%' } as CSSProperties
-  const measured = market.quarters.map((period, i) => {
-    const values = [focus.amounts[i], peer.amounts[i]]
-    return values.map(value => metric === 'share' && value != null ? share(value, period.total) : value)
-  })
-  const max = Math.max(1, ...measured.flat().map(value => value ?? 0))
+  const measured = periods.map(period => [period.focusAmount, period.peerAmount]
+    .map(value => metric === 'share' ? share(value, period.total) : value))
+  const max = Math.max(1, ...measured.flat())
   return <article className="performance-card" aria-label={market.name}>
     <div className="section-heading"><div><h3>{market.name}</h3><p>{market.scope}</p></div><Source href={market.source}>조사 원문</Source></div>
-    {!own && <p>이 기업 브랜드의 판매액은 공개 표에서 확인되지 않아 시장의 다른 브랜드를 표시합니다.</p>}
     <div className="performance-controls">
       <label>비교 브랜드 <select value={peer.stockId} onChange={event => setPeerId(event.target.value)}>
         {choices.map(brand => <option key={brand.stockId} value={brand.stockId}>{brand.name}</option>)}</select></label>
-      <label>시장점유율 분기 <select value={index} onChange={event => setIndex(Number(event.target.value))}>
-        {market.quarters.map((period, i) => <option key={period.quarter} value={i}>{quarterLabel(period.quarter)}</option>)}</select></label>
+      <label>시장점유율 분기 <select value={quarter.quarter} onChange={event => setSelectedQuarter(event.target.value)}>
+        {periods.map(period => <option key={period.quarter} value={period.quarter}>{quarterLabel(period.quarter)}</option>)}</select></label>
     </div>
     <div className="performance-grid">
       <div className="performance-share">
@@ -105,13 +111,13 @@ function RetailComparison({ market, stockId }: { market: Market; stockId: string
           <button aria-pressed={metric === 'share'} className={metric === 'share' ? 'selected' : ''} onClick={() => setMetric('share')}>점유율</button>
         </div></div>
         <div ref={trend} className="performance-bars" aria-label="분기별 두 브랜드 비교" data-visible={donutFinished && revealTrend}>
-          {market.quarters.map((period, i) => <div className="performance-bar-group" key={period.quarter}>
+          {periods.map((period, i) => <div className="performance-bar-group" key={period.quarter}>
             <small>{quarterLabel(period.quarter)}</small>
             {measured[i].map((value, j) => <div className="performance-bar-row" key={j}>
               <span className={j === 0 ? 'bar-fill' : 'bar-fill bar-peer'} aria-hidden style={{
-                '--bar-width': ((value ?? 0) / max * 100) + '%', '--bar-delay': (i * 65 + j * 25) + 'ms',
+                '--bar-width': (value / max * 100) + '%', '--bar-delay': (i * 65 + j * 25) + 'ms',
               } as CSSProperties} />
-              <span><span className="sr-only">{j === 0 ? focus.name : peer.name} </span>{value == null ? '자료 없음' : metric === 'share' ? number.format(value) + '%' : amounts(value)}</span>
+              <span><span className="sr-only">{j === 0 ? focus.name : peer.name} </span>{metric === 'share' ? number.format(value) + '%' : amounts(value)}</span>
             </div>)}
           </div>)}
         </div>

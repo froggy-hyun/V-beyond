@@ -30,7 +30,11 @@ export const nutritionBasis = (category: Category) => category === 'COLA' ? 'PER
 export type Criterion = keyof typeof criteria
 export type Stock = { id: string; symbol: string; name: string; english: string; market: string; exchange: string; currency: string; overview: string; source: string }
 export type Fact = { criterion: Criterion; value: number; unit: string; basis: string; source: string }
-export type HealthTopic = { id: string; name: string; category: string; aliases: string[]; assessment: string; sources: { title: string; url: string }[] }
+export type HealthTopic = {
+  id: string; name: string; category: string; aliases: string[]; condition: string; assessment: string; limits: string;
+  sources: { title: string; url: string; finding: string }[]
+}
+export type HealthAssessment = { topic: HealthTopic; support: { detail: string | null; source: string; fact: Fact | null } }
 export type Product = {
   id: string; symbol: string; name: string; brand: string; category: Category; market: string;
   relation: string; size: string; prep: string; source: string; facts: Fact[];
