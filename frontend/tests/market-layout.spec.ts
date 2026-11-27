@@ -1,5 +1,23 @@
 import { expect, test } from '@playwright/test'
 
+test('시장 로딩 스켈레톤과 종목 로고 표시', async ({ page }) => {
+  const catalog = '**/api/v1/stocks?market=KR'
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  let release = () => {}
+  const ready = new Promise<void>(resolve => { release = resolve })
+  await page.route(catalog, async route => { await ready; await route.continue() })
+  await page.goto('/')
+  await expect(page).toHaveTitle('V beyond')
+  await expect(page.getByRole('status', { name: '주요 종목 불러오는 중' })).toBeVisible()
+  await expect(page.locator('.route-content')).toHaveCSS('animation-name', 'none')
+  await expect.poll(() => page.getByRole('link', { name: 'V beyond' }).locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0)
+
+  release()
+  await expect(page.getByRole('status', { name: '주요 종목 불러오는 중' })).toHaveCount(0)
+  await expect(page.locator('.market-list-row .stock-mark img')).toHaveCount(4)
+  await expect.poll(() => page.locator('.market-list-row .stock-mark img').evaluateAll(images => images.every(img => (img as HTMLImageElement).naturalWidth > 0))).toBe(true)
+})
+
 test('시장 구분, 종목 검색 및 화면별 차트 이동', async ({ page }, info) => {
   await page.goto('/')
   await expect(page.getByRole('button', { name: '국내주식' })).toHaveAttribute('aria-pressed', 'true')

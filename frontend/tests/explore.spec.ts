@@ -11,6 +11,8 @@ for (const scenario of scenarios) {
   test(scenario.product + ' 근거부터 대안 기업 차트까지', async ({ page }) => {
     await page.goto('/products/' + scenario.product)
     await expect(page.getByRole('heading', { name: '건강 관련 근거' })).toBeVisible()
+    await expect.poll(() => page.getByRole('img', { name: /제품 사진$/ }).evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0)
+    await expect(page.getByRole('link', { name: '사진 출처' })).toHaveAttribute('href', /^https:\/\//)
     await expect(page.locator('.evidence .source').first()).toBeVisible()
     await page.getByRole('link', { name: '대안 상품 탐색' }).click()
     await expect(page.getByText(scenario.alternative, { exact: false }).first()).toBeVisible()

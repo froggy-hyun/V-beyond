@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  font-family: "Apple SD Gothic Neo", "Malgun Gothic", Inter, sans-serif;
+  font-family: "Pretendard Variable", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   font-synthesis: none;
   color: #17212d;
   background: #f2f4f7;
@@ -12,6 +12,8 @@
   --rise: #c73246;
   --fall: #255bc5;
   --radius: 14px;
+  --chart-height: 338px;
+  --motion-fast: 160ms cubic-bezier(.2, .7, .3, 1);
 }
 
 * { box-sizing: border-box }
@@ -36,27 +38,18 @@ small { display: block; color: var(--muted); font-size: .78rem; font-weight: 530
 }
 .top-inner, .shell { width: min(1200px, calc(100% - 64px)); margin-inline: auto }
 .top-inner { height: 64px; display: flex; align-items: center; gap: 42px }
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 1.24rem;
-  font-weight: 790;
-  letter-spacing: -.06em;
-  white-space: nowrap;
+.brand { display: inline-flex; align-items: center; flex: none }
+.brand img { width: 148px; height: auto }
+.route-content { animation: page-in 220ms cubic-bezier(.2, .7, .3, 1) both }
+@keyframes page-in { from { opacity: .75; transform: translateY(4px) } to { opacity: 1; transform: none } }
+
+.top nav a, .market-tabs button, .density-toggle button, .stock-preview-action,
+.stock-row, .product-card, .market-highlight, .tags button, .segmented button,
+.primary, .icon-btn, .market-search, .search-field, .search-tabs button {
+  transition: background-color var(--motion-fast), color var(--motion-fast), border-color var(--motion-fast), box-shadow var(--motion-fast);
 }
-.brand > span:last-child { margin-left: -5px; color: var(--accent) }
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  margin-right: 3px;
-  border-radius: 9px;
-  background: #173e39;
-  color: white;
-}
-.brand-mark svg { width: 18px }
+.primary:hover:not(:disabled) { background: #05574b }
+.tags button:hover, .icon-btn:hover { background: #dff0ea }
 .top nav { display: flex; align-self: stretch; align-items: stretch; gap: 27px }
 .top nav a { position: relative; display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: .9rem; font-weight: 680 }
 .top nav a.active { color: #182430 }
@@ -106,7 +99,9 @@ small { display: block; color: var(--muted); font-size: .78rem; font-weight: 530
 .market-highlights { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px }
 .market-highlight { min-width: 0; display: grid; gap: 11px; padding: 14px 17px; border: 1px solid var(--line); border-radius: 11px; background: #fff }
 .market-highlight:hover { border-color: #a9bbb8 }
-.highlight-label { display: flex; align-items: baseline; gap: 8px; font-size: .9rem; font-weight: 740 }
+.highlight-label { display: flex; align-items: center; gap: 8px; font-size: .9rem; font-weight: 740; line-height: 1.2 }
+.highlight-label .stock-mark { width: 33px; height: 33px }
+.highlight-label small { margin-top: 3px }
 .market-highlight .quote-value { display: flex; justify-content: space-between; align-items: center; gap: 6px; line-height: 1.1 }
 .market-highlight .quote-value strong { font-size: clamp(1rem, 2vw, 1.36rem); letter-spacing: -.035em }
 
@@ -137,12 +132,8 @@ small { display: block; color: var(--muted); font-size: .78rem; font-weight: 530
 .stock-row:hover, .product-card:hover { background: #f7faf9 }
 .market-list-row .stock-row { grid-template-columns: auto minmax(0, 1fr) minmax(166px, 34%); border: 0; padding: 11px 0 }
 .market-list-row .row-chevron { display: none }
-.stock-mark { display: grid; place-items: center; width: 37px; height: 37px; border-radius: 10px; background: #e4f2ee; color: #036756; font-weight: 760; font-size: .85rem; letter-spacing: -.055em }
-.stock-mark.red { background: #fbeaed; color: #a92f47 }
-.stock-mark.orange { background: #fff1dd; color: #925108 }
-.stock-mark.blue { background: #e8f1fd; color: #2b57a1 }
-.stock-mark.violet { background: #f0eafd; color: #6844a6 }
-.stock-mark.green { background: #e5f4df; color: #387526 }
+.stock-mark { display: grid; place-items: center; flex: none; width: 37px; height: 37px; padding: 4px; border: 1px solid #e9edf0; border-radius: 10px; background: #fff; color: var(--accent) }
+.stock-mark img { width: 100%; height: 100%; min-width: 0; min-height: 0; object-fit: contain }
 .stock-label, .quote-value { display: grid; align-items: center; gap: 3px; min-width: 0 }
 .stock-label strong { overflow-wrap: anywhere; line-height: 1.25 }
 .quote-value { justify-items: end; gap: 4px; font-variant-numeric: tabular-nums }
@@ -166,8 +157,13 @@ small { display: block; color: var(--muted); font-size: .78rem; font-weight: 530
 .preview-price { display: flex; align-items: center; gap: 8px; margin: 12px 0 8px }
 .preview-price strong { font-size: 1.5rem; font-variant-numeric: tabular-nums; letter-spacing: -.045em }
 .preview-chart { min-height: 168px }
-.preview-chart .price-chart { height: 168px }
+.market-preview { --chart-height: 168px }
 .market-shortcuts { padding: 15px 17px 12px }
+.shortcuts-heading, .discovery-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px }
+.shortcuts-heading img { width: 51px; height: auto }
+.discovery-heading img { width: 52px; height: auto; margin-right: 4px }
+.watchlist-empty { display: grid; justify-items: center; text-align: center; padding-block: 20px 6px }
+.watchlist-empty img { width: 134px; height: auto }
 .market-shortcuts .category-list { margin-top: 10px }
 .market-shortcut-links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px }
 .market-shortcut-links a { display: flex; align-items: center; gap: 6px; min-height: 36px; font-size: .84rem; color: #3f4e5f; font-weight: 700 }
@@ -178,8 +174,12 @@ small { display: block; color: var(--muted); font-size: .78rem; font-weight: 530
 .back, .plain-link, .source { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: .87rem; font-weight: 700; width: max-content; max-width: 100% }
 .source { white-space: nowrap }
 .stock-title, .product-heading { display: flex; align-items: center; gap: 13px }
-.stock-title .stock-mark, .product-heading .product-icon { width: 56px; height: 56px; font-size: 1.15rem }
+.stock-title .stock-mark { width: 56px; height: 56px; padding: 6px }
 .stock-title p, .product-heading p { margin: 4px 0 }
+.product-heading { gap: clamp(14px, 2.5vw, 28px) }
+.product-heading > div:last-child { min-width: 0 }
+.product-heading h1 { overflow-wrap: anywhere }
+.product-heading .source { margin-top: 6px }
 .detail-price { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 16px }
 .detail-price > strong { font-size: clamp(1.7rem, 4vw, 2.12rem); letter-spacing: -.045em; font-variant-numeric: tabular-nums }
 .quote-meta { color: var(--muted); font-size: .84rem; margin-top: 4px }
@@ -188,7 +188,7 @@ small { display: block; color: var(--muted); font-size: .78rem; font-weight: 530
 .segmented { display: flex; width: max-content; max-width: 100%; gap: 2px; border-radius: 8px; background: #edf0f4; padding: 3px }
 .segmented button { min-width: 48px; padding: 7px 10px; background: transparent; border: 0; border-radius: 6px; color: var(--muted); font-weight: 680; font-size: .83rem; white-space: nowrap }
 .segmented .selected { color: #182430; background: white; box-shadow: 0 1px 2px #25324720 }
-.price-chart { height: 338px; position: relative; min-width: 0 }
+.price-chart { height: var(--chart-height); position: relative; min-width: 0 }
 .icon-btn { display: grid; place-items: center; color: var(--accent); width: 43px; height: 43px; background: var(--accent-tint); border: 0; border-radius: 9px }
 .primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 8px; font-size: .9rem; padding: 10px 14px; font-weight: 710; border: 0; color: #fff; background: #086c5e; margin-top: 14px; min-height: 42px }
 .category-list, .products, .compare-grid, .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-top: 12px }
@@ -199,7 +199,11 @@ small { display: block; color: var(--muted); font-size: .78rem; font-weight: 530
 .product-icon.frying_pan { color: #53538a; background: #efedfa }
 .product-icon.chicken_noodle_soup { color: #a84935; background: #fff0e8 }
 .product-icon.cola { color: #983b58; background: #fcebf4 }
-.product-card { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px; border: 1px solid var(--line); border-radius: 9px; min-height: 72px }
+.product-photo { flex: none; aspect-ratio: 1; width: 68px; display: grid; place-items: center; background: #fff; border: 1px solid #eef1f3; border-radius: 9px; padding: 4px }
+.product-photo img { width: 100%; height: 100%; min-width: 0; min-height: 0; object-fit: contain }
+.product-heading .product-photo, .product-heading .product-icon { width: clamp(100px, 26vw, 188px); height: auto; aspect-ratio: 1; padding: 8px }
+.product-card { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px; border: 1px solid var(--line); border-radius: 9px; min-height: 90px }
+.product-card:hover { border-color: #b9d9d2 }
 .product-card strong { display: block; line-height: 1.3; margin: 2px 0; overflow-wrap: anywhere }
 .search-field input { padding-block: 13px }
 .fact-row, .match-meta { display: flex; align-items: center; gap: 10px; justify-content: space-between; padding: 10px 0; border-top: 1px solid #edf0f4; font-size: .91rem }
@@ -216,7 +220,44 @@ small { display: block; color: var(--muted); font-size: .78rem; font-weight: 530
 .muted, .empty { color: var(--muted) }
 .empty { padding: 20px 12px }
 .empty a { color: var(--accent); font-weight: 740 }
-footer { color: var(--muted); border-top: 1px solid var(--line); margin-top: 26px; padding: 14px 0 24px; display: flex; justify-content: space-between; gap: 10px; font-size: .77rem }
+footer { color: var(--muted); border-top: 1px solid var(--line); margin-top: 26px; padding: 14px 0 24px; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: .77rem }
+footer img { width: 117px; height: auto }
+
+.skeleton, .skeleton-content { display: block; min-width: 0 }
+.skeleton i { display: block; height: 10px; min-width: 0; border-radius: 5px; background: #ebeff2; overflow: hidden; position: relative }
+.skeleton i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(95deg, transparent, #ffffffa0 48%, transparent 77%);
+  animation: skeleton-shimmer 1.45s ease-in-out infinite;
+}
+@keyframes skeleton-shimmer { from { transform: translateX(-100%) } to { transform: translateX(100%) } }
+.skeleton-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 57px; border-top: 1px solid #edf0f4 }
+.skeleton-row > i:first-child { width: 36px; height: 36px; border-radius: 9px }
+.skeleton-row > span { display: grid; gap: 7px }
+.skeleton-row > span i { width: min(72%, 140px) }
+.skeleton-row > span i:last-child { width: min(49%, 76px); height: 8px }
+.skeleton-row > i:last-child { width: clamp(30px, 10vw, 62px) }
+.market-panel .skeleton-rows { padding-inline: 16px }
+.skeleton-products { margin-top: 10px }
+.skeleton-products .skeleton-row { min-height: 90px }
+.skeleton-products .skeleton-row > i:first-child, .skeleton-product .skeleton-row > i:first-child { width: 68px; height: 68px }
+.skeleton-product .skeleton-row { min-height: 90px }
+.skeleton-stock .skeleton-row, .skeleton-product .skeleton-row { border-top: 0 }
+.skeleton .skeleton-body { height: 150px; margin-top: 16px; border-radius: 12px }
+.skeleton-stock .skeleton-body { height: var(--chart-height) }
+.skeleton-highlights { margin-bottom: 18px }
+.skeleton-highlights .skeleton-content { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px }
+.skeleton-highlights .skeleton-row { border: 1px solid var(--line); border-radius: 11px; background: #fff; padding: 14px; min-height: 81px }
+.skeleton-highlights .skeleton-row > i:last-child { display: none }
+.skeleton-quote .skeleton-content { display: flex; align-items: center; justify-content: flex-end; gap: 7px; min-height: 21px }
+.skeleton-quote i:first-child { width: 60px }
+.skeleton-quote i:nth-child(2) { width: 45px; height: 17px }
+.detail-price .skeleton-quote, .preview-price .skeleton-quote { min-height: 32px; align-content: center }
+.skeleton-chart .skeleton-content { display: grid; align-content: end; gap: 12px; height: var(--chart-height); padding: 12px 6px; border-radius: 10px; background: repeating-linear-gradient(#fff 0 39px, #eef1f3 39px 40px) }
+.skeleton-chart i:first-child { height: calc(var(--chart-height) * .32); clip-path: polygon(0 68%, 12% 59%, 22% 65%, 33% 39%, 45% 53%, 58% 27%, 66% 35%, 76% 24%, 89% 28%, 100% 2%, 100% 100%, 0 100%) }
+.skeleton-chart i:nth-child(2) { width: 72%; height: 8px }
 
 @media (min-width: 840px) {
   .stock-page { grid-template-columns: minmax(0, 1.6fr) minmax(290px, 1fr); align-items: start }
@@ -225,8 +266,10 @@ footer { color: var(--muted); border-top: 1px solid var(--line); margin-top: 26p
 }
 
 @media (max-width: 839px) {
+  :root { --chart-height: 268px }
   .top-inner, .shell { width: calc(100% - 32px) }
   .top-inner { height: 55px; gap: 8px }
+  .brand img { width: 127px }
   .top nav {
     position: fixed;
     inset: auto 0 0;
@@ -256,8 +299,13 @@ footer { color: var(--muted); border-top: 1px solid var(--line); margin-top: 26p
     margin: -3px -3px 12px;
   }
   .market-highlight { padding: 10px 11px; gap: 7px; scroll-snap-align: start }
-  .highlight-label { flex-direction: column; gap: 1px }
-  .market-highlight .quote-value { display: grid; justify-items: start; gap: 5px }
+  .highlight-label { gap: 6px; min-width: 0 }
+  .highlight-label .stock-mark { width: 29px; height: 29px }
+  .market-highlight .quote-value { display: flex; flex-wrap: wrap; gap: 5px }
+  .market-highlight .skeleton-quote .skeleton-content { justify-content: flex-start }
+  .skeleton-highlights { overflow: hidden; margin-bottom: 12px }
+  .skeleton-highlights .skeleton-content { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: clamp(125px, 38%, 205px); gap: 8px }
+  .skeleton-highlights .skeleton-row { min-height: 72px; padding: 10px }
   .dashboard, .compare-grid { grid-template-columns: minmax(0, 1fr); gap: 12px }
   .market-aside { gap: 12px }
   .market-preview, .stock-preview-action, .preview-column { display: none }
@@ -274,7 +322,6 @@ footer { color: var(--muted); border-top: 1px solid var(--line); margin-top: 26p
   .page { padding-top: 18px }
   .panel:not(.market-panel) { padding: 14px }
   .products { grid-template-columns: minmax(0, 1fr) }
-  .price-chart { height: 268px }
   .fields select, .ask textarea { font-size: 1rem }
   footer { padding-bottom: calc(75px + env(safe-area-inset-bottom)) }
 }
@@ -311,4 +358,9 @@ footer { color: var(--muted); border-top: 1px solid var(--line); margin-top: 26p
   .market-list-tools { gap: 5px }
   .density-toggle button { padding-inline: 6px }
   .market-sort svg { display: none }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-content, .skeleton i::after { animation: none }
+  :root { --motion-fast: 0ms }
 }

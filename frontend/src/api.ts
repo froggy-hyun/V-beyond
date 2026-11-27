@@ -79,7 +79,9 @@ export function useQuotes(ids: string[]) {
     connection.addEventListener('resync-required', () => void queryClient.invalidateQueries({ queryKey: [path] }))
     return () => connection.close()
   }, [selection, path, queryClient])
-  return result.data ?? []
+  const quotes = result.data ?? []
+  const pending = Boolean(selection) && (result.isPending || result.isFetching)
+  return { quotes, getQuote: (id: string) => quotes.find(quote => quote.listingId === id) ?? (pending ? undefined : null) }
 }
 
 export const currency = (value: number, code: string) =>

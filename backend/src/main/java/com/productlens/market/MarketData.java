@@ -34,7 +34,7 @@ class MarketData implements MarketFeed {
         var percentage = change.movePointRight(2).divide(previous, 2, RoundingMode.HALF_UP);
         return new Quote(stock.id(), last.close(), previous, change, percentage,
                 bars.stream().mapToLong(Candle::volume).sum(), stock.currency(), last.startAt(), null,
-                "REPLAY", "FRESH", "CLOSED", "Product Lens 데모");
+                "REPLAY", "FRESH", "CLOSED", "V beyond 데모");
     }
 
     @Override public List<Candle> candles(Stock stock, String interval, String range) {

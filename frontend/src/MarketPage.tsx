@@ -3,7 +3,8 @@ import { ArrowDownUp, CalendarDays, ChartNoAxesCombined, ChevronRight, ScanSearc
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { categories, currency, pathFor, percent, tone, useData, useMarketMode, useQuotes } from './api'
 import type { Candle, Category, Quote, Stock } from './api'
-import { Empty, ProductIcon, QuoteValue, StockMark, StockRow, Wait } from './ui'
+import { Empty, ProductIcon, QuoteValue, Skeleton, StockMark, StockRow, Wait } from './ui'
+import marketCharacter from './assets/brand/market.png'
 
 const Chart = lazy(() => import('./Chart'))
 const dateFormat = new Intl.DateTimeFormat('ko-KR', {
@@ -43,10 +44,10 @@ export default function MarketPage() {
   }
   const stocks = useData<Stock[]>('/stocks?market=' + market)
   const rows = stocks.data ?? []
-  const quotes = new Map(useQuotes(rows.map(stock => stock.id)).map(quote => [quote.listingId, quote]))
-  const delayed = [...quotes.values()].some(quote => quote.freshness === 'STALE')
+  const { quotes, getQuote } = useQuotes(rows.map(stock => stock.id))
+  const delayed = quotes.some(quote => quote.freshness === 'STALE')
   const rank = (stock: Stock) => {
-    const quote = quotes.get(stock.id)
+    const quote = getQuote(stock.id)
     return (sort === 'volume' ? quote?.cumulativeVolume : quote?.changePercent) ?? Number.NEGATIVE_INFINITY
   }
   const ordered = [...rows].sort((left, right) => {
@@ -78,9 +79,9 @@ export default function MarketPage() {
       </div>
       <span className="market-feed">{mode === 'KIS_REST' ? delayed ? 'KIS 시세 · 갱신 지연' : '한국투자증권 시세' : mode === 'REPLAY' ? '데모 시세' : '시세 확인 중'}</span>
     </div>
-    <section className="market-highlights" aria-label="주요 종목">
-      {highlights.map(stock => <Highlight key={stock.id} stock={stock} quote={quotes.get(stock.id)} />)}
-    </section>
+    {stocks.isPending ? <Skeleton kind="highlights" label="주요 종목 불러오는 중" /> : <section className="market-highlights" aria-label="주요 종목">
+      {highlights.map(stock => <Highlight key={stock.id} stock={stock} quote={getQuote(stock.id)} />)}
+    </section>}
 
     <div className="dashboard">
       <section className="panel market-panel">
@@ -103,7 +104,7 @@ export default function MarketPage() {
         </div>
         <div className="market-columns" aria-hidden><span>종목명</span><span>현재가</span><span>등락률</span><span className="preview-column">차트</span></div>
         {stocks.data ? ordered.map(stock => <div className="market-list-row" key={stock.id}>
-          <StockRow stock={stock} quote={quotes.get(stock.id)} showVolume={detailed} />
+          <StockRow stock={stock} quote={getQuote(stock.id)} showVolume={detailed} />
           <button type="button" className="stock-preview-action" aria-label={stock.name + ' 차트 미리보기'} aria-pressed={preview?.id === stock.id} onClick={() => setPreviewId(stock.id)}>
             <ChartNoAxesCombined size={18} aria-hidden />
           </button>
@@ -111,9 +112,10 @@ export default function MarketPage() {
       </section>
 
       <aside className="market-aside">
-        {desktop && preview && <Preview stock={preview} quote={quotes.get(preview.id)} />}
+        {desktop && preview && <Preview stock={preview} quote={getQuote(preview.id)} />}
+        {desktop && stocks.isPending && <section className="panel market-preview"><Skeleton kind="chart" /></section>}
         <section className="panel market-shortcuts">
-          <h2>상품에서 종목 찾기</h2>
+          <div className="shortcuts-heading"><h2>상품에서 종목 찾기</h2><img src={marketCharacter} alt="" width={350} height={275} /></div>
           <div className="category-list">
             {(Object.keys(categories) as Category[]).map(category => <Link key={category} to={'/ai?category=' + category}>
               <ProductIcon category={category} /><strong>{categories[category]}</strong>
@@ -129,14 +131,14 @@ export default function MarketPage() {
   </div>
 }
 
-function Highlight({ stock, quote }: { stock: Stock; quote?: Quote }) {
+function Highlight({ stock, quote }: { stock: Stock; quote?: Quote | null }) {
   return <Link className="market-highlight" to={pathFor(stock.id)}>
-    <div className="highlight-label"><span>{stock.name}</span><small>{stock.symbol}</small></div>
+    <div className="highlight-label"><StockMark stock={stock} /><span>{stock.name}<small>{stock.symbol}</small></span></div>
     <QuoteValue quote={quote} />
   </Link>
 }
 
-function Preview({ stock, quote }: { stock: Stock; quote?: Quote }) {
+function Preview({ stock, quote }: { stock: Stock; quote?: Quote | null }) {
   const live = useMarketMode() === 'KIS_REST'
   const candles = useData<Candle[]>('/market' + pathFor(stock.id) + '/candles?interval=5m&range=1D', true, live ? (quote?.session === 'REGULAR' ? 20_000 : 60_000) : undefined)
   const data = candles.data
@@ -145,13 +147,13 @@ function Preview({ stock, quote }: { stock: Stock; quote?: Quote }) {
       <div className="preview-name"><StockMark stock={stock} /><div><h2>{stock.name}</h2><small>{stock.symbol} · {stock.exchange}</small></div></div>
       <Link className="plain-link" to={pathFor(stock.id)}>종목 상세 <ChevronRight size={15} aria-hidden /></Link>
     </div>
-    {quote?.price != null && <div className="preview-price">
+    {quote?.price != null ? <div className="preview-price">
       <strong>{currency(quote.price, quote.currency)}</strong>
       {quote.changePercent != null && <span className={'change ' + tone(quote.changePercent)}>{percent(quote.changePercent)}</span>}
-    </div>}
+    </div> : <div className="preview-price"><QuoteValue quote={quote} /></div>}
     <div className="preview-chart">
-      {data?.length ? <Suspense fallback={<Wait error={null} />}><Chart key={stock.id} bars={data} market={stock.market} candle={false} /></Suspense>
-        : data ? <Empty>표시할 시세가 없습니다.</Empty> : <Wait error={candles.error} />}
+      {data?.length ? <Suspense fallback={<Skeleton kind="chart" />}><Chart key={stock.id} bars={data} market={stock.market} candle={false} /></Suspense>
+        : data ? <Empty>표시할 시세가 없습니다.</Empty> : <Wait error={candles.error} kind="chart" />}
     </div>
   </section>
 }

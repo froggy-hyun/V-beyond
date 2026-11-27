@@ -1,0 +1,166 @@
+{
+  "issuers": {
+    "003230": {
+      "page": "https://www.samyangfoods.com/kor/index.do",
+      "image": "https://www.samyangfoods.com/asset/images/common/logo_w186.png"
+    },
+    "004370": {
+      "page": "https://www.nongshim.com/",
+      "image": "https://www.nongshim.com/resources2/images/favicon.ico"
+    },
+    "007310": {
+      "page": "https://www.otoki.com/about/ci",
+      "image": "https://www.otoki.com/favicon.ico?v=2606"
+    },
+    "017810": {
+      "page": "https://www.pulmuone.co.kr/",
+      "image": "https://www.pulmuone.co.kr/pulmuone/img/m_logo.png"
+    },
+    "CPB": {
+      "page": "https://www.thecampbellscompany.com/newsroom/news/its-official-we-are-the-campbells-company/",
+      "image": "https://www.thecampbellscompany.com/wp-content/uploads/2025/10/Campbells-Annual-Report-Bookmarked.pdf"
+    },
+    "GIS": {
+      "page": "https://www.generalmills.com/",
+      "image": "https://edge.sitecorecloud.io/generalmill1621-cmsplatforme170-production28a1-f426/media/Project/GMI/Corporate/GeneralMills/GMI-favicon.png"
+    },
+    "KO": {
+      "page": "https://www.coca-colacompany.com/",
+      "image": "https://www.coca-colacompany.com/content/dam/corporate/us/en/header-footer/Header%20Icon.svg"
+    },
+    "NWL": {
+      "page": "https://www.newellbrands.com/",
+      "image": "https://www.newellbrands.com/application/themes/newell-brands/img/logo-dark.svg"
+    },
+    "PEP": {
+      "page": "https://www.pepsico.com/media",
+      "image": "https://digitalassets.pepsico.com/transform/7c417867-1251-4602-8b69-1ea452a03bbe/Pepsico-logo-footer?q=75&w=3840"
+    },
+    "WSM": {
+      "page": "https://www.williams-sonomainc.com/",
+      "image": "https://www.williams-sonomainc.com/corpimgs/i/202641/0035/images/apple-icon-144x144.png"
+    }
+  },
+  "products": {
+    "buldak-carbonara": {
+      "page": "https://www.samyangfoods.com/kor/brand/view.do?seq=387",
+      "image": "https://www.samyangfoods.com/upload/product/20260622/20260622145514435491.png"
+    },
+    "buldak-original": {
+      "page": "https://www.samyangfoods.com/kor/brand/view.do?seq=53",
+      "image": "https://www.samyangfoods.com/upload/product/20260622/20260622144950814479.png"
+    },
+    "calphalon-ceramic": {
+      "page": "https://www.calphalon.com/cookware/cookware-by-product-type/frying-pans-skillets/calphalon-ceramic-nonstick-10-inch-frying-pan-easy-cleanup-ceramic-pan-for-searing-sauteing-pfas-free-cookware-dishwasher-safe-metal-utensil-safe-oven-safe-flour/SAP_2232479.html",
+      "image": "https://s7d1.scene7.com/is/image/NewellBrands/food0239_shot135_2232479_10in_fry_pan_flour_angle?hei=480&wid=480"
+    },
+    "calphalon-premier": {
+      "page": "https://www.calphalon.com/cookware/cookware-by-material/nonstick-hard-anodized-cookware/premier-hard-anodized-nonstick-10-inch-frying-pan/SAP_2172330.html?actionPoint=Show&bvrrp=Main_Site-en_US%2Freviews%2Fproduct%2F8%2FSP_2590408.htm&bvstate=pg%3A2%2Fct%3Ar&customBundleCategory=Build-Your-Own-Bundle",
+      "image": "https://s7d1.scene7.com/is/image/NewellBrands/2172330_1?hei=480&wid=480"
+    },
+    "calphalon-steel": {
+      "page": "https://www.calphalon.com/cookware/cookware-by-material/stainless-steel-cookware/calphalon-stainless-steel-10-fry-pan/SAP_2214233.html",
+      "image": "https://s7d1.scene7.com/is/image/NewellBrands/fodl0008_2214233_k001_glb99_image_01?hei=480&wid=480"
+    },
+    "campbell-heart": {
+      "page": "https://www.campbellsfoodservice.com/product/chicken-noodle-soup-11/",
+      "image": "https://images.salsify.com/image/upload/w_400,h_400,c_fill/w_300,h_300,c_pad,ar_1:1/03adc75be883e132aec2dd6b08fb347971674fc4.jpg"
+    },
+    "campbell-less-sodium": {
+      "page": "https://www.campbellsfoodservice.com/product/chicken-noodle-soup-7/",
+      "image": "https://images.salsify.com/image/upload/w_400,h_400,c_fill/w_300,h_300,c_pad,ar_1:1/f7b84b17449148e489505e1e47a3ee860817e117.jpg"
+    },
+    "campbell-original": {
+      "page": "https://www.kroger.com/p/campbell-s-condensed-chicken-noodle-soup/0005100001251",
+      "image": "https://www.kroger.com/product/images/xlarge/front/0005100001251"
+    },
+    "coke-original": {
+      "page": "https://www.coca-cola.com/us/en/brands/coca-cola/products/original/original-taste",
+      "image": "https://www.coca-cola.com/content/dam/onexp/us/en/brands/coca-cola-original/ko_original.png"
+    },
+    "coke-zero": {
+      "page": "https://www.coca-cola.com/us/en/brands/coca-cola/products/zero/zero-sugar",
+      "image": "https://www.coca-cola.com/content/dam/onexp/us/en/brands/coca-cola-zero/kozs-prod-og.png"
+    },
+    "cup-yeol": {
+      "page": "https://www.otokimall.com/front/product/5364",
+      "image": "https://cdn.otokimall.com/data/product/origin/20251111/1763431294216bOKmE.uvbf8n34ty5v.jpg"
+    },
+    "cup-yeoldak": {
+      "page": "https://www.otokimall.com/front/product/5363",
+      "image": "https://cdn.otokimall.com/data/product/etc/20260901/1788239565754GmNBb.t86utv2oqfjt.jpg"
+    },
+    "diet-coke": {
+      "page": "https://www.coca-cola.com/us/en/brands/diet-coke/products/original",
+      "image": "https://www.coca-cola.com/content/dam/onexp/us/en/brands/diet-coke/pdp-updates/dko-prod-og.png"
+    },
+    "diet-pepsi": {
+      "page": "https://www.gatewayp.com/diet-pepsi-canned-cola-ready-to-drink-diet-12-fl-oz-355-ml-12-pack--1",
+      "image": "https://content.etilize.com/500/1029886385.jpg"
+    },
+    "jin-spicy": {
+      "page": "https://www.otokimall.com/front/product/503",
+      "image": "https://cdn.otokimall.com/data/product/origin/20221125/1775615248455LgNH3.vf6xdm55oh9g.jpg"
+    },
+    "made-in-ceramic": {
+      "page": "https://www.williams-sonoma.com/products/made-in-ss-ceramic-ns-weeknight-pan/",
+      "image": "https://assets.wsimgs.com/wsimgs/rk/images/dp/wcm/202648/0052/made-in-stainless-steel-ceramic-nonstick-deep-draw-fry-pan-1-j.jpg"
+    },
+    "pepsi-original": {
+      "page": "https://www.walmart.com/ip/1281168074",
+      "image": "https://i5.walmartimages.com/seo/Pepsi-Soda-12oz-Cans-Quantity-of-36_d873d3ed-21bc-4db1-a83e-cbdc4fb5960c.f8d4a7ecd39238308a7057358186cc95.jpeg"
+    },
+    "pepsi-zero": {
+      "page": "https://www.bakersplus.com/p/pepsi-zero-sugar-cola-soda-single-can/0001200001877",
+      "image": "https://www.kroger.com/product/images/xlarge/front/0001200001877"
+    },
+    "progresso-light": {
+      "page": "https://www.progresso.com/products/light-chicken-noodle",
+      "image": "https://mojo.generalmills.com/api/public/content/9M_1CIC9VEm7a0DL-MR0VQ_04c57eea-66a2-45cd-a3f2-ecd27146a451_04c57eea-66a2-45cd-a3f2-ecd27146a451.png?v=781bd7bf&t=04c57eea66a245cda3f2ecd27146a451"
+    },
+    "progresso-original": {
+      "page": "https://www.progresso.com/products/traditional-chicken-noodle",
+      "image": "https://mojo.generalmills.com/api/public/content/j_zR3FZqQbuX29pnbYOr6w_04c57eea-66a2-45cd-a3f2-ecd27146a451_04c57eea-66a2-45cd-a3f2-ecd27146a451.png?v=16293fa2&t=04c57eea66a245cda3f2ecd27146a451"
+    },
+    "progresso-reduced": {
+      "page": "https://www.progresso.com/products/low-sodium-roasted-chicken-noodle",
+      "image": "https://mojo.generalmills.com/api/public/content/uf5K0HKC1Ui_Pka_n4A6ZQ_04c57eea-66a2-45cd-a3f2-ecd27146a451_04c57eea-66a2-45cd-a3f2-ecd27146a451.png?v=5daf4add&t=04c57eea66a245cda3f2ecd27146a451"
+    },
+    "pulmuone-jeong": {
+      "page": "https://shop.pulmuone.co.kr/shop/goodsView/41793",
+      "image": "https://shop-pulmuone.edge.naverncp.com//BOS/il/2024/12/20/640_39D83C01FAB649D6881F.jpg"
+    },
+    "pulmuone-jjajang": {
+      "page": "https://shop.pulmuone.co.kr/shop/goodsView/38726",
+      "image": "https://shop-pulmuone.edge.naverncp.com//BOS/il/2024/04/09/640_1A0524F379FF4061B5A7.jpg"
+    },
+    "pulmuone-jjambbong": {
+      "page": "https://shop.pulmuone.co.kr/shop/goodsView/34079",
+      "image": "https://shop-pulmuone.edge.naverncp.com//BOS/il/2023/02/03/640_1FDBD05A121D4EC681E2.jpg"
+    },
+    "samyang-spicy": {
+      "page": "https://www.samyangfoods.com/kor/brand/view.do?seq=486",
+      "image": "https://www.samyangfoods.com/upload/product/20231017/20231017141211455454.jpg"
+    },
+    "shin-light": {
+      "page": "https://brand.nongshim.com/shin-nonfrying/main/index",
+      "image": "https://image.nongshim.com/non/pro/1712274395852.jpg"
+    },
+    "shin-original": {
+      "page": "https://brand.nongshim.com/shinramyun/main/index",
+      "image": "https://image.nongshim.com/non/pro/1734997151278.jpg"
+    },
+    "shin-red": {
+      "page": "https://brand.nongshim.com/shinthered/main/index",
+      "image": "https://image.nongshim.com/non/pro/1700180810929.jpg"
+    },
+    "ws-copper-pro": {
+      "page": "https://www.williams-sonoma.com/products/williams-sonoma-thermo-clad-copper-pro-fry-pan/",
+      "image": "https://assets.wsimgs.com/wsimgs/ab/images/dp/wcm/202628/0173/img1j.jpg"
+    },
+    "ws-thermoclad": {
+      "page": "https://www.williams-sonoma.com/products/ws-signature-thermo-clad-ss-nonstick-covered-fry-pan/",
+      "image": "https://assets.wsimgs.com/wsimgs/ab/images/dp/wcm/202644/0355/williams-sonoma-signature-thermo-clad-stainless-steel-nons-j.jpg"
+    }
+  }
+}

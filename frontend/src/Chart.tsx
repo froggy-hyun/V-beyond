@@ -28,7 +28,7 @@ export default function Chart({ bars, candle, market, daily = false }: {
     const price = new Intl.NumberFormat('ko-KR', { minimumFractionDigits: digits, maximumFractionDigits: digits })
     const chart = createChart(host.current, {
       autoSize: true,
-      layout: { background: { type: ColorType.Solid, color: '#fff' }, textColor: '#51636a', attributionLogo: true },
+      layout: { background: { type: ColorType.Solid, color: '#fff' }, textColor: '#51636a', fontFamily: getComputedStyle(host.current).fontFamily, attributionLogo: true },
       grid: { vertLines: { color: '#f0f4f3' }, horzLines: { color: '#edf2f1' } },
       timeScale: { timeVisible: !daily, secondsVisible: false, fixLeftEdge: true, fixRightEdge: true, tickMarkFormatter: label },
       localization: { timeFormatter: label, priceFormatter: price.format },
