@@ -16,7 +16,20 @@ const quarterLabel = (value: string) => value.replace(/^FY\s*/, '회계 ').repla
 const amounts = (amount: number | null | undefined, currency = 'KRW') => amount == null ? '자료 없음'
   : currency === 'KRW' ? number.format(amount / 100_000_000) + '억 원' : number.format(amount / 1_000_000) + '백만 달러'
 const share = (amount: number, total: number) => total > 0 ? amount / total * 100 : 0
-const revealThreshold = .4
+
+function useChartReveal(threshold: number) {
+  const chart = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(() => !('IntersectionObserver' in window))
+  useEffect(() => {
+    if (!chart.current || visible) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.intersectionRatio >= threshold) setVisible(true)
+    }, { threshold })
+    observer.observe(chart.current)
+    return () => observer.disconnect()
+  }, [threshold, visible])
+  return [chart, visible] as const
+}
 
 export default function StockProductPerformance({ stock }: { stock: Stock }) {
   const result = useData<Overview>(pathFor(stock.id) + '/revenue-segments')
@@ -38,11 +51,28 @@ function RetailComparison({ market, stockId }: { market: Market; stockId: string
   const [peerId, setPeerId] = useState(choices[0].stockId)
   const [index, setIndex] = useState(market.quarters.length - 1)
   const [metric, setMetric] = useState<'sales' | 'share'>('sales')
+  const [donut, donutInView] = useChartReveal(.4)
+  const [trend, revealTrend] = useChartReveal(.25)
+  const [donutFinished, setDonutFinished] = useState(false)
+  const revealDonut = donutInView || revealTrend
   const peer = choices.find(brand => brand.stockId === peerId) ?? choices[0]
   const quarter = market.quarters[index]
   const focusShare = share(focus.amounts[index] ?? 0, quarter.total)
   const peerShare = share(peer.amounts[index] ?? 0, quarter.total)
   const otherShare = Math.max(0, 100 - focusShare - peerShare)
+  useEffect(() => {
+    const element = donut.current
+    if (!element || !revealDonut || donutFinished) return
+    let active = true
+    const frame = requestAnimationFrame(() => {
+      const transitions = element.getAnimations?.() ?? []
+      void Promise.allSettled(transitions.map(transition => transition.finished)).then(() => {
+        if (active) setDonutFinished(true)
+      })
+    })
+    return () => { active = false; cancelAnimationFrame(frame) }
+  }, [donut, revealDonut, donutFinished, focusShare, peerShare])
+  const slices = { '--focus-share': focusShare + '%', '--combined-share': (focusShare + peerShare) + '%' } as CSSProperties
   const measured = market.quarters.map((period, i) => {
     const values = [focus.amounts[i], peer.amounts[i]]
     return values.map(value => metric === 'share' && value != null ? share(value, period.total) : value)
@@ -60,7 +90,9 @@ function RetailComparison({ market, stockId }: { market: Market; stockId: string
     <div className="performance-grid">
       <div className="performance-share">
         <h4>{quarterLabel(quarter.quarter)} 판매액 점유율</h4>
-        <MarketShareChart total={quarter.total} focusShare={focusShare} peerShare={peerShare} />
+        <div ref={donut} className="performance-donut" data-visible={revealDonut} style={slices}>
+          <span><small>시장 전체</small><strong>{amounts(quarter.total)}</strong></span>
+        </div>
         <dl className="performance-legend">
           <div><dt><Link to={pathFor(focus.stockId)}>{focus.name}</Link></dt><dd>{number.format(focusShare)}%</dd></div>
           <div><dt><Link to={pathFor(peer.stockId)}>{peer.name}</Link></dt><dd>{number.format(peerShare)}%</dd></div>
@@ -72,11 +104,13 @@ function RetailComparison({ market, stockId }: { market: Market; stockId: string
           <button aria-pressed={metric === 'sales'} className={metric === 'sales' ? 'selected' : ''} onClick={() => setMetric('sales')}>판매액</button>
           <button aria-pressed={metric === 'share'} className={metric === 'share' ? 'selected' : ''} onClick={() => setMetric('share')}>점유율</button>
         </div></div>
-        <div className="performance-bars" aria-label="분기별 두 브랜드 비교">
+        <div ref={trend} className="performance-bars" aria-label="분기별 두 브랜드 비교" data-visible={donutFinished && revealTrend}>
           {market.quarters.map((period, i) => <div className="performance-bar-group" key={period.quarter}>
             <small>{quarterLabel(period.quarter)}</small>
             {measured[i].map((value, j) => <div className="performance-bar-row" key={j}>
-              <span className={j === 0 ? 'bar-fill' : 'bar-fill bar-peer'} aria-hidden style={{ width: ((value ?? 0) / max * 100) + '%' }} />
+              <span className={j === 0 ? 'bar-fill' : 'bar-fill bar-peer'} aria-hidden style={{
+                '--bar-width': ((value ?? 0) / max * 100) + '%', '--bar-delay': (i * 65 + j * 25) + 'ms',
+              } as CSSProperties} />
               <span><span className="sr-only">{j === 0 ? focus.name : peer.name} </span>{value == null ? '자료 없음' : metric === 'share' ? number.format(value) + '%' : amounts(value)}</span>
             </div>)}
           </div>)}
@@ -85,23 +119,6 @@ function RetailComparison({ market, stockId }: { market: Market; stockId: string
     </div>
     <p>판매액은 봉지와 용기를 합친 브랜드 집계입니다. 점유율은 공개된 소매 조사 전체 판매액을 기준으로 계산합니다.</p>
   </article>
-}
-
-function MarketShareChart({ total, focusShare, peerShare }: { total: number; focusShare: number; peerShare: number }) {
-  const chart = useRef<HTMLDivElement>(null)
-  const [visible, setVisible] = useState(() => !('IntersectionObserver' in window))
-  useEffect(() => {
-    if (!chart.current || visible) return
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.intersectionRatio >= revealThreshold) setVisible(true)
-    }, { threshold: revealThreshold })
-    observer.observe(chart.current)
-    return () => observer.disconnect()
-  }, [visible])
-  const slices = { '--focus-share': focusShare + '%', '--combined-share': (focusShare + peerShare) + '%' } as CSSProperties
-  return <div ref={chart} className="performance-donut" data-visible={visible} style={slices}>
-    <span><small>시장 전체</small><strong>{amounts(total)}</strong></span>
-  </div>
 }
 
 function ReportedSegment({ segment }: { segment: Segment }) {

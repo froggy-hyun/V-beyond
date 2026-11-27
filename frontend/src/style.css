@@ -230,6 +230,8 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .performance-bar-row { position: relative; isolation: isolate; min-height: 22px; display: flex; align-items: center; justify-content: flex-end; padding: 2px 6px; white-space: nowrap; font-size: .8rem; background: var(--surface); border-radius: 4px; overflow: hidden }
 .bar-fill { position: absolute; z-index: -1; inset: 0 auto 0 0; background: #cdebe4; border-radius: 4px; transition: width var(--motion) }
 .bar-peer { background: #dae4fe }
+.performance-bars .bar-fill { width: 0; transition: width 440ms cubic-bezier(.2, .7, .3, 1) var(--bar-delay) }
+.performance-bars[data-visible="true"] .bar-fill { width: var(--bar-width) }
 .health-item { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 13px }
 .health-criteria { flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-bottom: 12px }
 .health-pair, .health-peers { display: grid; gap: 8px; min-width: 0 }
@@ -239,11 +241,12 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .health-peers { grid-template-columns: repeat(var(--peer-count, 1), minmax(0, 1fr)) }
 .health-divider { display: grid; place-items: center }
 .vs-badge { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: #24272d; font-size: .71rem; font-weight: 800 }
-.health-side { position: relative; min-width: 0; border: 1px solid var(--line); border-radius: 9px; padding: 12px; overflow-wrap: anywhere }
+.alternative-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: 10px; margin-top: 12px }
+.comparison-card { position: relative; display: flex; flex-direction: column; min-width: 0; border: 1px solid var(--line); border-radius: 9px; padding: 12px; overflow-wrap: anywhere; container-type: inline-size }
 .health-pair:has(.winner-sticker) { margin-top: 24px }
-.health-pair:has(.winner-sticker) .health-side { padding-top: 18px }
-.health-side[data-winner="true"] { border-color: #86bfb2; box-shadow: 0 3px 12px #00857313; background: #f7fbfa; animation: winner-float 4s ease-in-out infinite }
-.health-side[data-winner="true"]:is(:hover, :focus-within) { animation-play-state: paused }
+.health-pair:has(.winner-sticker) .comparison-card { padding-top: 18px }
+.comparison-card[data-winner="true"] { border-color: #86bfb2; box-shadow: 0 3px 12px #00857313; background: #f7fbfa; animation: winner-float 4s ease-in-out infinite }
+.comparison-card[data-winner="true"]:is(:hover, :focus-within) { animation-play-state: paused }
 .winner-sticker {
   position: absolute;
   top: -13px;
@@ -266,13 +269,27 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .winner-sticker img { width: auto; height: 21px }
 .winner-reason { display: block; margin-top: 4px; color: #006857; font-size: .78rem; font-weight: 750 }
 @keyframes winner-float { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-5px) } }
-.health-side > small:first-of-type { font-weight: 690 }
-.health-product { display: flex; align-items: center; gap: 8px; margin-block: 6px }
-.health-product .product-photo, .health-product .product-icon { width: 38px; height: 38px }
-.health-product a:hover { color: var(--accent) }
-.health-value, .health-links { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin-top: 5px }
-.health-value .status { color: var(--accent); background: var(--accent-tint) }
-.health-links a { white-space: normal; min-height: 28px; width: auto }
+.comparison-label { font-weight: 690 }
+.comparison-product { display: flex; align-items: center; gap: 8px; margin-block: 6px }
+.comparison-product .product-photo, .comparison-product .product-icon { width: 38px; height: 38px }
+.comparison-product a:hover, .stock-row-compact:hover .stock-label strong { color: var(--accent) }
+.comparison-data { margin-bottom: 7px }
+.comparison-value, .comparison-links { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin-top: 5px }
+.comparison-value .status { color: var(--accent); background: var(--accent-tint) }
+.comparison-links a { white-space: normal; min-height: 24px; width: auto }
+.stock-row-compact { margin-top: auto; gap: 5px; padding: 8px 0 0; border-color: var(--line) }
+.stock-row-compact .stock-mark { width: 26px; height: 26px; border-radius: 6px; padding: 2px }
+.stock-row-compact .stock-label strong, .stock-row-compact .quote-value strong { font-size: .81rem }
+.stock-row-compact .stock-label small, .stock-row-compact .change { font-size: .67rem }
+.stock-row-compact .change { padding: 2px 4px }
+.stock-row-compact .row-chevron { width: 13px }
+.stock-row-compact .skeleton-quote i { width: 30px; height: 8px }
+@container (max-width: 180px) {
+  .stock-row-compact { grid-template-columns: auto minmax(0, 1fr) auto }
+  .stock-row-compact > :nth-child(3) { grid-column: 2 / -1; grid-row: 2; justify-self: start }
+  .stock-row-compact .quote-value { display: flex; flex-wrap: wrap }
+  .stock-row-compact .row-chevron { grid-column: 3; grid-row: 1 }
+}
 .health-comparisons .health-context { font-size: .8rem; margin-top: 7px }
 .health-context .source { margin-left: 3px }
 .chart-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 8px }
@@ -385,6 +402,7 @@ footer img { width: 95px; height: auto }
 
 @media (max-width: 839px) {
   .performance-grid, .performance-segments { grid-template-columns: minmax(0, 1fr) }
+  .alternative-grid { grid-template-columns: repeat(auto-fill, minmax(min(138px, 100%), 1fr)) }
   .health-pair:not([data-peers="0"]) { grid-template-columns: minmax(0, 1fr) }
   .health-pair[data-peers="3"] { --peer-count: 2 }
   .health-peers { row-gap: 18px }
@@ -435,8 +453,9 @@ footer img { width: 95px; height: auto }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .route-content, .skeleton i::after, .health-side[data-winner="true"] { animation: none }
+  .route-content, .skeleton i::after, .comparison-card[data-winner="true"] { animation: none }
   .performance-donut { --donut-main: var(--focus-share); --donut-end: var(--combined-share); transition: none }
+  .performance-bars .bar-fill { width: var(--bar-width); transition: none }
   :root { --motion: 0ms }
 }
 

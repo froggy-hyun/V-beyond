@@ -1,15 +1,16 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { bases, categories, criteria, formatFact, pathFor, relations, useData } from './api'
-import type { Criterion, Fact, HealthTopic, Match, Product, Stock } from './api'
-import { Empty, ProductPhoto, Source, Wait } from './ui'
-import winnerCharacter from './assets/brand/winner.webp'
+import { bases, categories, criteria, formatFact, pathFor, useData, useQuotes } from './api'
+import type { Criterion, Fact, HealthTopic, Match, Product, Quote, Stock } from './api'
+import { Empty, Source, Wait } from './ui'
+import ProductComparisonCard from './ProductComparisonCard'
 
 type HealthIssue = { criterion: Criterion; baseline: Fact | null; alternative: Match | null; comparisons: Match[] }
 type ProductPeer = { product: Product; stock: Stock }
 type HealthComparison = { product: Product; issues: HealthIssue[]; peers: ProductPeer[]; topics: HealthTopic[] }
+type ComparisonQuote = Quote | null | undefined
+type ComparisonRowProps = { row: HealthComparison; stock: Stock; getQuote: (id: string) => ComparisonQuote }
 
 const sodiumLimit = 2_000
 const contexts: Partial<Record<Criterion, { title: string; text: string; source?: string }>> = {
@@ -45,23 +46,28 @@ const contexts: Partial<Record<Criterion, { title: string; text: string; source?
 
 const issueLabel = (issue: HealthIssue) => contexts[issue.criterion]?.title ?? criteria[issue.criterion]
 
-export default function StockHealthComparisons({ stock }: { stock: Stock }) {
+export default function StockHealthComparisons({ stock, quote }: { stock: Stock; quote?: Quote | null }) {
   const comparison = useData<HealthComparison[]>(pathFor(stock.id) + '/health-comparisons')
+  const rows = comparison.data
+  const peerIds = new Set(rows?.flatMap(row => [...row.peers, ...row.issues.flatMap(issue => issue.comparisons)]
+    .map(peer => peer.stock.id)))
+  const quotes = useQuotes([...peerIds])
+  const getQuote = (id: string) => id === stock.id ? quote : quotes.getQuote(id)
   return <section className="panel health-comparisons stock-wide" aria-labelledby="stock-health-heading">
     <header><h2 id="stock-health-heading">판매 상품 건강 이슈 비교</h2>
       <p>{stock.name} 판매 상품과 다른 상장사의 상품을 성분·소재별로 비교합니다.</p></header>
-    {comparison.data ? comparison.data.length ? comparison.data.map(row => row.issues.length
-      ? <ComparisonRow key={row.product.id} row={row} stock={stock} />
-      : <ProductEvidence key={row.product.id} row={row} stock={stock} />
+    {rows ? rows.length ? rows.map(row => row.issues.length
+      ? <ComparisonRow key={row.product.id} row={row} stock={stock} getQuote={getQuote} />
+      : <ProductEvidence key={row.product.id} row={row} stock={stock} getQuote={getQuote} />
     ) : <Empty>비교할 판매 상품이 아직 없습니다.</Empty> : <Wait error={comparison.error} kind="products" />}
   </section>
 }
 
-function ProductEvidence({ row, stock }: { row: HealthComparison; stock: Stock }) {
+function ProductEvidence({ row, stock, getQuote }: ComparisonRowProps) {
   return <article className="health-item" aria-label={row.product.name + ' 건강 이슈 자료'}>
     <div className="section-heading health-criteria"><div><strong>{categories[row.product.category]}</strong><small>{row.product.prep}</small></div></div>
-    <HealthMatchup origin={<EvidenceProduct product={row.product} stock={stock} />}
-      peers={row.peers.map(peer => <EvidenceProduct key={peer.product.id} {...peer} competitor />)} />
+    <HealthMatchup origin={<EvidenceProduct product={row.product} stock={stock} quote={getQuote(stock.id)} />}
+      peers={row.peers.map(peer => <EvidenceProduct key={peer.product.id} {...peer} quote={getQuote(peer.stock.id)} competitor />)} />
     {row.peers.length > 0 && <p className="health-context">제품별로 공개된 시험 조건과 사양을 확인할 수 있습니다.</p>}
   </article>
 }
@@ -76,18 +82,16 @@ function HealthMatchup({ origin, peers }: { origin: ReactNode; peers: ReactNode[
   </div>
 }
 
-function EvidenceProduct({ product, stock, competitor = false }: ProductPeer & { competitor?: boolean }) {
+function EvidenceProduct({ product, stock, quote, competitor = false }: ProductPeer & { quote?: Quote | null; competitor?: boolean }) {
   const evidence = product.evidence[0]
-  return <div className="health-side">
-    <HealthProductTitle product={product} stock={stock} competitor={competitor} />
+  return <ProductComparisonCard product={product} stock={stock} quote={quote} label={competitor ? '타 기업 비교 상품' : '이 기업 상품'}>
     {product.material && <small>{product.material}</small>}
     {evidence && <p className="health-context">{evidence.summary}</p>}
-    <div className="health-links"><Source href={evidence?.source ?? product.source}>{evidence?.title ?? '상품 자료'}</Source>
-      {competitor && <StockJump stock={stock} />}</div>
-  </div>
+    <div className="comparison-links"><Source href={evidence?.source ?? product.source}>{evidence?.title ?? '상품 자료'}</Source></div>
+  </ProductComparisonCard>
 }
 
-function ComparisonRow({ row, stock }: { row: HealthComparison; stock: Stock }) {
+function ComparisonRow({ row, stock, getQuote }: ComparisonRowProps) {
   const [selected, setSelected] = useState<Criterion>(() => (
     row.issues.find(issue => issue.alternative) ?? row.issues.find(issue => issue.baseline && issue.comparisons.length)
       ?? row.issues.find(issue => issue.baseline) ?? row.issues[0]
@@ -107,11 +111,11 @@ function ComparisonRow({ row, stock }: { row: HealthComparison; stock: Stock }) 
         <button key={item.criterion} type="button" className={item.criterion === selected ? 'selected' : ''} aria-pressed={item.criterion === selected}
           onClick={() => setSelected(item.criterion)}>{issueLabel(item)}</button>)}</div>}
     </div>
-    <HealthMatchup origin={<HealthProduct product={row.product} stock={stock} fact={issue.baseline}
+    <HealthMatchup origin={<HealthProduct product={row.product} stock={stock} quote={getQuote(stock.id)} fact={issue.baseline}
       criterion={issue.criterion} winner={winner(issue.baseline?.value)} />}
       peers={comparisons.length ? comparisons.map(item => <HealthProduct key={item.product.id} {...item} criterion={issue.criterion}
-        reduction={item.reductionPercent} winner={winner(item.fact.value)} competitor />)
-        : qualitative.map(peer => <EvidenceProduct key={peer.product.id} {...peer} competitor />)} />
+        quote={getQuote(item.stock.id)} reduction={item.reductionPercent} winner={winner(item.fact.value)} competitor />)
+        : qualitative.map(peer => <EvidenceProduct key={peer.product.id} {...peer} quote={getQuote(peer.stock.id)} competitor />)} />
     {context && <p className="health-context"><strong>건강 쟁점</strong> {context.text} {context.source && <Source href={context.source}>기관 근거</Source>}</p>}
     {row.topics?.map(topic => {
       const evidence = row.product.evidence.find(item => item.topic === topic.id)
@@ -126,27 +130,15 @@ function ComparisonRow({ row, stock }: { row: HealthComparison; stock: Stock }) 
   </article>
 }
 
-function HealthProductTitle({ product, stock, competitor }: ProductPeer & { competitor: boolean }) {
-  return <><small>{competitor ? '타 기업 비교 상품' : '이 기업 상품'}</small><div className="health-product"><ProductPhoto product={product} /><div>
-    <h3><Link to={'/products/' + product.id}>{product.name}</Link></h3><small>{stock.name} · {relations[product.relation]}</small>
-  </div></div></>
-}
-
-function StockJump({ stock }: { stock: Stock }) {
-  return <Link className="plain-link" to={pathFor(stock.id)}>{stock.name} 종목 바로가기 <ChevronRight size={14} aria-hidden /></Link>
-}
-
-function HealthProduct({ product, stock, fact, criterion, reduction, winner, competitor = false }: ProductPeer & {
-  fact: Fact | null; criterion: Criterion; reduction?: number | null; winner: boolean; competitor?: boolean
+function HealthProduct({ product, stock, quote, fact, criterion, reduction, winner, competitor = false }: ProductPeer & {
+  quote?: Quote | null; fact: Fact | null; criterion: Criterion; reduction?: number | null; winner: boolean; competitor?: boolean
 }) {
   const secondaryCriterion = criterion === 'TOTAL_SUGAR' ? 'AVOID_ASPARTAME' : criterion === 'AVOID_ASPARTAME' ? 'TOTAL_SUGAR' : null
   const secondary = secondaryCriterion && product.facts.find(item => item.criterion === secondaryCriterion &&
     item.basis === (secondaryCriterion === 'TOTAL_SUGAR' ? 'PER_100ML' : 'INGREDIENTS'))
   const sodium = criterion === 'SODIUM' && fact?.unit === 'mg' ? Math.round(fact.value / sodiumLimit * 100) : null
-  return <div className="health-side" data-winner={winner}>
-    {winner && <span className="winner-sticker"><img src={winnerCharacter} width={112} height={155} alt="" />WINNER</span>}
-    <HealthProductTitle product={product} stock={stock} competitor={competitor} />
-    <div className="health-value"><strong>{fact ? formatFact(fact) : '자료 없음'}</strong>
+  return <ProductComparisonCard product={product} stock={stock} quote={quote} winner={winner} label={competitor ? '타 기업 비교 상품' : '이 기업 상품'}>
+    <div className="comparison-value"><strong>{fact ? formatFact(fact) : '자료 없음'}</strong>
       {reduction != null && <span className="status">{reduction}% 낮음</span>}
     </div>
     {winner && <span className="winner-reason">{criterion.startsWith('AVOID_') ? criteria[criterion] : criteria[criterion] + ' 낮음'}</span>}
@@ -154,9 +146,6 @@ function HealthProduct({ product, stock, fact, criterion, reduction, winner, com
     {!fact && product.material && <small>{product.material}</small>}
     {secondary && <small>{secondary.criterion === 'TOTAL_SUGAR' ? '당류' : '아스파탐'} {formatFact(secondary)}
       {secondary.basis === 'PER_100ML' && ' / ' + bases[secondary.basis]}</small>}
-    <div className="health-links">
-      {fact && <Source href={fact.source}>상품 자료</Source>}
-      {competitor && <StockJump stock={stock} />}
-    </div>
-  </div>
+    {fact && <div className="comparison-links"><Source href={fact.source}>상품 자료</Source></div>}
+  </ProductComparisonCard>
 }

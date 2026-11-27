@@ -42,8 +42,8 @@ export function QuoteValue({ quote }: { quote?: Quote | null }) {
     <span className={'change ' + tone(quote.changePercent ?? 0)}>{quote.changePercent == null ? '–' : percent(quote.changePercent)}</span>
   </span> : <span className="muted" aria-label="시세를 불러오지 못했습니다">—</span>
 }
-export function StockRow({ stock, quote, showVolume = false }: { stock: Stock; quote?: Quote | null; showVolume?: boolean }) {
-  return <Link className="stock-row" to={pathFor(stock.id)}>
+export function StockRow({ stock, quote, showVolume = false, compact = false }: { stock: Stock; quote?: Quote | null; showVolume?: boolean; compact?: boolean }) {
+  return <Link className={compact ? 'stock-row stock-row-compact' : 'stock-row'} to={pathFor(stock.id)}>
     <StockMark stock={stock} /><span className="stock-label"><strong>{stock.name}</strong><small>{stock.symbol} · {stock.exchange}</small>
       {showVolume && quote?.price != null && <small>거래량 {quote.cumulativeVolume.toLocaleString('ko-KR')}</small>}
     </span>

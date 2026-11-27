@@ -15,8 +15,13 @@ for (const scenario of scenarios) {
     await expect(page.getByRole('link', { name: '사진 출처' })).toHaveAttribute('href', /^https:\/\//)
     await expect(page.locator('.evidence .source').first()).toBeVisible()
     await page.getByRole('link', { name: '대안 상품 탐색' }).click()
-    await expect(page.getByText(scenario.alternative, { exact: false }).first()).toBeVisible()
-    await page.locator('.match .stock-row').filter({ hasText: scenario.competitor }).first().click()
+    const grid = page.locator('.alternative-grid')
+    const card = grid.getByRole('article').filter({ hasText: scenario.alternative }).first()
+    await expect(card).toBeVisible()
+    await expect(card.locator('.stock-row .stock-mark img')).toBeVisible()
+    await expect(card.locator('.stock-row .quote-value strong')).toBeVisible({ timeout: 12_000 })
+    expect((await card.boundingBox())!.width).toBeLessThan((await grid.boundingBox())!.width)
+    await grid.locator('.stock-row').filter({ hasText: scenario.competitor }).first().click()
     await expect(page.getByRole('heading', { name: scenario.competitor })).toBeVisible()
     await expect(page.getByRole('img', { name: '시세 및 거래량 차트' })).toBeVisible()
   })
@@ -33,13 +38,13 @@ test('종목 차트 아래 건강 이슈 비교와 대안 종목 이동', async 
   await expect(red.getByText('2,080 mg')).toBeVisible()
   await expect(red.getByText('1,560 mg')).toBeVisible()
   await expect(red.getByText('25% 낮음')).toBeVisible()
-  const winner = red.locator('.health-side[data-winner="true"]')
+  const winner = red.locator('.comparison-card[data-winner="true"]')
   const sticker = winner.locator('.winner-sticker')
   await expect(sticker).toHaveText('WINNER')
   await expect(sticker.locator('img')).toBeVisible()
   await expect(winner.locator('.winner-reason')).toHaveText('나트륨 낮음')
   await expect(winner).toHaveCSS('animation-name', 'winner-float')
-  const ownBox = (await red.locator('.health-pair > .health-side').boundingBox())!
+  const ownBox = (await red.locator('.health-pair > .comparison-card').boundingBox())!
   const versusBox = (await red.locator('.vs-badge').boundingBox())!
   const peerBox = (await red.getByRole('group', { name: '타 기업 비교 상품' }).boundingBox())!
   if (page.viewportSize()!.width >= 840) {
@@ -49,12 +54,16 @@ test('종목 차트 아래 건강 이슈 비교와 대안 종목 이동', async 
     expect(ownBox.y + ownBox.height).toBeLessThan(versusBox.y)
     expect(versusBox.y + versusBox.height).toBeLessThan(peerBox.y)
   }
-  await expect(red.getByRole('link', { name: /종목 바로가기/ })).toHaveCount(3)
+  await expect(red.getByRole('link', { name: /종목 바로가기/ })).toHaveCount(0)
+  await expect(red.locator('.health-peers .stock-row')).toHaveCount(3)
+  await expect(winner.locator('.stock-mark img')).toBeVisible()
+  await expect(winner.locator('.stock-row')).toContainText('017810 · KOSPI')
+  await expect(winner.locator('.stock-row .quote-value strong')).toBeVisible({ timeout: 12_000 })
   await expect(red.getByText(/심혈관질환/)).toBeVisible()
   await expect(red.getByRole('link', { name: '기관 근거' })).toHaveAttribute('href', /who\.int/)
   const light = comparison.getByRole('article', { name: '신라면 건면 건강 이슈 비교' })
   await expect(light.getByText('1,790 mg', { exact: true })).toBeVisible()
-  await expect(light.getByRole('link', { name: /종목 바로가기/ })).toHaveCount(3)
+  await expect(light.locator('.health-peers .stock-row')).toHaveCount(3)
   const pageWidth = (await page.locator('.stock-page').boundingBox())!.width
   expect((await comparison.boundingBox())!.width).toBeCloseTo(pageWidth, 0)
 
@@ -63,7 +72,7 @@ test('종목 차트 아래 건강 이슈 비교와 대안 종목 이동', async 
   await expect(page.getByRole('heading', { name: '판매 상품', exact: true })).toBeVisible()
   await expect(comparison).toHaveCount(0)
   await tabs.getByRole('button', { name: '차트', exact: true }).click()
-  const jump = red.getByRole('link', { name: '풀무원 종목 바로가기' }).first()
+  const jump = winner.getByRole('link', { name: /풀무원/ })
   if (page.viewportSize()!.width >= 840) {
     await jump.hover({ force: true })
     await expect(winner).toHaveCSS('animation-play-state', 'paused')
@@ -89,14 +98,14 @@ test('종목 비교에서 소재와 성분 기준별 검증 결과 표시', asyn
   const pan = page.getByRole('article', { name: /Premier.*건강 이슈 비교/ })
   await expect(pan.getByText('사용 확인', { exact: true })).toBeVisible()
   await expect(pan.getByText('미사용 확인', { exact: true }).first()).toBeVisible()
-  await expect(pan.getByRole('link', { name: '윌리엄스 소노마 종목 바로가기' })).toBeVisible()
+  await expect(pan.locator('.stock-row').filter({ hasText: '윌리엄스 소노마' })).toBeVisible()
 
   await page.goto('/stocks/US:NYSE:KO')
   const cola = page.getByRole('article', { name: '코카콜라 오리지널 건강 이슈 비교' })
   await expect(cola.getByText('10.99 g')).toBeVisible()
   await expect(cola.getByText('아스파탐 사용 확인').first()).toBeVisible()
   await cola.getByRole('button', { name: '아스파탐', exact: true }).click()
-  await expect(cola.getByRole('link', { name: /종목 바로가기/ })).toHaveCount(3)
+  await expect(cola.locator('.health-peers .stock-row')).toHaveCount(3)
   await expect(cola.getByText(/IARC.*JECFA/)).toBeVisible()
 
   const nuggets = await request.get('/api/v1/stocks/US:NYSE:CAG/health-comparisons')
@@ -128,8 +137,9 @@ test('브랜드 판매액과 분기 점유율, 공시 매출 및 AI 상품 소�
   await expect(retail.getByRole('button', { name: '점유율', exact: true })).toHaveAttribute('aria-pressed', 'true')
   const reported = performance.getByRole('article', { name: '라면 제품군 분기 공시 매출' })
   await expect(reported.getByRole('link', { name: '분기 원문' })).toHaveCount(3)
-  await expect(page.locator('.health-side[data-winner="true"]').first()).toHaveCSS('animation-name', 'none')
+  await expect(page.locator('.comparison-card[data-winner="true"]').first()).toHaveCSS('animation-name', 'none')
   await expect(retail.locator('.performance-donut')).toHaveCSS('transition-duration', '0s')
+  await expect(retail.locator('.performance-bars .bar-fill').first()).toHaveCSS('transition-duration', '0s')
   await page.getByRole('group', { name: '종목 상세 탭' }).getByRole('button', { name: '기업정보' }).click()
   const loadingOverview = page.getByRole('status', { name: 'AI 기업 소개를 불러오고 있습니다' })
   await expect(loadingOverview).toBeVisible()
@@ -140,10 +150,16 @@ test('브랜드 판매액과 분기 점유율, 공시 매출 및 AI 상품 소�
   await expect(page.getByText(/누들핏 컵면을 유통합니다/)).toBeVisible()
 })
 
-test('판매 점유율 그래프가 처음 화면에 들어올 때 0부터 채워짐', async ({ page }) => {
+test('판매 점유율이 채워진 뒤 분기별 막대가 순차적으로 나타남', async ({ page }) => {
   await page.goto('/stocks/KR:KOSPI:004370')
   const donut = page.locator('.performance-donut')
+  const bars = page.locator('.performance-bars')
   await expect(donut).toHaveAttribute('data-visible', 'false', { timeout: 12_000 })
+  await expect(bars.locator('.bar-fill').first()).toHaveCSS('width', '0px')
+  await bars.evaluate(element => element.addEventListener('transitionstart', () => {
+    const ring = element.closest('.performance-grid')!.querySelector('.performance-donut')!
+    element.dataset.firstBarRing ??= getComputedStyle(ring).getPropertyValue('--donut-main')
+  }))
   const angle = () => donut.evaluate(element => Number.parseFloat(getComputedStyle(element).getPropertyValue('--donut-main')))
   expect(await angle()).toBe(0)
   await donut.scrollIntoViewIfNeeded()
@@ -153,6 +169,11 @@ test('판매 점유율 그래프가 처음 화면에 들어올 때 0부터 채�
     return current > 0 && current < 25
   }, { intervals: [15, 30, 50] }).toBe(true)
   await expect.poll(angle).toBeCloseTo(25.92, 1)
+  await bars.scrollIntoViewIfNeeded()
+  await expect(bars).toHaveAttribute('data-visible', 'true')
+  await expect.poll(async () => Number.parseFloat((await bars.getAttribute('data-first-bar-ring')) ?? '0')).toBeCloseTo(25.92, 1)
+  await expect.poll(() => bars.locator('.bar-fill').first().evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(0)
+  await expect(bars.locator('.performance-bar-group').last().locator('.bar-fill').first()).toHaveCSS('transition-delay', '0.26s')
 })
 
 test('검색, 관심종목 및 자연어 조건 수정', async ({ page }) => {

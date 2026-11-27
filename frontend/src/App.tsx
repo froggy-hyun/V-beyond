@@ -5,6 +5,7 @@ import HealthPage from './HealthPage'
 import { ChoiceButtons } from './ChoiceButtons'
 import StockHealthComparisons from './StockHealthComparisons'
 import StockProductPerformance from './StockProductPerformance'
+import ProductComparisonCard from './ProductComparisonCard'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { ArrowLeft, ChevronLeft, ChevronRight, Cookie, Droplets, Flame, FlaskConical, GitCompareArrows, Heart, Home as HomeIcon, Menu, Search as SearchIcon, Shield, Sparkles, X } from 'lucide-react'
 import { Link, NavLink, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom'
@@ -195,7 +196,7 @@ function StockPage() {
           <div key={label}><dt>{label}</dt><dd>{currency(price, info.currency)}</dd></div>)}
       </dl>}
     </section><aside className="stock-side" aria-label="기업과 판매 상품">{companySection}{productSection}</aside>
-    <StockProductPerformance stock={info} /><StockHealthComparisons stock={info} /></>}
+    <StockProductPerformance stock={info} /><StockHealthComparisons stock={info} quote={quote} /></>}
   </div>
 }
 
@@ -258,9 +259,13 @@ function AlternativePage() {
       {result.data?.baseline && <p className="baseline">기준 상품 {formatFact(result.data.baseline)} · {bases[result.data.baseline.basis]}</p>}
     </section>
     <section className="panel"><h2>비교 결과</h2>{result.data ? <>
-      {result.data.matches.length ? result.data.matches.map(match =>
-        <div className="match" key={match.product.id}><ProductCard product={match.product} /><div className="match-meta"><strong>{formatFact(match.fact)} {match.reductionPercent != null && <span className="status">{match.reductionPercent}% 낮음</span>}</strong><Source href={match.fact.source} /></div>
-          <StockRow stock={match.stock} quote={getQuote(match.stock.id)} /></div>) : <Empty>동일 기준으로 확인된 대안 상품이 없습니다.</Empty>}
+      {result.data.matches.length ? <div className="alternative-grid">{result.data.matches.map(match =>
+        <ProductComparisonCard key={match.product.id} product={match.product} stock={match.stock} quote={getQuote(match.stock.id)}>
+          <div className="comparison-value"><strong>{formatFact(match.fact)}</strong>
+            {match.reductionPercent != null && <span className="status">{match.reductionPercent}% 낮음</span>}</div>
+          <small>{bases[match.fact.basis]}</small>
+          <div className="comparison-links"><Source href={match.fact.source}>상품 자료</Source></div>
+        </ProductComparisonCard>)}</div> : <Empty>동일 기준으로 확인된 대안 상품이 없습니다.</Empty>}
       {result.data.excluded > 0 && <p className="muted">비교 기준이 다르거나 조건에 맞지 않는 상품은 결과에서 제외했습니다.</p>}
     </> : <Wait error={result.error} kind="products" />}</section>
   </div>
