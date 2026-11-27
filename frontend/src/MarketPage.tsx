@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState, useSyncExternalStore } from 'react'
-import { ArrowDownUp, ChartNoAxesCombined, ChevronRight, FlaskConical, Heart, ScanSearch, Search } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { ArrowDownUp, ChartNoAxesCombined, ChevronRight, Droplets, FlaskConical, Search, Shield } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { categories, currency, pathFor, percent, tone, useData, useMarketMode, useQuotes } from './api'
 import type { Candle, Category, MarketIndex, Quote, Stock } from './api'
@@ -8,6 +9,11 @@ import marketCharacter from './assets/brand/market.png'
 
 const Chart = lazy(() => import('./Chart'))
 const markets = [['KR', '국내'], ['US', '미국']] as const
+const ingredientShortcuts = [
+  ['sodium-nitrite', '아질산나트륨', FlaskConical],
+  ['aspartame', '아스파탐', Droplets],
+  ['ptfe', 'PTFE', Shield],
+] as const
 const indexLabels = { KR: [['KOSPI', '코스피'], ['KOSDAQ', '코스닥']], US: [['SPX', 'S&P 500'], ['COMP', '나스닥 종합']] } as const
 const indexFormat = new Intl.NumberFormat('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const desktopWidth = window.matchMedia('(min-width: 840px)')
@@ -139,29 +145,30 @@ export default function MarketPage() {
       <aside className="market-aside">
         {desktop && preview && <Preview stock={preview} quote={getQuote(preview.id)} />}
         {desktop && stocks.isPending && <section className="panel market-preview"><Skeleton kind="chart" /></section>}
-        <section className="panel market-shortcuts">
-          <div className="shortcuts-heading"><h2>상품으로 종목 찾기</h2><img src={marketCharacter} alt="" width={350} height={275} /></div>
-          <div className="category-list">
-            {(Object.keys(categories) as Category[]).map(category => <Link key={category} to={'/ai?category=' + category}>
-              <ProductIcon category={category} /><strong>{categories[category]}</strong>
-            </Link>)}
-          </div>
-          <div className="market-shortcut-links">
-            <Link to="/ai"><ScanSearch size={17} aria-hidden /> 자연어로 탐색 <ChevronRight size={15} aria-hidden /></Link>
-            <Link to="/watchlist"><Heart size={17} aria-hidden /> 관심종목 <ChevronRight size={15} aria-hidden /></Link>
-          </div>
-        </section>
-        <section className="panel market-health" aria-labelledby="market-health-heading">
-          <Link to="/health" className="health-shortcut"><span className="product-icon"><FlaskConical aria-hidden /></span>
-            <h2 id="market-health-heading">건강 이슈 성분으로 종목 찾기</h2><ChevronRight size={17} aria-hidden /></Link>
-          <div className="tags">
-            {[['sodium-nitrite', '아질산나트륨'], ['aspartame', '아스파탐'], ['ptfe', 'PTFE']].map(([id, name]) =>
-              <Link key={id} to={'/health?topic=' + id}>{name}</Link>)}
-          </div>
-        </section>
+        <MarketShortcuts headingId="market-products-heading" title="상품으로 종목 찾기">
+          {(Object.keys(categories) as Category[]).map(category => <Link key={category} to={'/ai?category=' + category}>
+            <ProductIcon category={category} /><strong>{categories[category]}</strong>
+          </Link>)}
+        </MarketShortcuts>
+        <MarketShortcuts headingId="market-health-heading" title="건강 이슈 성분으로 종목 찾기" to="/health">
+          {ingredientShortcuts.map(([id, name, Icon]) => <Link key={id} to={'/health?topic=' + id}>
+            <span className="product-icon"><Icon aria-hidden strokeWidth={1.55} /></span><strong>{name}</strong>
+          </Link>)}
+        </MarketShortcuts>
+        <Link to="/ai" className="market-natural-link">
+          <img src={marketCharacter} alt="" width={350} height={275} />
+          <strong>자연어로 탐색</strong><ChevronRight size={16} aria-hidden />
+        </Link>
       </aside>
     </div>
   </div>
+}
+
+function MarketShortcuts({ headingId, title, to, children }: { headingId: string; title: string; to?: string; children: ReactNode }) {
+  return <section className="panel market-shortcuts" aria-labelledby={headingId}>
+    <h2 id={headingId}>{to ? <Link className="shortcut-heading-link" to={to}>{title}<ChevronRight size={17} aria-hidden /></Link> : title}</h2>
+    <div className="category-list">{children}</div>
+  </section>
 }
 
 function Preview({ stock, quote }: { stock: Stock; quote?: Quote | null }) {

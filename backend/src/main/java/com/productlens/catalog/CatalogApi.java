@@ -74,6 +74,11 @@ class CatalogApi {
         return catalog.alternatives(id, criterion, basis, scope);
     }
 
+    @GetMapping("/products/{id}/alternative-criteria")
+    List<Criterion> alternativeCriteria(@PathVariable String id, @RequestParam(defaultValue = "ALL_COMPANIES") Scope scope) {
+        return catalog.alternativeCriteria(id, scope);
+    }
+
     @GetMapping("/comparisons/companies")
     List<Comparison> compare(@RequestParam List<String> ids) {
         pair(ids);

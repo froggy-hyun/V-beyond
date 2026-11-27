@@ -27,6 +27,26 @@ for (const scenario of scenarios) {
   })
 }
 
+test('대안 상품이 확인되는 기준만 기업 범위에 맞춰 활성화', async ({ page }) => {
+  await page.goto('/products/calphalon-premier/alternatives?criterion=AVOID_PTFE')
+  const criteria = page.getByRole('group', { name: '비교 기준' })
+  const ptfe = criteria.getByRole('button', { name: 'PTFE 미사용', exact: true })
+  const pfas = criteria.getByRole('button', { name: 'PFAS 미사용', exact: true })
+  await expect(ptfe).toBeEnabled({ timeout: 12_000 })
+  await expect(ptfe).toHaveAttribute('aria-pressed', 'true')
+  await expect(criteria.getByRole('button', { name: '나트륨', exact: true })).toBeDisabled()
+  await page.getByRole('group', { name: '기업 관계' }).getByRole('button', { name: '같은 기업' }).click()
+  await expect(ptfe).toBeDisabled()
+  await expect(pfas).toBeEnabled()
+  await expect(pfas).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('.comparison-card-grid .comparison-card')).toHaveCount(1)
+
+  await page.goto('/products/lg-puricare-wd523vhm/alternatives')
+  await expect(page.getByText('선택하신 기업 범위에서 확인된 대안 상품이 없습니다.')).toBeVisible()
+  await expect(criteria.locator('button:not([disabled])')).toHaveCount(0)
+  await expect(page.locator('.comparison-card-grid')).toHaveCount(0)
+})
+
 test('종목 차트 아래 건강 이슈 비교와 대안 종목 이동', async ({ page }) => {
   await page.goto('/stocks/KR:KOSPI:004370')
   const chart = page.getByRole('img', { name: '시세 및 거래량 차트' })
@@ -206,8 +226,7 @@ test('검색, 관심종목 및 자연어 조건 수정', async ({ page }) => {
   expect((await explanation.boundingBox())!.y).toBeLessThan((await results.boundingBox())!.y)
   const cards = page.getByRole('region', { name: '탐색 결과' }).getByRole('article')
   await expect(cards.nth(1)).toBeVisible()
-  const first = (await cards.first().boundingBox())!
-  const second = (await cards.nth(1).boundingBox())!
+  const [first, second] = await cards.evaluateAll(elements => elements.slice(0, 2).map(element => element.getBoundingClientRect().toJSON()))
   expect(first.y).toBeCloseTo(second.y, 0)
   expect(first.x + first.width).toBeLessThan(second.x)
   await expect(cards.first().getByRole('link', { name: '상품 자료' })).toBeVisible()
@@ -228,11 +247,18 @@ test('검색, 관심종목 및 자연어 조건 수정', async ({ page }) => {
 
 test('홈 성분 탐색에서 제조사 표시와 기관 평가를 확인하고 관련 종목 이동', async ({ page }) => {
   await page.goto('/')
-  const productDiscovery = page.getByRole('heading', { name: '상품으로 종목 찾기' })
-  const ingredientDiscovery = page.getByRole('link', { name: '건강 이슈 성분으로 종목 찾기' })
+  const productDiscovery = page.getByRole('region', { name: '상품으로 종목 찾기' })
+  const ingredientDiscovery = page.getByRole('region', { name: '건강 이슈 성분으로 종목 찾기' })
+  const naturalDiscovery = page.getByRole('link', { name: '자연어로 탐색', exact: true })
   await expect(productDiscovery).toBeVisible()
   await expect(ingredientDiscovery).toBeVisible()
   expect((await productDiscovery.boundingBox())!.y).toBeLessThan((await ingredientDiscovery.boundingBox())!.y)
+  const ingredientBox = (await ingredientDiscovery.boundingBox())!
+  expect(ingredientBox.y + ingredientBox.height).toBeLessThan((await naturalDiscovery.boundingBox())!.y)
+  await expect(productDiscovery.locator('.category-list .product-icon').first()).toBeVisible()
+  await expect(ingredientDiscovery.locator('.category-list .product-icon')).toHaveCount(3)
+  await expect(page.getByRole('main').getByRole('link', { name: '관심종목', exact: true })).toHaveCount(0)
+  await expect(page.getByRole('navigation').getByRole('link', { name: '관심', exact: true })).toBeVisible()
   await page.getByRole('link', { name: '건강 이슈 성분으로 종목 찾기' }).click()
   await page.getByRole('textbox', { name: '성분·소재 검색' }).fill('보존료')
   const choices = page.getByRole('group', { name: '건강 이슈 성분' })

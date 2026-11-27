@@ -242,26 +242,29 @@ function AlternativePage() {
   const item = origin.data
   const defaultCriterion = item?.category === 'FRYING_PAN' ? 'AVOID_PTFE' : item?.category === 'COLA' ? 'TOTAL_SUGAR'
     : item?.category === 'CHOCOLATE' || item?.category === 'PEANUT_BUTTER' ? 'ADDED_SUGAR' : 'SODIUM'
-  const criterion = (params.get('criterion') || defaultCriterion) as Criterion
   const scope = params.get('scope') || 'OTHER_COMPANY'
-  const basis = item && !criterion.startsWith('AVOID_') ? nutritionBasis(item.category) : ''
+  const availability = useData<Criterion[]>('/products/' + id + '/alternative-criteria?' + new URLSearchParams({ scope }), Boolean(item))
+  const enabled = availability.data ?? []
+  const criterion = enabled.find(value => value === params.get('criterion')) ?? enabled.find(value => value === defaultCriterion) ?? enabled[0]
+  const basis = item && criterion && !criterion.startsWith('AVOID_') ? nutritionBasis(item.category) : ''
   const result = useData<{ baseline: Fact | null; matches: Match[]; excluded: number }>(
-    '/products/' + id + '/alternatives?' + new URLSearchParams({ criterion, basis, scope }), Boolean(item))
+    '/products/' + id + '/alternatives?' + new URLSearchParams({ criterion: criterion ?? '', basis, scope }), Boolean(item && criterion))
   if (!item) return <div className="page"><section className="panel"><Wait error={origin.error} kind="product" /></section></div>
   return <div className="page"><Link className="back" to={'/products/' + item.id}><ArrowLeft size={16} /> {item.name}</Link><h1>대안 상품 탐색</h1>
     <section className="panel"><div className="section-heading"><div><h2>{item.name}</h2><p>{item.prep}</p></div><ProductPhoto product={item} /></div>
-      <ChoiceButtons label="비교 기준" choices={criteria} value={criterion} icon={criterionIcon}
+      <ChoiceButtons label="비교 기준" choices={criteria} value={criterion ?? ''} enabledChoices={enabled} icon={criterionIcon}
         onSelect={value => setParams({ criterion: value, scope })} />
       <div className="segmented" role="group" aria-label="기업 관계">{Object.entries(scopeLabels).map(([value, name]) =>
         <button key={value} type="button" aria-pressed={scope === value} className={scope === value ? 'selected' : ''}
-          onClick={() => setParams({ criterion, scope: value })}>{name}</button>)}</div>
+          onClick={() => setParams(criterion ? { criterion, scope: value } : { scope: value })}>{name}</button>)}</div>
       {result.data?.baseline && <p className="baseline">기준 상품 {formatFact(result.data.baseline)} · {bases[result.data.baseline.basis]}</p>}
     </section>
     <section className="panel"><h2>비교 결과</h2>{result.data ? <>
       {result.data.matches.length ? <ProductMatchGrid matches={result.data.matches} />
         : <Empty>동일 기준으로 확인된 대안 상품이 없습니다.</Empty>}
       {result.data.excluded > 0 && <p className="muted">비교 기준이 다르거나 조건에 맞지 않는 상품은 결과에서 제외했습니다.</p>}
-    </> : <Wait error={result.error} kind="products" />}</section>
+    </> : availability.data?.length === 0 ? <Empty>선택하신 기업 범위에서 확인된 대안 상품이 없습니다.</Empty>
+      : <Wait error={availability.error ?? result.error} kind="products" />}</section>
   </div>
 }
 

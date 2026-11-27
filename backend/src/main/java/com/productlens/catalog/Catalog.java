@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
@@ -162,21 +163,41 @@ public class Catalog {
 
     public Alternatives alternatives(String id, Criterion criterion, String basis, Scope scope) {
         Product origin = product(id);
-        var candidates = group(origin.category(), origin.market()).stream()
-                .filter(p -> !p.id().equals(id))
-                .filter(p -> scope == Scope.ALL_COMPANIES
-                        || (scope == Scope.SAME_COMPANY) == p.symbol().equals(origin.symbol()))
-                .toList();
-        Fact baseline = origin.facts().stream()
-                .filter(f -> f.criterion() == criterion && (basis.isBlank() || f.basis().equals(basis)))
-                .findFirst().orElse(null);
-        if (baseline == null && !criterion.absence()) return new Alternatives(null, List.of(), candidates.size());
+        var candidates = alternativeCandidates(origin, scope);
+        var baseline = baseline(origin, criterion, basis);
         var matches = candidates.stream().flatMap(p -> p.facts().stream()
-                .filter(f -> f.criterion() == criterion)
-                .filter(f -> criterion.absence() ? f.value().signum() == 0 : comparable(origin, p, baseline, f))
+                .filter(f -> matchesAlternative(origin, p, criterion, baseline, f))
                 .limit(1).map(f -> new Alternative(p, stockFor(p), f, reduction(baseline, f, criterion))))
                 .sorted(Comparator.comparing(row -> row.fact().value())).toList();
         return new Alternatives(baseline, matches, candidates.size() - matches.size());
+    }
+
+    public List<Criterion> alternativeCriteria(String id, Scope scope) {
+        var origin = product(id);
+        var candidates = alternativeCandidates(origin, scope);
+        return Arrays.stream(Criterion.values()).filter(criterion -> {
+            var baseline = baseline(origin, criterion, criterion.absence() ? "" : origin.category().nutritionBasis());
+            return candidates.stream().anyMatch(candidate -> candidate.facts().stream()
+                    .anyMatch(fact -> matchesAlternative(origin, candidate, criterion, baseline, fact)));
+        }).toList();
+    }
+
+    private List<Product> alternativeCandidates(Product origin, Scope scope) {
+        return group(origin.category(), origin.market()).stream()
+                .filter(product -> !product.id().equals(origin.id()))
+                .filter(product -> scope == Scope.ALL_COMPANIES
+                        || (scope == Scope.SAME_COMPANY) == product.symbol().equals(origin.symbol()))
+                .toList();
+    }
+
+    private static Fact baseline(Product origin, Criterion criterion, String basis) {
+        return origin.facts().stream().filter(fact -> fact.criterion() == criterion && (basis.isBlank() || fact.basis().equals(basis)))
+                .findFirst().orElse(null);
+    }
+
+    private static boolean matchesAlternative(Product origin, Product candidate, Criterion criterion, Fact baseline, Fact fact) {
+        if (fact.criterion() != criterion) return false;
+        return criterion.absence() ? fact.value().signum() == 0 : baseline != null && comparable(origin, candidate, baseline, fact);
     }
 
     private static boolean comparable(Product origin, Product candidate, Fact baseline, Fact fact) {
