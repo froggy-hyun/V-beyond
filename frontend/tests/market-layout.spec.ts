@@ -32,14 +32,14 @@ test('시장 구분, 종목 검색 및 화면별 차트 이동', async ({ page }
   if (info.project.name === 'desktop') {
     await page.getByRole('button', { name: '코카콜라 차트 미리보기' }).click()
     const preview = page.getByRole('region', { name: '종목 차트 미리보기' })
-    await expect(preview.getByRole('heading', { name: '코카콜라' })).toBeVisible()
+    await expect(preview.getByRole('heading', { name: '코카콜라', exact: true })).toBeVisible()
     await expect(preview.getByRole('img', { name: '시세 및 거래량 차트' })).toBeVisible()
     await preview.getByRole('link', { name: '종목 상세' }).click()
   } else {
     await expect(page.getByRole('region', { name: '종목 차트 미리보기' })).toHaveCount(0)
     await page.locator('.market-list-row .stock-row').filter({ hasText: '코카콜라' }).click()
   }
-  await expect(page.getByRole('heading', { name: '코카콜라' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '코카콜라', level: 1, exact: true })).toBeVisible()
   await expect(page.getByRole('img', { name: '시세 및 거래량 차트' })).toBeVisible()
 
   await page.goto('/')
