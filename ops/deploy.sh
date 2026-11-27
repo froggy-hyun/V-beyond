@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 umask 077
-: "${PROD_HOST:?}" "${PROD_SSH_USER:?}" "${PROD_SSH_KEY:?}" "${PROD_SSH_PASSWORD:?}" "${PROD_SSH_KNOWN_HOSTS:?}" "${GH_TOKEN:?}"
+: "${PROD_HOST:?}" "${PROD_SITE_HOST:?}" "${PROD_SSH_USER:?}" "${PROD_SSH_KEY:?}" "${PROD_SSH_PASSWORD:?}" "${PROD_SSH_KNOWN_HOSTS:?}" "${GH_TOKEN:?}"
 [[ "$PROD_HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ && "$PROD_SSH_USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
 work=$(mktemp -d)
 trap 'rm -rf -- "$work"' EXIT
@@ -17,12 +17,18 @@ export SSH_ASKPASS="$work/askpass" SSH_ASKPASS_REQUIRE=force DISPLAY=:0
 ssh_opts=(-i "$work/key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$work/known_hosts" -o ConnectTimeout=12 -o NumberOfPasswordPrompts=1)
 cp Caddyfile compose.public.yaml compose.yaml ops/activate.sh "$work/bundle/"
 python3 - "$work/bundle/.env" <<'PY'
-import os, sys
+import ipaddress, os, re, sys
 from pathlib import Path
 keys = ('DB_PASSWORD', 'OPENAI_API_KEY', 'KIS_APP_KEY', 'KIS_APP_SECRET', 'BACKEND_IMAGE', 'FRONTEND_IMAGE')
+site = os.environ['PROD_SITE_HOST']
+label = r'[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?'
+if len(site) > 253 or not re.fullmatch(rf'(?:{label}\.)+[a-z](?:[a-z0-9-]{{0,61}}[a-z0-9])?', site):
+    raise ValueError('운영 도메인 확인 필요')
+site_ip = ipaddress.IPv4Address(os.environ['PROD_HOST'])
 with Path(sys.argv[1]).open('w') as env:
     print('COMPOSE_FILE=compose.yaml:compose.public.yaml', file=env)
-    print('SITE_HOST=' + os.environ['PROD_HOST'], file=env)
+    print(f'SITE_HOST={site}', file=env)
+    print(f'SITE_IP={site_ip}', file=env)
     mode = os.environ.get('MARKET_DATA_MODE') or 'REPLAY'
     if mode not in ('REPLAY', 'KIS'):
         raise ValueError('MARKET_DATA_MODE는 REPLAY 또는 KIS')

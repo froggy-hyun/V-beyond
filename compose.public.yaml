@@ -4,6 +4,7 @@ services:
     ports: ["80:8080", "443:8443"]
     environment:
       SITE_HOST: ${SITE_HOST:?SITE_HOST required}
+      SITE_IP: ${SITE_IP:?SITE_IP required}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - certificates:/data

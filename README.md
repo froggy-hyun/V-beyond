@@ -8,7 +8,7 @@
 
 배포 환경은 GitHub Actions의 `production`. SSH 호스트 키 고정, 키와 비밀번호 인증, 작업별 단기 레지스트리 토큰 사용. 필수 secret 이름은 워크플로의 deploy 단계 참조. 실제 등록값은 이 컴퓨터의 Git 제외 파일 `.local/GITHUB_SECRETS.md`에 보관.
 
-서버 배포 경로는 `~/product-lens`. 운영은 Caddy가 80·443 포트를 점유하고 HTTP를 HTTPS로 전환. 공개 IP용 단기 ACME 인증서 자동 갱신. 로컬 Compose 웹은 `127.0.0.1:18081`에서 접근. 헬스체크 실패 시 이전 이미지 구성으로 복귀. DB 마이그레이션은 이전 앱 버전과 호환되는 변경으로 작성.
+서버 배포 경로는 `~/product-lens`. 운영 도메인은 GitHub `production` 변수 `PROD_SITE_HOST`로 지정하고 DNS A 레코드를 서버 IPv4에 연결. Caddy가 80·443 포트에서 HTTP를 HTTPS로 전환하고 도메인 및 공개 IP의 ACME 인증서를 자동 발급·갱신. 인증서는 Compose 볼륨에 보관. 로컬 Compose 웹은 `127.0.0.1:18081`에서 접근. 헬스체크 실패 시 이전 이미지 구성으로 복귀. DB 마이그레이션은 이전 앱 버전과 호환되는 변경으로 작성.
 
 ## 로컬 실행
 

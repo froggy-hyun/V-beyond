@@ -11,10 +11,11 @@ rm -f registry-token registry-user
 previous=$(readlink -f "$base/current" || true)
 docker compose pull
 site=$(sed -n 's/^SITE_HOST=//p' .env)
-[[ -n "$site" ]]
+ip=$(sed -n 's/^SITE_IP=//p' .env)
+[[ -n "$site" && -n "$ip" ]]
 verify_market() {
-  local url="https://$site/api/v1"
-  local tls=(--resolve "$site:443:127.0.0.1")
+  local url="https://$ip/api/v1"
+  local tls=(--resolve "$ip:443:127.0.0.1")
   curl -fsS --retry 8 --retry-all-errors --retry-delay 3 --max-time 5 \
     "${tls[@]}" "$url/stocks?market=KR" >/dev/null || return 1
   if ! grep -qx 'MARKET_DATA_MODE=KIS' .env; then return 0; fi
@@ -41,3 +42,14 @@ fi
 for path in "$base"/releases/build.*; do
   if [[ -d "$path" && "$path" != "$previous" && "$path" != "$release" ]]; then rm -rf -- "$path"; fi
 done
+
+if getent ahostsv4 "$site" | awk '{ print $1 }' | grep -Fx "$ip" >/dev/null; then
+  if curl -fsS --retry 6 --retry-all-errors --retry-delay 5 --max-time 5 \
+    --resolve "$site:443:127.0.0.1" "https://$site/api/v1/stocks?market=KR" >/dev/null; then
+    printf '도메인 HTTPS 확인 %s\n' "$site"
+  else
+    printf '::warning::도메인 HTTPS 발급 대기 또는 확인 실패 %s\n' "$site"
+  fi
+else
+  printf '::warning::운영 도메인 DNS 연결 대기 %s\n' "$site"
+fi
