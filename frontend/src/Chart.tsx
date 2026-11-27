@@ -12,12 +12,14 @@ export default function Chart({ bars, candle, market }: { bars: Candle[]; candle
     const localDate = new Intl.DateTimeFormat('ko-KR', { timeZone: 'UTC', month: 'numeric', day: 'numeric' })
     const daily = new Date(bars[1]?.startAt ?? bars[0].startAt).getTime() - new Date(bars[0].startAt).getTime() >= 86_400_000
     const label = (time: number) => (daily ? localDate : localTime).format(time * 1000)
+    const digits = market === 'KR' ? 0 : 2
+    const price = new Intl.NumberFormat('ko-KR', { minimumFractionDigits: digits, maximumFractionDigits: digits })
     const chart = createChart(host.current, {
       autoSize: true,
       layout: { background: { type: ColorType.Solid, color: '#fff' }, textColor: '#51636a', attributionLogo: true },
       grid: { vertLines: { color: '#f0f4f3' }, horzLines: { color: '#edf2f1' } },
-      timeScale: { timeVisible: !daily, secondsVisible: false, tickMarkFormatter: label },
-      localization: { timeFormatter: label },
+      timeScale: { timeVisible: !daily, secondsVisible: false, fixLeftEdge: true, fixRightEdge: true, tickMarkFormatter: label },
+      localization: { timeFormatter: label, priceFormatter: price.format },
     })
     const points = bars.map(bar => ({ ...bar, time: Math.floor(new Date(bar.startAt).getTime() / 1000) as UTCTimestamp }))
     if (candle) {

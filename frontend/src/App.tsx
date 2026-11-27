@@ -1,7 +1,8 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
+import MarketPage from './MarketPage'
 import { useMutation } from '@tanstack/react-query'
-import { Activity, ArrowLeft, ArrowUpRight, FlaskConical, Home as HomeIcon, Layers3, Search as SearchIcon, Sparkles, Star, GitCompareArrows } from 'lucide-react'
+import { ArrowLeft, FlaskConical, Home as HomeIcon, Layers3, Search as SearchIcon, Sparkles, Star, GitCompareArrows } from 'lucide-react'
 import { Link, NavLink, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { api, bases, categories, criteria, currency, formatFact, pathFor, percent, relations, tone, useData, useQuotes } from './api'
 import type { Candle, Category, Comparison, Criterion, Fact, Match, Product, Stock } from './api'
@@ -12,7 +13,6 @@ const Chart = lazy(() => import('./Chart'))
 const links = [['/', '시장', HomeIcon], ['/search', '검색', SearchIcon], ['/ai', 'AI 탐색', Sparkles],
   ['/compare', '기업 비교', GitCompareArrows], ['/watchlist', '관심종목', Star]] as const
 const prompts = ['나트륨이 낮은 라면', 'PTFE 없는 프라이팬', '당류가 낮은 콜라']
-const statusDate = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'long', timeZone: 'Asia/Seoul' }).format(new Date())
 
 export default function App() {
   const location = useLocation()
@@ -22,11 +22,11 @@ export default function App() {
       <Link to="/" className="brand"><span className="brand-mark"><Layers3 size={22} /></span>Product<span>Lens</span></Link>
       <nav aria-label="주 메뉴">{links.map(([to, label, Icon]) =>
         <NavLink key={to} to={to} end><Icon size={17} aria-hidden /><span>{label}</span></NavLink>)}</nav>
-      <span className="demo"><i /> 비공식 데모</span>
+      <span className="demo">비공식 데모</span>
     </div></header>
     <main className="shell">
       <Routes>
-        <Route index element={<Market />} />
+        <Route index element={<MarketPage />} />
         <Route path="search" element={<SearchPage />} />
         <Route path="stocks/:id" element={<StockPage />} />
         <Route path="products/:id" element={<ProductPage />} />
@@ -38,36 +38,6 @@ export default function App() {
       </Routes>
       <footer>Product Lens · 비공식 데모 <span>시세는 시연용 데이터입니다.</span></footer>
     </main>
-  </>
-}
-
-function Market() {
-  const [params, setParams] = useSearchParams()
-  const market = params.get('market') === 'US' ? 'US' : 'KR'
-  const stocks = useData<Stock[]>('/stocks?market=' + market)
-  const rows = stocks.data ?? []
-  const quotes = useQuotes(rows.map(stock => stock.id))
-  return <>
-    <div className="market-heading"><div><p className="eyebrow"><Activity size={16} /> 시장 브리핑</p><h1>오늘의 주식시장</h1></div><span className="date">{statusDate}</span></div>
-    <div className="dashboard">
-      <section className="panel market-panel">
-        <div className="section-heading"><div><h2>종목 시세</h2><p>국내·미국 종목의 시세와 판매 상품을 살펴보세요.</p></div><span className="status">데모 시세</span></div>
-        <div className="segmented" aria-label="시장">
-          <button className={market === 'KR' ? 'selected' : ''} onClick={() => setParams({ market: 'KR' })}>국내</button>
-          <button className={market === 'US' ? 'selected' : ''} onClick={() => setParams({ market: 'US' })}>미국</button>
-        </div>
-        <div className="list-heading"><span>종목</span><span>현재가 / 등락률</span></div>
-        {stocks.data ? rows.map(stock => <StockRow key={stock.id} stock={stock} quote={quotes.find(q => q.listingId === stock.id)} />) : <Wait error={stocks.error} />}
-      </section>
-      <aside className="market-aside">
-        <section className="explore-hero"><span className="hero-icon"><Sparkles size={24} /></span><h2>주가 너머,<br />기업이 파는 것을 보다.</h2>
-          <p>성분과 소재로 상품을 비교하고 관련 상장사를 찾아보세요.</p><Link to="/ai">AI로 탐색 <ArrowUpRight size={16} /></Link>
-        </section>
-        <section className="panel topics"><h2>상품군 탐색</h2><div className="category-list">
-          {(Object.keys(categories) as Category[]).map(category => <Link key={category} to={'/ai?category=' + category}><ProductIcon category={category} /><strong>{categories[category]}</strong></Link>)}
-        </div></section>
-      </aside>
-    </div>
   </>
 }
 
@@ -110,7 +80,7 @@ function StockPage() {
   }
   if (!stock.data) return <Wait error={stock.error} />
   const info = stock.data
-  return <div className="page">
+  return <div className="page stock-page">
     <Link className="back" to={'/?market=' + info.market}><ArrowLeft size={16} /> 시장</Link>
     <section className="panel stock-detail"><div className="section-heading"><div className="stock-title"><StockMark stock={info} /><div><h1>{info.name}</h1><p>{info.symbol} · {info.exchange}</p></div></div>
       <button aria-label="관심종목" aria-pressed={watch.includes(id)} className="icon-btn" onClick={toggle}><Star size={23} fill={watch.includes(id) ? '#087968' : 'none'} /></button></div>
