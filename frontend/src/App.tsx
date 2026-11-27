@@ -92,9 +92,11 @@ function StockPage() {
       </div>
       {bars.data ? <Suspense fallback={<Wait error={null} />}><Chart bars={bars.data} market={info.market} candle={range !== '1D' || ['1m', '5m'].includes(params.get('interval') ?? '')} /></Suspense> : <Wait error={bars.error} />}
     </section>
-    <section className="panel"><div className="section-heading"><h2>기업 소개</h2><Source href={info.source}>기업 웹사이트</Source></div><p>{info.overview}</p></section>
-    <section className="panel"><div className="section-heading"><h2>판매 상품</h2><Link className="plain-link" to={'/compare?first=' + encodeURIComponent(id)}>기업 비교</Link></div>
-      {products.data ? <div className="products">{products.data.map(product => <ProductCard key={product.id} product={product} />)}</div> : <Wait error={products.error} />}</section>
+    <aside className="stock-side" aria-label="기업과 판매 상품">
+      <section className="panel"><div className="section-heading"><h2>기업 소개</h2><Source href={info.source}>기업 웹사이트</Source></div><p>{info.overview}</p></section>
+      <section className="panel"><div className="section-heading"><h2>판매 상품</h2><Link className="plain-link" to={'/compare?first=' + encodeURIComponent(id)}>기업 비교</Link></div>
+        {products.data ? <div className="products">{products.data.map(product => <ProductCard key={product.id} product={product} />)}</div> : <Wait error={products.error} />}</section>
+    </aside>
   </div>
 }
 
