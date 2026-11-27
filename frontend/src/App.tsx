@@ -4,7 +4,7 @@ import MarketPage from './MarketPage'
 import { useMutation } from '@tanstack/react-query'
 import { ArrowLeft, FlaskConical, Home as HomeIcon, Layers3, Search as SearchIcon, Sparkles, Star, GitCompareArrows } from 'lucide-react'
 import { Link, NavLink, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom'
-import { api, bases, categories, criteria, currency, formatFact, pathFor, percent, relations, tone, useData, useQuotes } from './api'
+import { api, bases, categories, criteria, currency, formatFact, pathFor, percent, quoteStatus, quoteTime, relations, tone, useData, useMarketMode, useQuotes } from './api'
 import type { Candle, Category, Comparison, Criterion, Fact, Match, Product, Stock } from './api'
 import { Empty, ProductCard, ProductIcon, Source, StockMark, StockRow, Wait } from './ui'
 
@@ -15,6 +15,7 @@ const links = [['/', '시장', HomeIcon], ['/search', '검색', SearchIcon], ['/
 const prompts = ['나트륨이 낮은 라면', 'PTFE 없는 프라이팬', '당류가 낮은 콜라']
 
 export default function App() {
+  const mode = useMarketMode()
   const location = useLocation()
   useEffect(() => { window.scrollTo(0, 0) }, [location.pathname])
   return <>
@@ -22,7 +23,7 @@ export default function App() {
       <Link to="/" className="brand"><span className="brand-mark"><Layers3 size={22} /></span>Product<span>Lens</span></Link>
       <nav aria-label="주 메뉴">{links.map(([to, label, Icon]) =>
         <NavLink key={to} to={to} end><Icon size={17} aria-hidden /><span>{label}</span></NavLink>)}</nav>
-      <span className="demo">비공식 데모</span>
+      <span className="demo">비공식 서비스</span>
     </div></header>
     <main className="shell">
       <Routes>
@@ -36,7 +37,7 @@ export default function App() {
         <Route path="watchlist" element={<Watchlist />} />
         <Route path="*" element={<Empty>페이지를 찾을 수 없습니다. <Link to="/">시장으로</Link></Empty>} />
       </Routes>
-      <footer>Product Lens · 비공식 데모 <span>시세는 시연용 데이터입니다.</span></footer>
+      <footer>Product Lens · 비공식 서비스 <span>{mode === 'KIS_REST' ? '시세 제공: 한국투자증권' : mode === 'REPLAY' ? '시세는 시연용 데이터입니다.' : ''}</span></footer>
     </main>
   </>
 }
@@ -68,10 +69,12 @@ function StockPage() {
   const [params, setParams] = useSearchParams()
   const stock = useData<Stock>(pathFor(id))
   const products = useData<Product[]>(pathFor(id) + '/products')
+  const mode = useMarketMode()
   const quote = useQuotes([id])[0]
+  const time = quote ? quoteTime(quote) : null
   const range = ['1M', '3M', '1Y'].includes(params.get('range') ?? '') ? params.get('range')! : '1D'
   const interval = range !== '1D' ? '1d' : params.get('interval') === '5m' ? '5m' : '1m'
-  const bars = useData<Candle[]>('/market' + pathFor(id) + '/candles?interval=' + interval + '&range=' + range)
+  const bars = useData<Candle[]>('/market' + pathFor(id) + '/candles?interval=' + interval + '&range=' + range, true, mode === 'KIS_REST' && range === '1D' ? 60_000 : undefined)
   const [watch, setWatch] = useState(readWatchlist)
   const toggle = () => {
     const next = watch.includes(id) ? watch.filter(entry => entry !== id) : [...watch, id]
@@ -84,13 +87,18 @@ function StockPage() {
     <Link className="back" to={'/?market=' + info.market}><ArrowLeft size={16} /> 시장</Link>
     <section className="panel stock-detail"><div className="section-heading"><div className="stock-title"><StockMark stock={info} /><div><h1>{info.name}</h1><p>{info.symbol} · {info.exchange}</p></div></div>
       <button aria-label="관심종목" aria-pressed={watch.includes(id)} className="icon-btn" onClick={toggle}><Star size={23} fill={watch.includes(id) ? '#087968' : 'none'} /></button></div>
-      {quote ? <div className="detail-price"><strong>{currency(quote.price, quote.currency)}</strong><span className={'change ' + tone(quote.changePercent)}>{percent(quote.changePercent)}</span><span className="status">데모 · 장 마감</span></div> : <Empty>시세 확인 중…</Empty>}
-      {quote && <div className="quote-meta">전일 대비 {currency(quote.change, quote.currency)} · 거래량 {quote.cumulativeVolume.toLocaleString('ko-KR')} · {new Date(quote.exchangeTimestamp).toLocaleDateString('ko-KR', { timeZone: info.market === 'KR' ? 'Asia/Seoul' : 'America/New_York' })}</div>}
+      {quote?.price != null
+        ? <div className="detail-price"><strong>{currency(quote.price, quote.currency)}</strong>{quote.changePercent != null && <span className={'change ' + tone(quote.changePercent)}>{percent(quote.changePercent)}</span>}<span className="status">{quoteStatus(quote)}</span></div>
+        : <Empty>{quote ? quoteStatus(quote) : '시세 확인 중…'}</Empty>}
+      {quote?.price != null && <div className="quote-meta">
+        {quote.change != null && <>전일 대비 {currency(quote.change, quote.currency)} · </>}거래량 {quote.cumulativeVolume.toLocaleString('ko-KR')}
+        {time && <> · {quote.exchangeTimestamp ? '기준' : '조회'} {new Date(time).toLocaleString('ko-KR', { timeZone: quote.exchangeTimestamp && info.market === 'US' ? 'America/New_York' : 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</>}
+      </div>}
       <div className="chart-controls">
         <div className="segmented">{['1D', '1M', '3M', '1Y'].map(value => <button className={range === value ? 'selected' : ''} key={value} onClick={() => setParams({ range: value })}>{value}</button>)}</div>
         {range === '1D' && <div className="segmented">{[['line', '선'], ['1m', '1분 봉'], ['5m', '5분 봉']].map(([value, label]) => <button key={value} className={(params.get('interval') ?? 'line') === value ? 'selected' : ''} onClick={() => setParams({ range, interval: value })}>{label}</button>)}</div>}
       </div>
-      {bars.data ? <Suspense fallback={<Wait error={null} />}><Chart bars={bars.data} market={info.market} candle={range !== '1D' || ['1m', '5m'].includes(params.get('interval') ?? '')} /></Suspense> : <Wait error={bars.error} />}
+      {bars.data?.length ? <Suspense fallback={<Wait error={null} />}><Chart bars={bars.data} market={info.market} candle={range !== '1D' || ['1m', '5m'].includes(params.get('interval') ?? '')} /></Suspense> : bars.data ? <Empty>표시할 시세가 없습니다.</Empty> : <Wait error={bars.error} />}
     </section>
     <aside className="stock-side" aria-label="기업과 판매 상품">
       <section className="panel"><div className="section-heading"><h2>기업 소개</h2><Source href={info.source}>기업 웹사이트</Source></div><p>{info.overview}</p></section>

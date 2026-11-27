@@ -21,10 +21,10 @@ export function StockMark({ stock }: { stock: Stock }) {
   return <span className={'stock-mark ' + palette[stock.symbol]} aria-hidden>{stock.market === 'KR' ? stock.name.slice(0, 1) : stock.symbol.slice(0, 2)}</span>
 }
 export function QuoteValue({ quote }: { quote?: Quote }) {
-  return quote ? <span className="quote-value">
+  return quote?.price != null ? <span className="quote-value">
     <strong>{currency(quote.price, quote.currency)}</strong>
-    <span className={'change ' + tone(quote.changePercent)}>{percent(quote.changePercent)}</span>
-  </span> : <span className="muted">시세 확인 중</span>
+    <span className={'change ' + tone(quote.changePercent ?? 0)}>{quote.changePercent == null ? '–' : percent(quote.changePercent)}</span>
+  </span> : <span className="muted">{quote ? '시세 확인 불가' : '시세 확인 중'}</span>
 }
 export function StockRow({ stock, quote }: { stock: Stock; quote?: Quote }) {
   return <Link className="stock-row" to={pathFor(stock.id)}>

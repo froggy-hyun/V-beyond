@@ -23,6 +23,10 @@ keys = ('DB_PASSWORD', 'OPENAI_API_KEY', 'KIS_APP_KEY', 'KIS_APP_SECRET', 'BACKE
 with Path(sys.argv[1]).open('w') as env:
     print('COMPOSE_FILE=compose.yaml:compose.public.yaml', file=env)
     print('SITE_HOST=' + os.environ['PROD_HOST'], file=env)
+    mode = os.environ.get('MARKET_DATA_MODE') or 'REPLAY'
+    if mode not in ('REPLAY', 'KIS'):
+        raise ValueError('MARKET_DATA_MODE는 REPLAY 또는 KIS')
+    print('MARKET_DATA_MODE=' + mode, file=env)
     for key in keys:
         value = os.environ[key]
         if not value or any(char in value for char in "\r\n'\\"):

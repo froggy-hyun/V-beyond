@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState, useSyncExternalStore } from 'react'
 import { ArrowDownUp, CalendarDays, ChartNoAxesCombined, ChevronRight, ScanSearch, Search, Star } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { categories, currency, pathFor, percent, tone, useData, useQuotes } from './api'
+import { categories, currency, pathFor, percent, tone, useData, useMarketMode, useQuotes } from './api'
 import type { Candle, Category, Quote, Stock } from './api'
 import { Empty, ProductIcon, QuoteValue, StockMark, StockRow, Wait } from './ui'
 
@@ -22,6 +22,7 @@ type Sort = 'name' | 'volume' | 'change'
 export default function MarketPage() {
   const [params, setParams] = useSearchParams()
   const desktop = useSyncExternalStore(subscribeToWidth, isDesktop)
+  const mode = useMarketMode()
   const [sort, setSort] = useState<Sort>('name')
   const [previewId, setPreviewId] = useState('')
   const navigate = useNavigate()
@@ -29,6 +30,7 @@ export default function MarketPage() {
   const stocks = useData<Stock[]>('/stocks?market=' + market)
   const rows = stocks.data ?? []
   const quotes = new Map(useQuotes(rows.map(stock => stock.id)).map(quote => [quote.listingId, quote]))
+  const delayed = [...quotes.values()].some(quote => quote.freshness === 'STALE')
   const rank = (stock: Stock) => {
     const quote = quotes.get(stock.id)
     return (sort === 'volume' ? quote?.cumulativeVolume : quote?.changePercent) ?? Number.NEGATIVE_INFINITY
@@ -63,7 +65,7 @@ export default function MarketPage() {
           setParams(code === 'KR' ? {} : { market: code })
         }}>{label}주식</button>)}
       </div>
-      <span className="market-feed">데모 시세</span>
+      <span className="market-feed">{mode === 'KIS_REST' ? delayed ? 'KIS 시세 · 갱신 지연' : '한국투자증권 시세' : mode === 'REPLAY' ? '데모 시세' : '시세 확인 중'}</span>
     </div>
     <section className="market-highlights" aria-label="주요 종목">
       {highlights.map(stock => <Highlight key={stock.id} stock={stock} quote={quotes.get(stock.id)} />)}
@@ -118,16 +120,17 @@ function Highlight({ stock, quote }: { stock: Stock; quote?: Quote }) {
 }
 
 function Preview({ stock, quote }: { stock: Stock; quote?: Quote }) {
-  const candles = useData<Candle[]>('/market' + pathFor(stock.id) + '/candles?interval=5m&range=1D')
+  const live = useMarketMode() === 'KIS_REST'
+  const candles = useData<Candle[]>('/market' + pathFor(stock.id) + '/candles?interval=5m&range=1D', true, live ? 60_000 : undefined)
   const data = candles.data
   return <section className="panel market-preview" aria-label="종목 차트 미리보기">
     <div className="section-heading">
       <div className="preview-name"><StockMark stock={stock} /><div><h2>{stock.name}</h2><small>{stock.symbol} · {stock.exchange}</small></div></div>
       <Link className="plain-link" to={pathFor(stock.id)}>종목 상세 <ChevronRight size={15} aria-hidden /></Link>
     </div>
-    {quote && <div className="preview-price">
+    {quote?.price != null && <div className="preview-price">
       <strong>{currency(quote.price, quote.currency)}</strong>
-      <span className={'change ' + tone(quote.changePercent)}>{percent(quote.changePercent)}</span>
+      {quote.changePercent != null && <span className={'change ' + tone(quote.changePercent)}>{percent(quote.changePercent)}</span>}
     </div>}
     <div className="preview-chart">
       {data?.length ? <Suspense fallback={<Wait error={null} />}><Chart bars={data} market={stock.market} candle={false} /></Suspense>

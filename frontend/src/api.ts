@@ -22,7 +22,7 @@ export type Product = {
   relation: string; size: string; prep: string; source: string; facts: Fact[];
   evidence: { title: string; summary: string; source: string }[]; material: string | null; description: string
 }
-export type Quote = { listingId: string; price: number; change: number; changePercent: number; cumulativeVolume: number; currency: string; exchangeTimestamp: string; feedMode: string; freshness: string; session: string }
+export type Quote = { listingId: string; price: number | null; change: number | null; changePercent: number | null; cumulativeVolume: number; currency: string; exchangeTimestamp: string | null; receivedAt: string | null; feedMode: string; freshness: string; session: string }
 export type Candle = { startAt: string; open: number; high: number; low: number; close: number; volume: number }
 export type Comparison = { stock: Stock; products: Product[] }
 export type Match = { product: Product; stock: Stock; fact: Fact; reductionPercent?: number | null }
@@ -36,8 +36,17 @@ export async function api<T>(path: string, options?: RequestInit): Promise<T> {
   return result.json()
 }
 export const pathFor = (id: string) => '/stocks/' + encodeURIComponent(id)
-export function useData<T>(path: string, enabled = true) {
-  return useQuery({ queryKey: [path], queryFn: ({ signal }) => api<T>(path, { signal }), enabled })
+export function useData<T>(path: string, enabled = true, refetchInterval?: number) {
+  return useQuery({ queryKey: [path], queryFn: ({ signal }) => api<T>(path, { signal }), enabled, refetchInterval })
+}
+export function useMarketMode() {
+  return useData<{ feedMode: string }>('/market/mode').data?.feedMode
+}
+export const quoteTime = (quote: Quote) => quote.exchangeTimestamp ?? quote.receivedAt
+export function quoteStatus(quote: Quote) {
+  if (quote.feedMode === 'REPLAY') return '데모 · 장 마감'
+  if (quote.freshness === 'UNAVAILABLE') return '시세 확인 불가'
+  return quote.freshness === 'STALE' ? '갱신 지연' : 'KIS 조회'
 }
 export function useQuotes(ids: string[]) {
   const queryClient = useQueryClient()
@@ -51,7 +60,7 @@ export function useQuotes(ids: string[]) {
       const quote: Quote = JSON.parse(event.data)
       queryClient.setQueryData<Quote[]>([path], (old = []) => {
         const existing = old.find(item => item.listingId === quote.listingId)
-        if (existing && existing.exchangeTimestamp >= quote.exchangeTimestamp) return old
+        if (existing && (Date.parse(quoteTime(existing) ?? '') || 0) > (Date.parse(quoteTime(quote) ?? '') || 0)) return old
         return [...old.filter(item => item.listingId !== quote.listingId), quote]
       })
     })

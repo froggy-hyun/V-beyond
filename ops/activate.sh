@@ -12,8 +12,23 @@ previous=$(readlink -f "$base/current" || true)
 docker compose pull
 site=$(sed -n 's/^SITE_HOST=//p' .env)
 [[ -n "$site" ]]
-if docker compose up -d --wait --wait-timeout 150 && curl -fsS --retry 8 --retry-all-errors --retry-delay 3 --max-time 5 \
-    --resolve "$site:443:127.0.0.1" "https://$site/api/v1/stocks?market=KR" >/dev/null; then
+verify_market() {
+  local url="https://$site/api/v1"
+  local tls=(--resolve "$site:443:127.0.0.1")
+  curl -fsS --retry 8 --retry-all-errors --retry-delay 3 --max-time 5 \
+    "${tls[@]}" "$url/stocks?market=KR" >/dev/null || return 1
+  if ! grep -qx 'MARKET_DATA_MODE=KIS' .env; then return 0; fi
+  for attempt in {1..26}; do
+    if curl -fsS --max-time 5 "${tls[@]}" "$url/market/quotes?ids=KR%3AKOSPI%3A004370,US%3ANYSE%3AKO" |
+      python3 -c 'import json,sys; rows=json.load(sys.stdin); sys.exit(not (len(rows)==2 and all(r["feedMode"]=="KIS_REST" and r["freshness"]=="FRESH" and r["price"] for r in rows)))'; then
+      return 0
+    fi
+    sleep 3
+  done
+  return 1
+}
+
+if docker compose up -d --wait --wait-timeout 150 && verify_market; then
   ln -s "$release" "$base/current.new"
   mv -Tf "$base/current.new" "$base/current"
 else

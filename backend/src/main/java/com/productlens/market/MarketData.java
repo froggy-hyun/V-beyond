@@ -4,17 +4,19 @@ import com.productlens.catalog.Catalog.Stock;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
-class MarketData {
+@ConditionalOnProperty(name = "lens.market.mode", havingValue = "REPLAY", matchIfMissing = true)
+class MarketData implements MarketFeed {
     record Quote(String listingId, BigDecimal price, BigDecimal previousClose, BigDecimal change,
-                 BigDecimal changePercent, long cumulativeVolume, String currency, Instant exchangeTimestamp,
+                 BigDecimal changePercent, long cumulativeVolume, String currency, Instant exchangeTimestamp, Instant receivedAt,
                  String feedMode, String freshness, String session, String source) {}
     record Candle(Instant startAt, BigDecimal open, BigDecimal high, BigDecimal low,
                   BigDecimal close, long volume) {}
@@ -24,32 +26,41 @@ class MarketData {
             "004370", 406500, "007310", 386000, "003230", 1189000, "017810", 12420,
             "NWL", 6, "WSM", 191, "CPB", 33, "GIS", 48, "KO", 69, "PEP", 143);
 
-    Quote quote(Stock stock) {
+    @Override public Quote quote(Stock stock) {
         var bars = candles(stock, "1m", "1D");
         var last = bars.getLast();
         var previous = previousClose(stock);
         var change = last.close().subtract(previous);
         var percentage = change.movePointRight(2).divide(previous, 2, RoundingMode.HALF_UP);
         return new Quote(stock.id(), last.close(), previous, change, percentage,
-                bars.stream().mapToLong(Candle::volume).sum(), stock.currency(), last.startAt(),
+                bars.stream().mapToLong(Candle::volume).sum(), stock.currency(), last.startAt(), null,
                 "REPLAY", "FRESH", "CLOSED", "Product Lens 데모");
     }
 
-    List<Candle> candles(Stock stock, String interval, String range) {
+    @Override public List<Candle> candles(Stock stock, String interval, String range) {
         double opening = opening(stock);
         if (interval.equals("1d")) return daily(stock, opening, range);
         Instant start = DAY.plusSeconds(stock.market().equals("KR") ? 0 : 14 * 3600 + 30 * 60);
         var bars = generate(stock, start, 390, 60, opening, 0.0008, "intraday");
         if (interval.equals("1m")) return bars;
-        List<Candle> aggregate = new ArrayList<>();
-        for (int i = 0; i < bars.size(); i += 5) {
-            var group = bars.subList(i, Math.min(i + 5, bars.size()));
-            aggregate.add(new Candle(group.getFirst().startAt(), group.getFirst().open(),
+        return fiveMinuteBars(bars);
+    }
+
+    @Override public String mode() { return "REPLAY"; }
+
+    static List<Candle> fiveMinuteBars(List<Candle> bars) {
+        var buckets = new TreeMap<Instant, List<Candle>>();
+        for (var bar : bars) {
+            var start = Instant.ofEpochSecond(Math.floorDiv(bar.startAt().getEpochSecond(), 300) * 300);
+            buckets.computeIfAbsent(start, ignored -> new ArrayList<>()).add(bar);
+        }
+        return buckets.entrySet().stream().map(bucket -> {
+            var group = bucket.getValue();
+            return new Candle(bucket.getKey(), group.getFirst().open(),
                     group.stream().map(Candle::high).max(BigDecimal::compareTo).orElseThrow(),
                     group.stream().map(Candle::low).min(BigDecimal::compareTo).orElseThrow(),
-                    group.getLast().close(), group.stream().mapToLong(Candle::volume).sum()));
-        }
-        return aggregate;
+                    group.getLast().close(), group.stream().mapToLong(Candle::volume).sum());
+        }).toList();
     }
 
     private List<Candle> daily(Stock stock, double opening, String range) {

@@ -85,6 +85,7 @@ jobs:
           PROD_SSH_KNOWN_HOSTS: ${{ secrets.PROD_SSH_KNOWN_HOSTS }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          MARKET_DATA_MODE: ${{ vars.MARKET_DATA_MODE }}
           KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
           KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
           GH_TOKEN: ${{ github.token }}
