@@ -359,18 +359,44 @@
         "value": 350,
         "unit": "kcal",
         "basis": "PER_SERVING",
-        "source": "https://brand.nongshim.com/shin-nonfrying/main/index"
+        "source": "https://www.nongshimshop.com/product_info/101004264.jpg"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 1790,
+        "unit": "mg",
+        "basis": "PER_SERVING",
+        "source": "https://www.nongshimshop.com/product_info/101004264.jpg"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 4,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.nongshimshop.com/product_info/101004264.jpg"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 1.4,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.nongshimshop.com/product_info/101004264.jpg"
       }
     ],
     "evidence": [
       {
-        "title": "농심 제품 표시",
-        "summary": "농심 브랜드관에 등록된 국내 봉지면 97 g의 열량을 사용했습니다. 나트륨 수치는 추가 검수 대상입니다.",
-        "source": "https://brand.nongshim.com/shin-nonfrying/main/index"
+        "title": "농심 제품 영양표시",
+        "summary": "농심 공식몰에서 공개한 국내 봉지면 97 g의 영양표시입니다. 한 봉지에 나트륨 1,790 mg이 표시되어 있습니다.",
+        "source": "https://www.nongshimshop.com/product_info/101004264.jpg"
+      },
+      {
+        "title": "WHO 성인 나트륨 섭취 권고",
+        "summary": "WHO는 성인에게 하루 나트륨 2,000 mg 미만을 권고합니다. 실제 섭취량은 먹은 양과 하루 동안의 다른 음식에 따라 달라집니다.",
+        "source": "https://www.who.int/news-room/fact-sheets/detail/sodium-reduction"
       }
     ],
     "material": null,
-    "description": "튀기지 않은 면을 사용한 국물라면입니다. 국내 판매 봉지 제품을 기준으로 안내합니다."
+    "description": "농심 공식몰에 공개된 튀기지 않은 면을 사용한 봉지라면입니다. 국내 97 g 제품의 한 봉지 영양표시를 사용합니다."
   },
   {
     "id": "cup-yeol",
@@ -1260,6 +1286,12 @@
         "title": "브랜드 관계",
         "summary": "The Coca-Cola Company의 공식 브랜드 목록에서 상장사와의 관계를 확인할 수 있습니다.",
         "source": "https://www.coca-colacompany.com/brands"
+      },
+      {
+        "title": "착색료 · 카라멜색소",
+        "summary": "미국 제조사 성분표에 카라멜색소가 표시돼 있습니다. 색소 유형과 4-MEI 함량은 공개되지 않았습니다.",
+        "source": "https://www.coca-cola.com/us/en/brands/coca-cola/products/original/original-taste",
+        "topic": "caramel-color"
       }
     ],
     "material": null,
@@ -1352,6 +1384,18 @@
         "title": "브랜드 관계",
         "summary": "The Coca-Cola Company의 공식 브랜드 목록에서 상장사와의 관계를 확인할 수 있습니다.",
         "source": "https://www.coca-colacompany.com/brands"
+      },
+      {
+        "title": "보존료 · 안식향산칼륨",
+        "summary": "미국 제조사 성분표에 안식향산칼륨이 표시돼 있습니다. 제품의 벤젠 검출 여부는 이 표시로 확인할 수 없습니다.",
+        "source": "https://www.coca-cola.com/us/en/brands/coca-cola/products/zero/zero-sugar",
+        "topic": "potassium-benzoate"
+      },
+      {
+        "title": "착색료 · 카라멜색소",
+        "summary": "미국 제조사 성분표에 카라멜색소가 표시돼 있습니다. 색소 유형과 4-MEI 함량은 공개되지 않았습니다.",
+        "source": "https://www.coca-cola.com/us/en/brands/coca-cola/products/zero/zero-sugar",
+        "topic": "caramel-color"
       }
     ],
     "material": null,
@@ -1430,6 +1474,18 @@
         "title": "브랜드 관계",
         "summary": "The Coca-Cola Company의 공식 브랜드 목록에서 상장사와의 관계를 확인할 수 있습니다.",
         "source": "https://www.coca-colacompany.com/brands"
+      },
+      {
+        "title": "보존료 · 안식향산칼륨",
+        "summary": "미국 제조사 성분표에 안식향산칼륨이 표시돼 있습니다. 제품의 벤젠 검출 여부는 이 표시로 확인할 수 없습니다.",
+        "source": "https://www.coca-cola.com/us/en/brands/diet-coke/products/original",
+        "topic": "potassium-benzoate"
+      },
+      {
+        "title": "착색료 · 카라멜색소",
+        "summary": "미국 제조사 성분표에 카라멜색소가 표시돼 있습니다. 색소 유형과 4-MEI 함량은 공개되지 않았습니다.",
+        "source": "https://www.coca-cola.com/us/en/brands/diet-coke/products/original",
+        "topic": "caramel-color"
       }
     ],
     "material": null,
@@ -1503,6 +1559,13 @@
         "unit": "g",
         "basis": "PER_100ML",
         "source": "https://www.pepsi.com/products/pepsi"
+      },
+      {
+        "criterion": "AVOID_ASPARTAME",
+        "value": 0,
+        "unit": "flag",
+        "basis": "INGREDIENTS",
+        "source": "https://www.pepsi.com/products/pepsi"
       }
     ],
     "evidence": [
@@ -1515,6 +1578,17 @@
         "title": "브랜드 관계",
         "summary": "PepsiCo의 공식 브랜드 목록에서 상장사와의 관계를 확인할 수 있습니다.",
         "source": "https://www.pepsico.com/brands"
+      },
+      {
+        "title": "미국 제품 원재료 표시",
+        "summary": "미국 판매 일반 펩시 12 fl oz 제품의 공식 원재료 목록에 아스파탐은 기재되어 있지 않습니다.",
+        "source": "https://www.pepsi.com/products/pepsi"
+      },
+      {
+        "title": "착색료 · 카라멜색소",
+        "summary": "미국 제조사 성분표에 카라멜색소가 표시돼 있습니다. 색소 유형과 4-MEI 함량은 공개되지 않았습니다.",
+        "source": "https://www.pepsi.com/products/pepsi",
+        "topic": "caramel-color"
       }
     ],
     "material": null,
@@ -1607,6 +1681,18 @@
         "title": "브랜드 관계",
         "summary": "PepsiCo의 공식 브랜드 목록에서 상장사와의 관계를 확인할 수 있습니다.",
         "source": "https://www.pepsico.com/brands"
+      },
+      {
+        "title": "보존료 · 안식향산칼륨",
+        "summary": "미국 제조사 성분표에 안식향산칼륨이 표시돼 있습니다. 제품의 벤젠 검출 여부는 이 표시로 확인할 수 없습니다.",
+        "source": "https://www.pepsi.com/products/pepsi-zero-sugar",
+        "topic": "potassium-benzoate"
+      },
+      {
+        "title": "착색료 · 카라멜색소",
+        "summary": "미국 제조사 성분표에 카라멜색소가 표시돼 있습니다. 색소 유형과 4-MEI 함량은 공개되지 않았습니다.",
+        "source": "https://www.pepsi.com/products/pepsi-zero-sugar",
+        "topic": "caramel-color"
       }
     ],
     "material": null,
@@ -1671,6 +1757,18 @@
         "title": "브랜드 관계",
         "summary": "PepsiCo의 공식 브랜드 목록에서 상장사와의 관계를 확인할 수 있습니다.",
         "source": "https://www.pepsico.com/brands"
+      },
+      {
+        "title": "보존료 · 안식향산칼륨",
+        "summary": "미국 제조사 성분표에 안식향산칼륨이 표시돼 있습니다. 제품의 벤젠 검출 여부는 이 표시로 확인할 수 없습니다.",
+        "source": "https://www.pepsi.com/products/diet-pepsi",
+        "topic": "potassium-benzoate"
+      },
+      {
+        "title": "착색료 · 카라멜색소",
+        "summary": "미국 제조사 성분표에 카라멜색소가 표시돼 있습니다. 색소 유형과 4-MEI 함량은 공개되지 않았습니다.",
+        "source": "https://www.pepsi.com/products/diet-pepsi",
+        "topic": "caramel-color"
       }
     ],
     "material": null,
@@ -2618,5 +2716,642 @@
     ],
     "material": "주름형 여과 매체",
     "description": "미국 판매 16 × 25 × 1인치 규격입니다. 호환 공조 설비에 삽입하는 교체 필터로, 제조사 등급은 MPR 1900 및 MERV 13입니다."
+  },
+  {
+    "id": "noodlefit-yukgaejang",
+    "symbol": "004370",
+    "name": "누들핏 육개장사발면맛",
+    "brand": "농심 누들핏",
+    "category": "RAMEN",
+    "market": "KR",
+    "relation": "DISTRIBUTOR",
+    "status": "VERIFIED",
+    "size": "35.5 g",
+    "prep": "소용량 국물 컵면 · 1컵 전체",
+    "source": "https://www.nongshimshop.com/product/detail.html?product_no=4119",
+    "facts": [
+      {
+        "criterion": "CALORIES",
+        "value": 125,
+        "unit": "kcal",
+        "basis": "PER_SERVING",
+        "source": "https://www.nongshimshop.com/web/upload/NNEditor/20240318/EC8381EC84B8ED8E98EC9DB4ECA780_EB8884EB93A4ED958F20EC9CA1EAB09CEC9EA5EC82ACEBB09CEBA9B4EBA79B.jpg"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 1000,
+        "unit": "mg",
+        "basis": "PER_SERVING",
+        "source": "https://www.nongshimshop.com/web/upload/NNEditor/20240318/EC8381EC84B8ED8E98EC9DB4ECA780_EB8884EB93A4ED958F20EC9CA1EAB09CEC9EA5EC82ACEBB09CEBA9B4EBA79B.jpg"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 3,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.nongshimshop.com/web/upload/NNEditor/20240318/EC8381EC84B8ED8E98EC9DB4ECA780_EB8884EB93A4ED958F20EC9CA1EAB09CEC9EA5EC82ACEBB09CEBA9B4EBA79B.jpg"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 0.7,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.nongshimshop.com/web/upload/NNEditor/20240318/EC8381EC84B8ED8E98EC9DB4ECA780_EB8884EB93A4ED958F20EC9CA1EAB09CEC9EA5EC82ACEBB09CEBA9B4EBA79B.jpg"
+      }
+    ],
+    "evidence": [
+      {
+        "title": "농심 상품 영양표시",
+        "summary": "총 내용량 35.5 g 한 컵의 영양표시입니다. 제조원은 두리두리이고 유통전문판매원은 농심입니다. 품목보고번호는 20200470347139입니다.",
+        "source": "https://www.nongshimshop.com/web/upload/NNEditor/20240318/EC8381EC84B8ED8E98EC9DB4ECA780_EB8884EB93A4ED958F20EC9CA1EAB09CEC9EA5EC82ACEBB09CEBA9B4EBA79B.jpg"
+      },
+      {
+        "title": "WHO 성인 나트륨 섭취 권고",
+        "summary": "WHO는 성인에게 하루 나트륨 2,000 mg 미만을 권고합니다. 실제 섭취량은 먹은 양과 하루 동안의 다른 음식에 따라 달라집니다.",
+        "source": "https://www.who.int/news-room/fact-sheets/detail/sodium-reduction"
+      }
+    ],
+    "material": null,
+    "description": "소용량 당면 컵 제품입니다."
+  },
+  {
+    "id": "noodlefit-chapaguri",
+    "symbol": "004370",
+    "name": "누들핏 짜파구리맛",
+    "brand": "농심 누들핏",
+    "category": "RAMEN",
+    "market": "KR",
+    "relation": "DISTRIBUTOR",
+    "status": "VERIFIED",
+    "size": "41.5 g",
+    "prep": "소용량 비빔 컵면 · 1컵 전체",
+    "source": "https://www.nongshimshop.com/product/detail.html?product_no=4214",
+    "facts": [
+      {
+        "criterion": "CALORIES",
+        "value": 135,
+        "unit": "kcal",
+        "basis": "PER_SERVING",
+        "source": "https://www.nongshimshop.com/web/upload/NNEditor/20240712/901002802.jpg"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 578,
+        "unit": "mg",
+        "basis": "PER_SERVING",
+        "source": "https://www.nongshimshop.com/web/upload/NNEditor/20240712/901002802.jpg"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 3,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.nongshimshop.com/web/upload/NNEditor/20240712/901002802.jpg"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 0.6,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.nongshimshop.com/web/upload/NNEditor/20240712/901002802.jpg"
+      }
+    ],
+    "evidence": [
+      {
+        "title": "농심 상품 영양표시",
+        "summary": "총 내용량 41.5 g 한 컵의 영양표시입니다. 제조원은 두리두리이고 유통전문판매원은 농심입니다. 품목보고번호는 20200470347159입니다.",
+        "source": "https://www.nongshimshop.com/web/upload/NNEditor/20240712/901002802.jpg"
+      },
+      {
+        "title": "WHO 성인 나트륨 섭취 권고",
+        "summary": "WHO는 성인에게 하루 나트륨 2,000 mg 미만을 권고합니다. 실제 섭취량은 먹은 양과 하루 동안의 다른 음식에 따라 달라집니다.",
+        "source": "https://www.who.int/news-room/fact-sheets/detail/sodium-reduction"
+      }
+    ],
+    "material": null,
+    "description": "소용량 당면 컵 제품입니다."
+  },
+  {
+    "id": "lg-puricare-wd523vhm",
+    "symbol": "066570",
+    "name": "퓨리케어 오브제컬렉션 정수기",
+    "brand": "LG전자",
+    "category": "WATER_FILTER",
+    "market": "KR",
+    "relation": "MANUFACTURER",
+    "size": "WD523VHM · 냉온정수기",
+    "prep": "가정용 직수 정수기",
+    "source": "https://www.lge.co.kr/product/water-purifiers/wd523vhm",
+    "status": "VERIFIED",
+    "facts": [],
+    "evidence": [
+      {
+        "title": "정수 필터 구성 및 냉각 방식",
+        "summary": "LG전자는 중금속9 흡착 필터와 바이러스 클리어 필터를 명시합니다. 냉각 방식은 직수식 순간 냉수입니다.",
+        "source": "https://www.lge.co.kr/product/water-purifiers/wd523vhm"
+      },
+      {
+        "title": "음용수 PFAS 저감 확인 기준",
+        "summary": "미국 환경보호청은 제품과 필터 모델별로 PFAS 저감 인증 정보를 확인하라고 안내합니다.",
+        "source": "https://www.epa.gov/water-research/identifying-drinking-water-filters-certified-reduce-pfas"
+      }
+    ],
+    "material": "중금속9 흡착 필터와 바이러스 클리어 필터",
+    "description": "중금속9 흡착 필터와 바이러스 클리어 필터를 사용하는 LG전자의 가정용 냉온정수기입니다."
+  },
+  {
+    "id": "annies-aged-cheddar-mac-cup",
+    "symbol": "GIS",
+    "name": "애니스 리얼 에이지드 체더 맥앤치즈 컵",
+    "brand": "Annie’s",
+    "category": "MAC_AND_CHEESE",
+    "market": "US",
+    "status": "VERIFIED",
+    "relation": "OWNER",
+    "size": "2.01 oz (57 g)",
+    "prep": "컵 맥앤치즈 · 물 추가 전 내용물",
+    "source": "https://www.annies.com/products/real-aged-cheddar-microwavable-mac-cheese-cup",
+    "facts": [
+      {
+        "criterion": "CALORIES",
+        "value": 220,
+        "unit": "kcal",
+        "basis": "PER_SERVING",
+        "source": "https://www.annies.com/products/real-aged-cheddar-microwavable-mac-cheese-cup"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 440,
+        "unit": "mg",
+        "basis": "PER_SERVING",
+        "source": "https://www.annies.com/products/real-aged-cheddar-microwavable-mac-cheese-cup"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 771.93,
+        "unit": "mg",
+        "basis": "PER_100G",
+        "source": "https://www.annies.com/products/real-aged-cheddar-microwavable-mac-cheese-cup"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 3,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.annies.com/products/real-aged-cheddar-microwavable-mac-cheese-cup"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 2,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.annies.com/products/real-aged-cheddar-microwavable-mac-cheese-cup"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 0,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.annies.com/products/real-aged-cheddar-microwavable-mac-cheese-cup"
+      }
+    ],
+    "evidence": [
+      {
+        "title": "미국 제품 영양 표시",
+        "summary": "한 컵의 물을 넣기 전 내용물(57 g)에 나트륨 440 mg이 들어 있습니다. 100 g 값은 이 제공량을 기준으로 환산했습니다.",
+        "source": "https://www.annies.com/products/real-aged-cheddar-microwavable-mac-cheese-cup"
+      },
+      {
+        "title": "제품 중량 확인",
+        "summary": "미국 판매 제품의 영양성분 표시에서 같은 2.01 oz 컵의 나트륨 수치와 57 g 제공량을 확인할 수 있습니다.",
+        "source": "https://www.frysfood.com/p/annie-s-real-aged-cheddar-microwavable-mac-and-cheese-cup/0001356200058"
+      },
+      {
+        "title": "브랜드 보유 관계",
+        "summary": "제너럴 밀스는 2026 회계연도 연차보고서에 애니스를 보유 브랜드로 기재했습니다.",
+        "source": "https://www.sec.gov/Archives/edgar/data/40704/000162828026046466/gis-20260531.htm"
+      }
+    ],
+    "material": null,
+    "description": "물을 넣어 전자레인지로 조리하는 미국 판매 컵 맥앤치즈입니다. 나트륨은 물을 넣기 전 내용물 기준입니다."
+  },
+  {
+    "id": "cuckoo-kindel-24",
+    "symbol": "192400",
+    "name": "킨델 스텐 코팅 프라이팬",
+    "brand": "쿠쿠전자",
+    "category": "FRYING_PAN",
+    "market": "KR",
+    "relation": "OWNER",
+    "size": "24 cm · CFP-SF2410H",
+    "prep": "조리 표면",
+    "source": "https://www.cuckoo.co.kr/mall/productView?categoryCd=87&epCode=google&productNo=10691",
+    "status": "VERIFIED",
+    "facts": [],
+    "evidence": [
+      {
+        "title": "몸체와 코팅 소재",
+        "summary": "쿠쿠는 이 제품군의 스테인리스 몸체에 세라믹 코팅을 적용했다고 설명합니다.",
+        "source": "https://newsletter.cuckoo.co.kr/24/?bmode=view&idx=173501914&t=board"
+      },
+      {
+        "title": "제조사와 상장사 관계",
+        "summary": "쿠쿠홀딩스 사업보고서에 쿠쿠전자 보유 지분이 100%로 기재되어 있습니다.",
+        "source": "https://kind.krx.co.kr/external/2026/03/16/002187/20260316006221/11011.htm"
+      }
+    ],
+    "material": "스테인리스 몸체와 세라믹 코팅",
+    "description": "쿠쿠전자의 24 cm 인덕션용 프라이팬입니다."
+  },
+  {
+    "id": "pn-fullsteel-vtxka",
+    "symbol": "024940",
+    "name": "풀스텐 전기압력밥솥",
+    "brand": "PN풍년",
+    "category": "RICE_COOKER",
+    "market": "KR",
+    "relation": "DISTRIBUTOR",
+    "size": "6인용 · VTXKA-1000G",
+    "prep": "취사 내솥",
+    "source": "https://www.elandmall.co.kr/i/item?itemNo=2106087289",
+    "status": "VERIFIED",
+    "facts": [],
+    "evidence": [
+      {
+        "title": "내솥 소재와 모델명",
+        "summary": "판매처는 VTXKA-1000G를 풀스텐 6인용 전기압력밥솥으로 안내합니다.",
+        "source": "https://www.elandmall.co.kr/i/item?itemNo=2106087289"
+      },
+      {
+        "title": "제품 신고 정보",
+        "summary": "한국에너지공단 제조·수입업체 목록에서 해당 모델을 PN풍년의 6인용 전기밥솥으로 확인할 수 있습니다.",
+        "source": "https://eep.energy.or.kr/certification/certi_list_295.aspx"
+      }
+    ],
+    "material": "스테인리스 내솥",
+    "description": "PN풍년이 수입하는 6인용 전기압력밥솥입니다."
+  },
+  {
+    "id": "pentair-freshpoint-gro-575b",
+    "symbol": "PNR",
+    "name": "펜테어 프레시포인트 5단계 역삼투 정수기",
+    "brand": "Pentair FreshPoint",
+    "category": "WATER_FILTER",
+    "market": "US",
+    "relation": "MANUFACTURER",
+    "status": "VERIFIED",
+    "size": "GRO-575B · 161112",
+    "prep": "싱크대 하부 설치형 역삼투 장치",
+    "source": "https://www.pentair.com/en-us/home-water-treatment/under-sink-filtration-systems/gro-575b/sku/161112.html",
+    "facts": [],
+    "evidence": [
+      {
+        "title": "총 PFAS 저감 인증",
+        "summary": "제조사 사양서에 총 PFAS 저감에 대한 IAPMO의 NSF/ANSI 53 인증이 기재되어 있습니다. 사양서에서 시험 혼합물에 포함한 7개 물질과 농도를 확인하실 수 있습니다.",
+        "source": "https://www.pentair.com/content/dam/extranet/nam/filtration/freshpoint/marketing-collateral/spec-sheets/4006660-fp-gro-575b-spec-sheet.pdf"
+      },
+      {
+        "title": "미국 EPA의 정수 필터 인증 안내",
+        "summary": "EPA는 저감 대상 물질의 인증과 모델별 성능표를 확인하도록 안내합니다.",
+        "source": "https://www.epa.gov/water-research/identifying-drinking-water-filters-certified-reduce-pfas"
+      }
+    ],
+    "material": "역삼투 막 · 전후처리 카트리지",
+    "description": "미국 판매 모델 GRO-575B입니다. 싱크대 아래에 설치하는 5단계 역삼투 정수기로, 4.4갤런 저장 탱크가 포함됩니다."
+  },
+  {
+    "id": "clorox-hvac-merv13",
+    "symbol": "CLX",
+    "name": "클로락스 엘리트 MERV 13 공조 필터",
+    "brand": "Clorox",
+    "category": "AIR_PURIFIER",
+    "market": "US",
+    "relation": "OWNER",
+    "status": "VERIFIED",
+    "size": "16 × 25 × 1인치",
+    "prep": "HVAC 공조 설비용 교체형 필터",
+    "source": "https://cloroxairfilters.com/collections/merv-13-air-filters",
+    "facts": [],
+    "evidence": [
+      {
+        "title": "공조 필터 등급과 규격",
+        "summary": "미국 판매 페이지와 제품 포장에 공조 설비용 MERV 13, 16 × 25 × 1인치 규격이 표시됩니다. 설치 전에 공조 설비의 필터 규격과 호환성을 확인해 주세요.",
+        "source": "https://www.walmart.com/ip/19277817650"
+      },
+      {
+        "title": "클로락스 상표 사용 관계",
+        "summary": "Con-Air Industries가 The Clorox Company의 상표를 허가받아 사용합니다.",
+        "source": "https://cloroxairfilters.com/collections/merv-13-air-filters"
+      }
+    ],
+    "material": "주름형 정전기 여과 매체",
+    "description": "미국 판매 16 × 25 × 1인치 MERV 13 교체 필터입니다. Con-Air Industries가 클로락스 상표를 허가받아 판매하는 제품입니다."
+  },
+  {
+    "id": "oscar-mayer-classic-beef-franks",
+    "symbol": "KHC",
+    "name": "오스카 마이어 클래식 비프 프랭크",
+    "brand": "Oscar Mayer",
+    "category": "BEEF_FRANKS",
+    "market": "US",
+    "status": "VERIFIED",
+    "relation": "OWNER",
+    "size": "15 oz · 10개",
+    "prep": "빵과 토핑을 제외한 미국 판매 소고기 소시지",
+    "source": "https://www.oscarmayer.com/products/00044700075050/original-beef-uncured-franks",
+    "facts": [
+      {
+        "criterion": "CALORIES",
+        "value": 140,
+        "unit": "kcal",
+        "basis": "PER_SERVING",
+        "source": "https://www.oscarmayer.com/products/00044700075050/original-beef-uncured-franks"
+      },
+      {
+        "criterion": "CALORIES",
+        "value": 333.33,
+        "unit": "kcal",
+        "basis": "PER_100G",
+        "source": "https://www.oscarmayer.com/products/00044700075050/original-beef-uncured-franks"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 380,
+        "unit": "mg",
+        "basis": "PER_SERVING",
+        "source": "https://www.oscarmayer.com/products/00044700075050/original-beef-uncured-franks"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 904.76,
+        "unit": "mg",
+        "basis": "PER_100G",
+        "source": "https://www.oscarmayer.com/products/00044700075050/original-beef-uncured-franks"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 5,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.oscarmayer.com/products/00044700075050/original-beef-uncured-franks"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 11.9,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.oscarmayer.com/products/00044700075050/original-beef-uncured-franks"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 1,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.oscarmayer.com/products/00044700075050/original-beef-uncured-franks"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 2.38,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.oscarmayer.com/products/00044700075050/original-beef-uncured-franks"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 1,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.oscarmayer.com/products/00044700075050/original-beef-uncured-franks"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 2.38,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.oscarmayer.com/products/00044700075050/original-beef-uncured-franks"
+      }
+    ],
+    "evidence": [
+      {
+        "title": "가공육 섭취",
+        "summary": "제조사가 소고기 프랭크 또는 핫도그 소시지로 표시한 제품입니다.",
+        "source": "https://www.oscarmayer.com/products/00044700075050/original-beef-uncured-franks",
+        "topic": "processed-meat"
+      },
+      {
+        "title": "발색제·보존료 · 아질산나트륨",
+        "summary": "미국 제조사 성분표에서 첨가 원료로 확인했습니다. 제품 내 잔류량은 공개된 성분표에 표시되지 않습니다.",
+        "source": "https://www.oscarmayer.com/products/00044700075050/original-beef-uncured-franks",
+        "topic": "sodium-nitrite"
+      }
+    ],
+    "material": null,
+    "description": "미국 판매 소고기 소시지입니다. 제조사 1회 제공량 42 g을 기준으로 100 g 값을 환산했습니다."
+  },
+  {
+    "id": "hebrew-national-beef-franks",
+    "symbol": "CAG",
+    "name": "히브루 내셔널 비프 프랭크",
+    "brand": "Hebrew National",
+    "category": "BEEF_FRANKS",
+    "market": "US",
+    "status": "VERIFIED",
+    "relation": "OWNER",
+    "size": "12 oz · 7개입",
+    "prep": "빵과 토핑을 제외한 미국 판매 소고기 소시지",
+    "source": "https://smartlabel.conagra.com/074956182592-0002-en-US/product.json",
+    "facts": [
+      {
+        "criterion": "CALORIES",
+        "value": 150,
+        "unit": "kcal",
+        "basis": "PER_SERVING",
+        "source": "https://smartlabel.conagra.com/074956182592-0002-en-US/product.json"
+      },
+      {
+        "criterion": "CALORIES",
+        "value": 306.12,
+        "unit": "kcal",
+        "basis": "PER_100G",
+        "source": "https://smartlabel.conagra.com/074956182592-0002-en-US/product.json"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 480,
+        "unit": "mg",
+        "basis": "PER_SERVING",
+        "source": "https://smartlabel.conagra.com/074956182592-0002-en-US/product.json"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 979.59,
+        "unit": "mg",
+        "basis": "PER_100G",
+        "source": "https://smartlabel.conagra.com/074956182592-0002-en-US/product.json"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 5,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://smartlabel.conagra.com/074956182592-0002-en-US/product.json"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 10.2,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://smartlabel.conagra.com/074956182592-0002-en-US/product.json"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 0,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://smartlabel.conagra.com/074956182592-0002-en-US/product.json"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 0.0,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://smartlabel.conagra.com/074956182592-0002-en-US/product.json"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 0,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://smartlabel.conagra.com/074956182592-0002-en-US/product.json"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 0.0,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://smartlabel.conagra.com/074956182592-0002-en-US/product.json"
+      }
+    ],
+    "evidence": [
+      {
+        "title": "가공육 섭취",
+        "summary": "제조사가 소고기 프랭크 또는 핫도그 소시지로 표시한 제품입니다.",
+        "source": "https://smartlabel.conagra.com/074956182592-0002-en-US/index.html",
+        "topic": "processed-meat"
+      },
+      {
+        "title": "발색제·보존료 · 아질산나트륨",
+        "summary": "미국 제조사 성분표에서 첨가 원료로 확인했습니다. 제품 내 잔류량은 공개된 성분표에 표시되지 않습니다.",
+        "source": "https://smartlabel.conagra.com/074956182592-0002-en-US/product.json",
+        "topic": "sodium-nitrite"
+      }
+    ],
+    "material": null,
+    "description": "미국 판매 소고기 소시지입니다. 제조사 1회 제공량 49 g을 기준으로 100 g 값을 환산했습니다."
+  },
+  {
+    "id": "applegate-organic-beef-hot-dog",
+    "symbol": "HRL",
+    "name": "애플게이트 유기농 소고기 핫도그",
+    "brand": "Applegate Organics",
+    "category": "BEEF_FRANKS",
+    "market": "US",
+    "status": "VERIFIED",
+    "relation": "OWNER",
+    "size": "10 oz · 6개",
+    "prep": "빵과 토핑을 제외한 미국 판매 소고기 소시지",
+    "source": "https://www.applegate.com/products/applegate-organics-the-great-organic-uncured-beef-hot-dog-brand-10oz",
+    "facts": [
+      {
+        "criterion": "CALORIES",
+        "value": 100,
+        "unit": "kcal",
+        "basis": "PER_SERVING",
+        "source": "https://www.applegate.com/products/applegate-organics-the-great-organic-uncured-beef-hot-dog-brand-10oz"
+      },
+      {
+        "criterion": "CALORIES",
+        "value": 212.77,
+        "unit": "kcal",
+        "basis": "PER_100G",
+        "source": "https://www.applegate.com/products/applegate-organics-the-great-organic-uncured-beef-hot-dog-brand-10oz"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 480,
+        "unit": "mg",
+        "basis": "PER_SERVING",
+        "source": "https://www.applegate.com/products/applegate-organics-the-great-organic-uncured-beef-hot-dog-brand-10oz"
+      },
+      {
+        "criterion": "SODIUM",
+        "value": 1021.28,
+        "unit": "mg",
+        "basis": "PER_100G",
+        "source": "https://www.applegate.com/products/applegate-organics-the-great-organic-uncured-beef-hot-dog-brand-10oz"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 3.5,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.applegate.com/products/applegate-organics-the-great-organic-uncured-beef-hot-dog-brand-10oz"
+      },
+      {
+        "criterion": "SATURATED_FAT",
+        "value": 7.45,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.applegate.com/products/applegate-organics-the-great-organic-uncured-beef-hot-dog-brand-10oz"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 0,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.applegate.com/products/applegate-organics-the-great-organic-uncured-beef-hot-dog-brand-10oz"
+      },
+      {
+        "criterion": "TOTAL_SUGAR",
+        "value": 0.0,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.applegate.com/products/applegate-organics-the-great-organic-uncured-beef-hot-dog-brand-10oz"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 0,
+        "unit": "g",
+        "basis": "PER_SERVING",
+        "source": "https://www.applegate.com/products/applegate-organics-the-great-organic-uncured-beef-hot-dog-brand-10oz"
+      },
+      {
+        "criterion": "ADDED_SUGAR",
+        "value": 0.0,
+        "unit": "g",
+        "basis": "PER_100G",
+        "source": "https://www.applegate.com/products/applegate-organics-the-great-organic-uncured-beef-hot-dog-brand-10oz"
+      }
+    ],
+    "evidence": [
+      {
+        "title": "가공육 섭취",
+        "summary": "제조사가 소고기 프랭크 또는 핫도그 소시지로 표시한 제품입니다.",
+        "source": "https://www.applegate.com/products/applegate-organics-the-great-organic-uncured-beef-hot-dog-brand-10oz",
+        "topic": "processed-meat"
+      },
+      {
+        "title": "발효 셀러리 분말",
+        "summary": "미국 제조사 성분표에 발효 셀러리 분말이 표시돼 있습니다. 표시만으로 아질산염의 잔류량은 확인할 수 없습니다.",
+        "source": "https://www.applegate.com/products/applegate-organics-the-great-organic-uncured-beef-hot-dog-brand-10oz"
+      },
+      {
+        "title": "상장사와의 관계",
+        "summary": "호멜 푸즈 공식 자료에서 애플게이트를 보유 브랜드로 확인할 수 있습니다.",
+        "source": "https://www.hormelfoods.com/brand/applegate-brand/"
+      }
+    ],
+    "material": null,
+    "description": "미국 판매 소고기 소시지입니다. 제조사 1회 제공량 47 g을 기준으로 100 g 값을 환산했습니다."
   }
 ]

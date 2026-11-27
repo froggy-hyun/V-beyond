@@ -11,8 +11,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
@@ -31,12 +33,12 @@ class DiscoveryApi {
     record Question(@NotBlank @Size(max = 240) String question) {}
     record Filters(Category category, Criterion criterion) {}
     record Match(Product product, Stock stock, Fact fact) {}
-    record Result(Filters filters, List<Match> results, String method, String message) {}
+    record Result(Filters filters, List<Match> results, String method, String message, String explanation) {}
 
     private static final String SCHEMA = """
             {"type":"object","additionalProperties":false,"properties":{
                 "category":{"enum":["RAMEN","FRYING_PAN","CHICKEN_NOODLE_SOUP","COLA","FROZEN_CHICKEN_NUGGETS",
-                "PEANUT_BUTTER","CHOCOLATE","MAC_AND_CHEESE","UNSUPPORTED"],"type":"string"},
+                "PEANUT_BUTTER","CHOCOLATE","MAC_AND_CHEESE","BEEF_FRANKS","UNSUPPORTED"],"type":"string"},
                 "criterion":{"enum":["SODIUM","TOTAL_SUGAR","ADDED_SUGAR","SATURATED_FAT","CALORIES",
                 "AVOID_PTFE","AVOID_PFAS","AVOID_ASPARTAME","UNSUPPORTED"],"type":"string"}},
              "required":["category","criterion"]}
@@ -50,6 +52,7 @@ class DiscoveryApi {
     private final boolean configured;
     private final Semaphore concurrency = new Semaphore(2);
     private final AtomicLong nextCall = new AtomicLong();
+    private final Map<Filters, String> explanations = new ConcurrentHashMap<>();
 
     DiscoveryApi(Catalog catalog, ObjectProvider<ChatModel> model, ObjectMapper json,
                  @Value("${OPENAI_API_KEY:}") String key) {
@@ -79,8 +82,8 @@ class DiscoveryApi {
             var response = model.getObject().call(new Prompt(List.of(instruction, new UserMessage(question)), options));
             Map<?, ?> item = json.readValue(response.getResult().getOutput().getText(), Map.class);
             if ("UNSUPPORTED".equals(item.get("category")) || "UNSUPPORTED".equals(item.get("criterion"))) return unsupported();
-            return lookup(new Filters(Category.valueOf((String) item.get("category")),
-                    Criterion.valueOf((String) item.get("criterion"))), "OPENAI");
+            return explain(lookup(new Filters(Category.valueOf((String) item.get("category")),
+                    Criterion.valueOf((String) item.get("criterion"))), "OPENAI"));
         } catch (Exception error) {
             return fallback == null ? unsupported() : lookup(fallback, "RULES");
         } finally {
@@ -90,7 +93,44 @@ class DiscoveryApi {
 
     @GetMapping("/discover")
     Result filters(@RequestParam Category category, @RequestParam Criterion criterion) {
-        return lookup(new Filters(category, criterion), "FILTER");
+        var result = lookup(new Filters(category, criterion), "FILTER");
+        if (!configured || result.results().isEmpty()) return result;
+        if (explanations.containsKey(result.filters())) return explain(result);
+        if (!eligible()) return result;
+        try {
+            return explain(result);
+        } finally {
+            concurrency.release();
+        }
+    }
+
+    private Result explain(Result result) {
+        if (result.results().isEmpty()) return result;
+        var explanation = explanations.get(result.filters());
+        if (explanation == null) {
+            try {
+                var rows = result.results().stream().map(row -> String.join(" | ", row.product().name(),
+                        row.product().market(), row.product().prep(), row.fact().basis(),
+                        row.fact().value().toPlainString(), row.fact().unit())).collect(Collectors.joining("\n"));
+                var instruction = new SystemMessage("""
+                        확인된 상품 검색 결과를 한국어 존댓말 두 문장으로 설명합니다.
+                        어떤 기준으로 찾았는지 말하고, 확인된 상품을 예로 듭니다.
+                        상품의 시장, 조리·섭취 기준과 단위가 같을 때만 우열을 언급합니다.
+                        INGREDIENTS 또는 SURFACE에서 flag 0은 해당 성분이나 소재의 미사용 표시입니다.
+                        자료에 없는 의료 효과나 투자 조언은 포함하지 않습니다. 표나 마크다운을 쓰지 않습니다.
+                        """);
+                var facts = result.filters().criterion().name() + "\n" + rows;
+                var options = OpenAiChatOptions.builder().store(false).maxCompletionTokens(220).build();
+                var response = model.getObject().call(new Prompt(List.of(instruction, new UserMessage(facts)), options));
+                explanation = response.getResult().getOutput().getText();
+                if (explanation == null || explanation.isBlank() || explanation.length() > 450) return result;
+                explanation = explanation.strip();
+                explanations.put(result.filters(), explanation);
+            } catch (RuntimeException error) {
+                return result;
+            }
+        }
+        return new Result(result.filters(), result.results(), result.method(), result.message(), explanation);
     }
 
     private boolean eligible() {
@@ -115,17 +155,18 @@ class DiscoveryApi {
                 .limit(10).toList();
         return new Result(filters, matches, method,
                 matches.isEmpty() ? "조건에 맞는 상품을 찾지 못했습니다. 다른 기준을 선택해 주세요."
-                        : "공개 자료에서 조건에 맞는 상품을 찾았습니다. 상품별 비교 기준과 출처를 확인해 주세요.");
+                        : "공개 자료에서 조건에 맞는 상품을 찾았습니다. 상품별 비교 기준과 출처를 확인해 주세요.", null);
     }
 
     private Result unsupported() {
-        return new Result(null, List.of(), "RULES", "상품군과 비교 기준을 선택해 다시 찾아보실 수 있습니다.");
+        return new Result(null, List.of(), "RULES", "상품군과 비교 기준을 선택해 다시 찾아보실 수 있습니다.", null);
     }
 
     private Filters parseLocally(String q) {
         Category group = q.matches(".*(라면|불닭|라멘).*") ? Category.RAMEN
                 : q.matches(".*(프라이팬|후라이팬|팬).*") ? Category.FRYING_PAN
                 : q.contains("너겟") ? Category.FROZEN_CHICKEN_NUGGETS
+                : q.matches(".*(소시지|핫도그).*") ? Category.BEEF_FRANKS
                 : q.contains("땅콩") ? Category.PEANUT_BUTTER
                 : q.matches(".*(초콜릿|초콜렛).*") ? Category.CHOCOLATE
                 : q.matches(".*맥\\s*앤\\s*치즈.*") ? Category.MAC_AND_CHEESE

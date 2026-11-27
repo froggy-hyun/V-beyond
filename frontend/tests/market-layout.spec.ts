@@ -89,13 +89,15 @@ test('홈 지수 그래프와 종목 화면 메뉴 전환', async ({ page }) => 
   await expect(usIndices.getByRole('img', { name: '나스닥 종합 정규장 지수 그래프' })).toBeVisible()
   await expect(indices).toHaveCount(0)
 
-  await page.getByRole('navigation').getByRole('link', { name: '현재가', exact: true }).click()
-  await expect(page.getByRole('heading', { name: '시세 정보' })).toBeVisible()
+  await expect(page.getByRole('navigation').getByRole('link', { name: '현재가', exact: true })).toHaveCount(0)
+  await page.goto('/stocks/KR:KOSPI:004370?tab=price')
   const tabs = page.getByRole('group', { name: '종목 상세 탭' })
-  await tabs.getByRole('button', { name: '차트', exact: true }).click()
+  await expect(tabs.getByRole('button', { name: '차트', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByRole('img', { name: '시세 및 거래량 차트' })).toBeVisible()
   await tabs.getByRole('button', { name: '판매상품' }).click()
   await expect(page.locator('.stock-products .product-card').first()).toBeVisible()
+  await page.goto('/menu')
+  await expect(page.getByRole('link', { name: '현재가', exact: true })).toHaveCount(0)
 })
 
 test('종목 차트 구간과 분봉 선택', async ({ page }) => {

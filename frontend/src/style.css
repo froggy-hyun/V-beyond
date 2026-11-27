@@ -190,10 +190,38 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .quote-meta, .stock-detail .chart-session { color: var(--muted); font-size: .78rem; margin: 3px 0 7px }
 .stock-tabs { margin-top: 6px }
 .stock-detail { padding-top: 10px }
-.stock-main { min-width: 0 }
+.stock-wide { grid-column: 1 / -1; min-width: 0 }
+.compare-heading img { width: 66px; height: auto; flex: none }
+.company-intro-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 7px }
+.ai-label { display: inline-flex; align-items: center; gap: 3px; color: var(--accent); background: var(--accent-tint) }
+.performance-card { --peer: #4671d9; border-top: 1px solid var(--line); margin-top: 14px; padding-top: 13px }
+.performance-controls { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 12px 0 }
+.performance-controls label { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-size: .84rem }
+.performance-controls select { min-height: 34px; max-width: 100%; padding: 4px 7px; background: var(--surface); border-radius: 6px; color: #202329 }
+.performance-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr); gap: 18px }
+.performance-grid > div { min-width: 0; border: 1px solid var(--line); border-radius: 9px; padding: 12px }
+.performance-grid h4 { font-size: .91rem; font-weight: 730; margin: 0 }
+.performance-share { display: grid; gap: 9px; justify-items: center }
+.performance-donut { display: grid; place-items: center; width: min(134px, 100%); aspect-ratio: 1; border-radius: 50% }
+.performance-donut > span { display: grid; place-content: center; text-align: center; width: 73%; height: 73%; border-radius: 50%; background: #fff; font-size: .82rem }
+.performance-legend { width: 100%; max-width: 250px; display: grid; gap: 4px; font-size: .83rem }
+.performance-legend div { display: flex; align-items: center; justify-content: space-between; gap: 5px }
+.performance-legend dt::before { content: ""; display: inline-block; vertical-align: middle; width: 8px; height: 8px; margin-right: 6px; border-radius: 2px; background: var(--accent) }
+.performance-legend div:nth-child(2) dt::before { background: var(--peer) }
+.performance-legend div:nth-child(3) dt::before { background: #dce1e5 }
+.performance-legend dd, .performance-bar-row { font-variant-numeric: tabular-nums }
+.performance-legend a:hover { color: var(--accent) }
+.performance-bars, .performance-segments { display: grid; gap: 8px; margin-top: 10px }
+.performance-segments { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px }
+.performance-bar-group { display: grid; gap: 4px; align-content: start }
+.performance-bar-row { position: relative; isolation: isolate; min-height: 22px; display: flex; align-items: center; justify-content: flex-end; padding: 2px 6px; white-space: nowrap; font-size: .8rem; background: var(--surface); border-radius: 4px; overflow: hidden }
+.bar-fill { position: absolute; z-index: -1; inset: 0 auto 0 0; background: #cdebe4; border-radius: 4px; transition: width var(--motion) }
+.bar-peer { background: #dae4fe }
 .health-item { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px }
 .health-criteria { flex-wrap: wrap; align-items: flex-start; gap: 6px 12px; margin-bottom: 9px }
 .health-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px }
+.health-pair[data-count="1"] { grid-template-columns: minmax(0, 1fr) }
+.health-side[data-winner="true"] { border-color: #87c2ae; background: #f2faf7 }
 .health-side { min-width: 0; border: 1px solid var(--line); border-radius: 8px; padding: 9px; overflow-wrap: anywhere }
 .health-side > small:first-child { font-weight: 690 }
 .health-product { display: flex; align-items: center; gap: 6px; margin-block: 6px }
@@ -202,9 +230,14 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .health-value, .health-links { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin-top: 5px }
 .health-value .status { color: var(--accent); background: var(--accent-tint) }
 .health-links a { white-space: normal; min-height: 28px; width: auto }
-.health-empty { background: var(--surface); border-color: transparent }
 .health-comparisons .health-context { font-size: .8rem; margin-top: 7px }
 .health-context .source { margin-left: 3px }
+.vs-badge, .winner-badge { display: inline-flex; align-items: center; gap: 5px; font-size: .75rem; font-weight: 670; line-height: 1.25; padding: 4px 7px; border-radius: 6px }
+.vs-badge { margin-left: auto; background: #24272d; color: #fff; font-weight: 800; animation: comparison-float 3.8s ease-in-out infinite }
+.winner-badge { margin-top: 5px; background: var(--accent-tint); color: #006857; animation: winner-rise 240ms ease-out both }
+.comparison-mascot { animation: comparison-float 4.6s ease-in-out infinite }
+@keyframes comparison-float { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-3px) } }
+@keyframes winner-rise { from { opacity: .5; transform: translateY(3px) } to { opacity: 1; transform: none } }
 .chart-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 8px }
 .segmented { display: flex; width: max-content; max-width: 100%; gap: 1px; padding: 3px; border-radius: 7px; background: var(--surface) }
 .segmented button { min-width: 43px; padding: 6px 8px; border-radius: 5px; color: var(--muted); font-size: .8rem; font-weight: 650; white-space: nowrap }
@@ -265,7 +298,6 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .match, .compare-product { margin: 10px 0; border-top: 1px solid var(--line); padding-top: 7px }
 .match .product-card, .compare-product .product-card { border-top: 0 }
 .discovery-heading img { width: 45px; height: auto }
-.discovery-result > p { padding: 10px 12px; background: var(--accent-tint); border-radius: 8px }
 .watchlist-empty { display: grid; justify-items: center; text-align: center; padding: 26px 0 8px }
 .watchlist-empty img { width: 119px; height: auto }
 .watchlist-table .market-columns { grid-template-columns: minmax(0, 1fr) 109px 65px; padding-right: 13px }
@@ -304,6 +336,8 @@ footer img { width: 95px; height: auto }
 .skeleton-chart i:nth-child(2) { width: 72%; height: 8px }
 
 @media (min-width: 840px) {
+  .health-pair[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+  .health-pair[data-count="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)) }
   .market-aside, .stock-side { border-left: 1px solid var(--line); padding-left: 22px }
   .market-aside > :first-child, .stock-side > :first-child { border-top: 0; padding-top: 4px }
   .stock-page:has(.stock-side) { grid-template-columns: minmax(0, 1.65fr) minmax(292px, 1fr); column-gap: 26px; align-items: start }
@@ -313,6 +347,7 @@ footer img { width: 95px; height: auto }
 }
 
 @media (max-width: 839px) {
+  .performance-grid, .performance-segments { grid-template-columns: minmax(0, 1fr) }
   :root { --chart-height: 286px }
   .top-inner, .shell { width: calc(100% - 32px) }
   .top-inner { height: 51px }
@@ -358,6 +393,47 @@ footer img { width: 95px; height: auto }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .route-content, .skeleton i::after { animation: none }
+  .route-content, .skeleton i::after, .vs-badge, .winner-badge, .comparison-mascot { animation: none }
   :root { --motion: 0ms }
+}
+
+.market-health { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin: 0 0 14px; padding: 9px 14px; border: 1px solid #d9eee8; border-radius: 10px; background: #f1faf7 }
+.health-shortcut { display: inline-flex; align-items: center; gap: 9px; min-height: 40px; color: #174f45 }
+.health-shortcut h2 { font-size: .97rem }
+.health-shortcut > span { display: grid; place-items: center; color: var(--accent) }
+.health-shortcut-topics, .topic-links { display: flex; flex-wrap: wrap; gap: 6px 12px }
+.health-shortcut-topics a { padding: 6px 10px; border: 1px solid #cce7de; border-radius: 20px; background: #fff; color: #176456; font-size: .8rem; font-weight: 650 }
+.health-shortcut:hover, .health-shortcut-topics a:hover, .topic-stock:hover, .topic-product a:hover { color: var(--accent) }
+.health-page > header p { margin-top: 7px; color: var(--muted); font-size: .91rem }
+.topic-choices, .icon-choices > div { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 135px), 1fr)); gap: 8px; margin-top: 12px }
+.topic-choices button, .icon-choices button { display: flex; align-items: center; gap: 7px; padding: 8px; min-height: 48px; max-width: 100%; border: 1px solid var(--line); border-radius: 9px; text-align: left; font-weight: 650; font-size: .83rem; transition: background-color var(--motion), border-color var(--motion), color var(--motion) }
+.topic-choices button > svg, .icon-choices button > svg { flex: none; color: var(--accent) }
+.topic-choices button:hover, .icon-choices button:hover { background: var(--surface) }
+.topic-choices button[aria-pressed="true"], .icon-choices button[aria-pressed="true"] { border-color: #66b7a4; background: var(--accent-tint); color: #126858 }
+.topic-assessment { border-color: #d9eee8; background: #f4faf8 }
+.topic-assessment p { margin-top: 6px }
+.topic-links { margin-top: 8px }
+.health-topic-detail { margin-top: 7px; padding: 0 9px; border: 1px solid var(--line); border-radius: 7px; font-size: .82rem }
+.health-topic-detail summary { padding-block: 8px; cursor: pointer; font-weight: 700 }
+.health-topic-detail summary small { display: inline; margin-left: 4px }
+.health-topic-detail p, .health-topic-detail .topic-links { margin-block: 0 8px }
+.topic-company { padding: 10px 0; border-bottom: 1px solid var(--line) }
+.topic-company:last-child { border-bottom: 0 }
+.topic-stock { display: flex; align-items: center; gap: 8px; width: max-content; max-width: 100%; min-height: 44px }
+.topic-product { display: flex; justify-content: space-between; align-items: start; gap: 4px 10px; padding: 7px 0 7px 42px; min-width: 0; font-size: .9rem }
+.topic-product a { font-weight: 660 }
+.topic-product small { margin-top: 3px }
+.icon-choices { min-width: 0; padding: 0; border: 0; margin: 14px 0 }
+.icon-choices legend { font-weight: 700; font-size: .9rem }
+.icon-choices > div { margin-top: 2px }
+.icon-choices button .product-icon { width: 30px; height: 30px; flex: none }
+.icon-choices button .product-icon svg { width: 19px; height: 19px }
+.discovery-summary { border-color: #d9eee8; background: #f1faf7 }
+.discovery-summary h2 { display: flex; align-items: center; gap: 6px; color: #14594d }
+.discovery-summary p { margin-top: 7px }
+@media (max-width: 460px) {
+  .market-health { padding: 7px 10px }
+  .topic-product { flex-wrap: wrap }
+  .topic-product > div { flex: 1 1 100% }
+  .icon-choices > div, .topic-choices { grid-template-columns: repeat(2, minmax(0, 1fr)) }
 }

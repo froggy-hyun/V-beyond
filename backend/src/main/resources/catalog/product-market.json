@@ -1,0 +1,267 @@
+{
+  "segments": {
+    "KR:KOSPI:004370": [
+      {
+        "name": "라면 제품군",
+        "scope": "DART 주요 제품 및 서비스의 연결 기준 라면 제품군 판매액입니다. 매출에누리 등은 공시에서 별도 항목입니다.",
+        "currency": "KRW",
+        "quarters": [
+          {
+            "quarter": "2026Q1",
+            "periodEnd": "2026-03-31",
+            "amount": 801087000000,
+            "source": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260515000865"
+          },
+          {
+            "quarter": "2026Q2",
+            "periodEnd": "2026-06-30",
+            "amount": 821662000000,
+            "source": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814000362",
+            "note": "해당 누적 공시 금액에서 직전 분기 누적 금액을 뺐습니다."
+          },
+          {
+            "quarter": "2026Q3",
+            "periodEnd": "2026-09-30",
+            "amount": 794557000000,
+            "source": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261113000302",
+            "note": "해당 누적 공시 금액에서 직전 분기 누적 금액을 뺐습니다."
+          }
+        ]
+      }
+    ],
+    "KR:KOSPI:007310": [
+      {
+        "name": "면제품류",
+        "scope": "DART 주요 제품 및 서비스의 연결 기준 면제품류 매출입니다. 라면, 당면, 국수 등이 포함됩니다.",
+        "currency": "KRW",
+        "quarters": [
+          {
+            "quarter": "2026Q1",
+            "periodEnd": "2026-03-31",
+            "amount": 282566036000,
+            "source": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260515001174"
+          },
+          {
+            "quarter": "2026Q2",
+            "periodEnd": "2026-06-30",
+            "amount": 266227964000,
+            "source": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814001966",
+            "note": "해당 누적 공시 금액에서 직전 분기 누적 금액을 뺐습니다."
+          },
+          {
+            "quarter": "2026Q3",
+            "periodEnd": "2026-09-30",
+            "amount": 289561655000,
+            "source": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261116000708",
+            "note": "해당 누적 공시 금액에서 직전 분기 누적 금액을 뺐습니다."
+          }
+        ]
+      }
+    ],
+    "KR:KOSPI:003230": [
+      {
+        "name": "면스낵",
+        "scope": "DART 주요 제품 및 서비스의 연결 기준 면스낵 사업군 매출입니다. 봉지면, 용기면, 스낵류 등이 포함됩니다.",
+        "currency": "KRW",
+        "quarters": [
+          {
+            "quarter": "2026Q1",
+            "periodEnd": "2026-03-31",
+            "amount": 653988000000,
+            "source": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260513000571"
+          },
+          {
+            "quarter": "2026Q2",
+            "periodEnd": "2026-06-30",
+            "amount": 690898000000,
+            "source": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003053",
+            "note": "해당 누적 공시 금액에서 직전 분기 누적 금액을 뺐습니다."
+          },
+          {
+            "quarter": "2026Q3",
+            "periodEnd": "2026-09-30",
+            "amount": 717118000000,
+            "source": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261116001082",
+            "note": "해당 누적 공시 금액에서 직전 분기 누적 금액을 뺐습니다."
+          }
+        ]
+      }
+    ],
+    "US:NASDAQ:NWL": [
+      {
+        "name": "Home and Commercial Solutions",
+        "scope": "Calphalon을 포함한 주방·생활·상업용 제품 사업부의 순매출입니다.",
+        "currency": "USD",
+        "quarters": [
+          {
+            "quarter": "2026Q1",
+            "periodEnd": "2026-03-31",
+            "amount": 780000000,
+            "source": "https://ir.newellbrands.com/news-releases/news-release-details/newell-brands-announces-first-quarter-2026-results"
+          },
+          {
+            "quarter": "2026Q2",
+            "periodEnd": "2026-06-30",
+            "amount": 903000000,
+            "source": "https://ir.newellbrands.com/news-releases/news-release-details/newell-brands-announces-second-quarter-2026-results/"
+          },
+          {
+            "quarter": "2026Q3",
+            "periodEnd": "2026-09-30",
+            "amount": 1012000000,
+            "source": "https://ir.newellbrands.com/news-releases/news-release-details/newell-brands-announces-third-quarter-2026-results"
+          }
+        ]
+      }
+    ],
+    "US:NASDAQ:CPB": [
+      {
+        "name": "Meals & Beverages",
+        "scope": "캠벨 수프와 간편식·음료 등의 사업부 순매출입니다. 캠벨의 회계연도 기준입니다.",
+        "currency": "USD",
+        "quarters": [
+          {
+            "quarter": "2026Q2",
+            "periodEnd": "2026-02-01",
+            "amount": 1650000000,
+            "source": "https://investor.thecampbellscompany.com/news-releases/news-release-details/campbells-reports-second-quarter-fiscal-2026-results"
+          },
+          {
+            "quarter": "2026Q3",
+            "periodEnd": "2026-05-03",
+            "amount": 1426000000,
+            "source": "https://investor.thecampbellscompany.com/news-releases/news-release-details/campbells-reports-third-quarter-fiscal-2026-results"
+          },
+          {
+            "quarter": "2026Q4",
+            "periodEnd": "2026-08-02",
+            "amount": 1187000000,
+            "source": "https://investor.thecampbellscompany.com/news-releases/news-release-details/campbells-reports-fourth-quarter-fiscal-2026-results"
+          }
+        ]
+      }
+    ],
+    "US:NYSE:GIS": [
+      {
+        "name": "North America Retail",
+        "scope": "미국·캐나다 소매 사업부 순매출입니다. 시리얼·간식·식사 및 베이킹 제품 등을 포함하며 제너럴 밀스의 회계연도를 따릅니다.",
+        "currency": "USD",
+        "quarters": [
+          {
+            "quarter": "2026Q3",
+            "periodEnd": "2026-02-22",
+            "amount": 2596400000,
+            "source": "https://investors.generalmills.com/press-releases/press-release-details/2026/General-Mills-Reports-Fiscal-2026-Third-quarter-Results-and-Reaffirms-Full-year-Outlook/default.aspx"
+          },
+          {
+            "quarter": "2026Q4",
+            "periodEnd": "2026-05-31",
+            "amount": 2466600000,
+            "source": "https://investors.generalmills.com/press-releases/press-release-details/2026/General-Mills-Reports-Fiscal-2026-Fourth-quarter-Adjusted-Results-in-Line-with-Company-Expectations/default.aspx",
+            "note": "2026 회계연도는 53주이며, 추가 1주는 4분기에 포함됩니다."
+          },
+          {
+            "quarter": "2027Q1",
+            "periodEnd": "2026-08-30",
+            "amount": 2451800000,
+            "source": "https://investors.generalmills.com/press-releases/press-release-details/2026/General-Mills-Reports-Fiscal-2027-First-quarter-Results-and-Reaffirms-Full-year-Outlook/default.aspx"
+          }
+        ]
+      }
+    ],
+    "US:NYSE:CAG": [
+      {
+        "name": "Refrigerated & Frozen",
+        "scope": "뱅킷 냉동식품 등 미국 소매 채널의 냉장·냉동 제품 사업부 순매출입니다. 콘아그라의 회계연도 기준입니다.",
+        "currency": "USD",
+        "quarters": [
+          {
+            "quarter": "2026Q3",
+            "periodEnd": "2026-02-22",
+            "amount": 1133200000,
+            "source": "https://www.sec.gov/Archives/edgar/data/23217/000110465926038548/tmb-20260222x10q.htm"
+          },
+          {
+            "quarter": "2026Q4",
+            "periodEnd": "2026-05-31",
+            "amount": 1181200000,
+            "source": "https://www.sec.gov/Archives/edgar/data/23217/000002321726000022/tmb-20260715xex99d1.htm",
+            "note": "2026 회계연도는 53주이며, 추가 1주는 4분기에 포함됩니다."
+          },
+          {
+            "quarter": "2027Q1",
+            "periodEnd": "2026-08-30",
+            "amount": 1053800000,
+            "source": "https://www.sec.gov/Archives/edgar/data/23217/000110465926112354/tmb-20260830x10q.htm"
+          }
+        ]
+      }
+    ]
+  },
+  "markets": [
+    {
+      "name": "국내 라면 소매시장",
+      "region": "KR",
+      "category": "RAMEN",
+      "scope": "aT FIS 소매점 POS 조사 기준 · 마켓링크 · 라면(봉지·용기) 브랜드 판매액",
+      "source": "https://www.atfis.or.kr/home/offsales.do?dataGubun=NEW&category1=9&category2=86&gubun=BRAND&periodGubun=QUARTER&begin=2025_Q1&end=2026_Q1&searchPeriodAll=Y&searchPeriodPoint=2025_Q1&searchPeriodPoint=2025_Q2&searchPeriodPoint=2025_Q3&searchPeriodPoint=2025_Q4&searchPeriodPoint=2026_Q1",
+      "quarters": [
+        {
+          "quarter": "2025Q1",
+          "total": 386905000000
+        },
+        {
+          "quarter": "2025Q2",
+          "total": 383466000000
+        },
+        {
+          "quarter": "2025Q3",
+          "total": 372768000000
+        },
+        {
+          "quarter": "2025Q4",
+          "total": 397932000000
+        },
+        {
+          "quarter": "2026Q1",
+          "total": 383068000000
+        }
+      ],
+      "brands": [
+        {
+          "name": "신라면",
+          "stockId": "KR:KOSPI:004370",
+          "amounts": [
+            104447000000,
+            96288000000,
+            95925000000,
+            103508000000,
+            99287000000
+          ]
+        },
+        {
+          "name": "진라면",
+          "stockId": "KR:KOSPI:007310",
+          "amounts": [
+            49216000000,
+            47342000000,
+            44608000000,
+            48736000000,
+            44830000000
+          ]
+        },
+        {
+          "name": "불닭볶음면",
+          "stockId": "KR:KOSPI:003230",
+          "amounts": [
+            42726000000,
+            44052000000,
+            46038000000,
+            49119000000,
+            49702000000
+          ]
+        }
+      ]
+    }
+  ]
+}

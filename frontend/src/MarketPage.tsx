@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState, useSyncExternalStore } from 'react'
-import { ArrowDownUp, ChartNoAxesCombined, ChevronRight, Heart, ScanSearch, Search } from 'lucide-react'
+import { ArrowDownUp, ChartNoAxesCombined, ChevronRight, FlaskConical, Heart, ScanSearch, Search } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { categories, currency, pathFor, percent, tone, useData, useMarketMode, useQuotes } from './api'
 import type { Candle, Category, MarketIndex, Quote, Stock } from './api'
@@ -108,6 +108,14 @@ export default function MarketPage() {
       {mode === 'REPLAY' && <span className="market-feed">시연용 시세입니다</span>}
     </div>
 
+    <section className="market-health" aria-label="건강 이슈 성분 탐색">
+      <Link to="/health" className="health-shortcut"><span><FlaskConical size={20} aria-hidden /></span>
+        <h2>건강 이슈 성분으로 종목 찾기</h2><ChevronRight size={17} aria-hidden /></Link>
+      <div className="health-shortcut-topics">
+        {[['sodium-nitrite', '아질산나트륨'], ['aspartame', '아스파탐'], ['ptfe', 'PTFE']].map(([id, name]) =>
+          <Link key={id} to={'/health?topic=' + id}>{name}</Link>)}
+      </div>
+    </section>
     <div className="dashboard">
       <section className="panel market-panel">
         <div className="section-heading market-list-heading">

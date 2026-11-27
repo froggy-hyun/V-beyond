@@ -1,0 +1,91 @@
+[
+  {
+    "id": "sodium-nitrite",
+    "name": "아질산나트륨",
+    "category": "발색제·보존료",
+    "aliases": ["아질산염", "질산염", "발색제", "보존료", "E250", "sodium nitrite", "니트로사민", "발암", "가공육"],
+    "assessment": "IARC는 체내 니트로소화가 일어나는 조건에서 섭취한 질산염·아질산염을 발암 추정(2A군)으로 평가했습니다. 이 과정에서 일부 발암성 니트로사민이 만들어질 수 있습니다. EFSA는 아질산염의 일일섭취허용량을 체중 1 kg당 0.07 mg으로 평가했습니다. 성분표는 첨가 여부를 보여주며 잔류량이나 실제 섭취량은 알려주지 않습니다.",
+    "sources": [
+      {"title":"IARC 질산염·아질산염 평가","url":"https://publications.iarc.who.int/_publications/media/download/4175/e0fbc3ba9afe8d18ce4f85e8cfb7552aa4569fe6.pdf"},
+      {"title":"EFSA 섭취량 평가","url":"https://www.efsa.europa.eu/en/press/news/170615"}
+    ]
+  },
+  {
+    "id": "processed-meat",
+    "name": "가공육",
+    "category": "식품군",
+    "aliases": ["햄", "소시지", "핫도그", "대장암", "발암", "processed meat"],
+    "assessment": "IARC는 가공육 섭취와 대장암 사이의 인과관계에 충분한 근거가 있다고 보아 1군으로 분류했습니다. 당시 분석에서 매일 가공육을 50 g 더 먹을 때 대장암 상대위험이 약 18% 높았습니다. 1군은 인과 근거의 강도를 뜻하며 개별 상품의 위험도나 사람마다의 발생 확률을 나타내지 않습니다.",
+    "sources": [{"title":"WHO·IARC 가공육 평가","url":"https://www.iarc.who.int/wp-content/uploads/2018/11/Monographs-QA_Vol114.pdf"}]
+  },
+  {
+    "id": "aspartame",
+    "name": "아스파탐",
+    "category": "감미료",
+    "aliases": ["아스파르탐", "제로", "인공감미료", "aspartame", "E951", "발암"],
+    "criterion": "AVOID_ASPARTAME",
+    "assessment": "IARC는 인체 근거가 제한적인 상황에서 아스파탐을 발암 가능(2B군)으로 분류했습니다. 실제 섭취량에 따른 위해를 평가한 JECFA는 일일섭취허용량을 체중 1 kg당 40 mg으로 유지했습니다. 성분표만으로 개인의 섭취량은 계산할 수 없습니다.",
+    "sources": [{"title":"WHO IARC·JECFA 아스파탐 평가","url":"https://www.who.int/news/item/14-07-2023-aspartame-hazard-and-risk-assessment-results-released"}]
+  },
+  {
+    "id": "potassium-benzoate",
+    "name": "안식향산칼륨",
+    "category": "보존료",
+    "aliases": ["벤조산칼륨", "안식향산염", "벤조산염", "보존료", "방부제", "potassium benzoate", "E212", "벤젠"],
+    "assessment": "FDA는 일부 음료에서 안식향산염과 비타민 C 또는 에리토르브산이 함께 있을 때 벤젠이 미량 생성될 수 있다고 설명합니다. 열이나 빛이 이 반응을 촉진할 수 있습니다. 제조사 성분표로는 이 상품에서 벤젠이 검출됐는지나 그 양을 알 수 없습니다.",
+    "sources": [{"title":"FDA 음료의 벤젠 자료","url":"https://www.fda.gov/food/environmental-contaminants-food/questions-and-answers-occurrence-benzene-soft-drinks-and-other-beverages"}]
+  },
+  {
+    "id": "caramel-color",
+    "name": "카라멜색소",
+    "category": "착색료",
+    "aliases": ["캐러멜색소", "착색료", "색소", "caramel color", "4-MEI", "E150"],
+    "assessment": "FDA에 따르면 일부 카라멜색소(III·IV형) 제조 시 부산물인 4-MEI가 생길 수 있습니다. 높은 노출량의 동물실험에서 일부 종양이 늘었고, FDA는 식품에서 예상되는 노출 수준에 단기 건강 위험이 있다고 볼 근거가 없다고 설명합니다. 제조사 성분표의 ‘카라멜색소’만으로 유형이나 4-MEI 양을 알 수 없습니다.",
+    "sources": [{"title":"FDA 카라멜색소와 4-MEI 자료","url":"https://www.fda.gov/food/food-additives-petitions/questions-answers-caramel-coloring-and-4-mei"}]
+  },
+  {
+    "id": "ptfe",
+    "name": "PTFE",
+    "category": "조리기구 코팅",
+    "aliases": ["테플론", "플루오로수지", "불소수지", "프라이팬", "논스틱", "과열"],
+    "criterion": "AVOID_PTFE",
+    "assessment": "빈 팬을 심하게 과열하면 PTFE가 분해돼 유해한 기체가 나올 수 있습니다. 독일 연방위해평가원은 과열이 없는 정상 사용에서 건강에 악영향을 예상하지 않습니다.",
+    "sources": [{"title":"독일 연방위해평가원 PTFE 안내","url":"https://www.bfr.bund.de/en/service/frequently-asked-questions/topic/selected-questions-and-answers-on-cookware-ovenware-and-frying-pans-with-a-non-stick-coating-made-of-ptfe"}]
+  },
+  {
+    "id": "pfas",
+    "name": "PFAS",
+    "category": "조리기구 코팅",
+    "aliases": ["과불화화합물", "불소계", "피파스", "코팅", "PFOA", "PFOS"],
+    "criterion": "AVOID_PFAS",
+    "assessment": "EPA는 일부 PFAS 노출과 건강 영향 사이의 연관성을 보고합니다. 영향은 물질의 종류, 노출량, 기간 등에 따라 다릅니다. 결과에는 제조사가 계열 사용을 공개한 상품만 표시합니다.",
+    "sources": [{"title":"미국 EPA PFAS 건강 영향 평가","url":"https://www.epa.gov/pfas/our-current-understanding-human-health-and-environmental-risks-pfas"}]
+  },
+  {
+    "id": "sodium",
+    "name": "나트륨",
+    "category": "영양성분",
+    "aliases": ["소금", "염분", "고혈압", "sodium"],
+    "criterion": "SODIUM",
+    "assessment": "나트륨을 과다 섭취하면 혈압이 높아지고 심혈관질환 위험이 커질 수 있습니다. WHO는 성인에게 하루 2,000 mg 미만을 권고합니다. 각 상품에 표시된 비교 단위를 함께 확인하실 수 있습니다.",
+    "sources": [{"title":"WHO 나트륨 감량 권고","url":"https://www.who.int/news-room/fact-sheets/detail/sodium-reduction"}]
+  },
+  {
+    "id": "sugar",
+    "name": "당류",
+    "category": "영양성분",
+    "aliases": ["설탕", "유리당", "충치", "sugar"],
+    "criterion": "TOTAL_SUGAR",
+    "assessment": "WHO는 당류 섭취와 관련된 충치 등을 줄이기 위해 유리당 섭취를 하루 총 에너지의 10% 미만으로 제한하도록 권고합니다. 상품에 표시된 총당류에는 식품에 자연적으로 들어 있는 당도 포함됩니다.",
+    "sources": [{"title":"WHO 유리당 권고","url":"https://www.who.int/tools/elena/interventions/free-sugars-adults-ncds"}]
+  },
+  {
+    "id": "saturated-fat",
+    "name": "포화지방",
+    "category": "영양성분",
+    "aliases": ["포화지방산", "지방", "콜레스테롤", "saturated fat"],
+    "criterion": "SATURATED_FAT",
+    "assessment": "WHO는 심혈관질환 예방을 위해 포화지방을 하루 총 에너지의 10% 이하로 줄이도록 권고합니다. 실제 섭취량은 제품을 먹은 양과 다른 음식에 따라 달라집니다.",
+    "sources": [{"title":"WHO 포화지방 섭취 권고","url":"https://www.who.int/publications/i/item/9789240073630"}]
+  }
+]

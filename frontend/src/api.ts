@@ -12,7 +12,7 @@ export const categories = {
   FROZEN_CHICKEN_NUGGETS: '냉동 치킨너겟',
   PEANUT_BUTTER: '땅콩버터',
   CHOCOLATE: '초콜릿',
-  MAC_AND_CHEESE: '맥앤치즈',
+  MAC_AND_CHEESE: '맥앤치즈', BEEF_FRANKS: '소고기 소시지',
 } as const
 export const criteria = {
   SODIUM: '나트륨', TOTAL_SUGAR: '당류', ADDED_SUGAR: '첨가당', SATURATED_FAT: '포화지방', CALORIES: '열량',
@@ -21,15 +21,16 @@ export const criteria = {
 export const bases: Record<string, string> = { PER_SERVING: '1회 제공량', PER_100ML: '100 mL', PER_100G: '100 g', SURFACE: '조리 접촉면', INGREDIENTS: '원재료' }
 export const relations: Record<string, string> = { OWNER: '브랜드 소유', DISTRIBUTOR: '판매·유통', MANUFACTURER: '제조', LICENSEE: '라이선스' }
 export type Category = keyof typeof categories
-const standardizedFood = new Set<Category>(['FROZEN_CHICKEN_NUGGETS', 'PEANUT_BUTTER', 'CHOCOLATE', 'MAC_AND_CHEESE'])
+const standardizedFood = new Set<Category>(['FROZEN_CHICKEN_NUGGETS', 'PEANUT_BUTTER', 'CHOCOLATE', 'MAC_AND_CHEESE', 'BEEF_FRANKS'])
 export const nutritionBasis = (category: Category) => category === 'COLA' ? 'PER_100ML' : standardizedFood.has(category) ? 'PER_100G' : 'PER_SERVING'
 export type Criterion = keyof typeof criteria
 export type Stock = { id: string; symbol: string; name: string; english: string; market: string; exchange: string; currency: string; overview: string; source: string }
 export type Fact = { criterion: Criterion; value: number; unit: string; basis: string; source: string }
+export type HealthTopic = { id: string; name: string; category: string; aliases: string[]; assessment: string; sources: { title: string; url: string }[] }
 export type Product = {
   id: string; symbol: string; name: string; brand: string; category: Category; market: string;
   relation: string; size: string; prep: string; source: string; facts: Fact[];
-  evidence: { title: string; summary: string; source: string }[]; material: string | null; description: string
+  evidence: { title: string; summary: string; source: string; topic?: string }[]; material: string | null; description: string
 }
 export type Quote = { listingId: string; price: number | null; change: number | null; changePercent: number | null; cumulativeVolume: number; currency: string; exchangeTimestamp: string | null; receivedAt: string | null; feedMode: string; freshness: string; session: string }
 export type Candle = { startAt: string; open: number; high: number; low: number; close: number; volume: number }
@@ -59,9 +60,9 @@ export function useData<T>(path: string, enabled = true, refetchInterval?: numbe
   const isChart = path.startsWith('/market/stocks/')
   return useQuery({
     queryKey: [path], queryFn: ({ signal }) => api<T>(path, { signal }), enabled, refetchInterval,
-    retry: isChart ? (failures, error) =>
-      failures < (error instanceof ApiError && [429, 502, 503, 504].includes(error.status) ? 3 : 1) : 1,
-    retryDelay: isChart ? attempt => Math.min(1000 * 2 ** attempt, 4000) : undefined,
+    retry: (failures, error) => failures < (error instanceof ApiError &&
+      (error.status === 429 || (isChart && [502, 503, 504].includes(error.status))) ? 3 : 1),
+    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 4000),
   })
 }
 export function useMarketMode() {

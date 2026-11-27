@@ -12,9 +12,18 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api/v1")
 class CatalogApi {
+    record StockHealth(Product product, List<HealthIssue> issues, List<ProductPeer> peers, List<HealthTopics.Topic> topics) {}
     private final Catalog catalog;
+    private final ProductMarketData productMarket;
+    private final ProductOverview productOverview;
+    private final HealthTopics healthTopics;
 
-    CatalogApi(Catalog catalog) { this.catalog = catalog; }
+    CatalogApi(Catalog catalog, ProductMarketData productMarket, ProductOverview productOverview, HealthTopics healthTopics) {
+        this.catalog = catalog;
+        this.productMarket = productMarket;
+        this.productOverview = productOverview;
+        this.healthTopics = healthTopics;
+    }
 
     @GetMapping("/stocks")
     List<Stock> stocks(@RequestParam(defaultValue = "") @Pattern(regexp = "KR|US|") String market) {
@@ -28,18 +37,29 @@ class CatalogApi {
     List<Product> products(@PathVariable String id) { return catalog.products(id); }
 
     @GetMapping("/stocks/{id}/health-comparisons")
-    List<HealthComparison> healthComparisons(@PathVariable String id) { return catalog.healthComparisons(id); }
+    List<StockHealth> healthComparisons(@PathVariable String id) {
+        return catalog.healthComparisons(id).stream().map(row -> new StockHealth(
+                row.product(), row.issues(), row.peers(), healthTopics.labeledTopics(row.product()))).toList();
+    }
+
+    @GetMapping("/stocks/{id}/product-overview")
+    ProductOverview.Summary productOverview(@PathVariable String id) {
+        return productOverview.read(catalog.stock(id), catalog.products(id));
+    }
 
     @GetMapping("/stocks/{id}/competitors")
     List<Stock> competitors(@PathVariable String id) { return catalog.competitors(id); }
 
     @GetMapping("/stocks/{id}/revenue-segments")
-    Map<String, String> revenues(@PathVariable String id) {
-        return Map.of("status", "UNAVAILABLE", "source", catalog.stock(id).source());
+    ProductMarketData.Overview revenues(@PathVariable String id) {
+        return productMarket.overview(catalog.stock(id), catalog.products(id));
     }
 
     @GetMapping("/search")
     Search search(@RequestParam @Size(max = 100) String q) { return catalog.search(q); }
+
+    @GetMapping("/health-topics")
+    List<HealthTopics.Results> healthTopics() { return healthTopics.results(); }
 
     @GetMapping("/products/{id}")
     Product product(@PathVariable String id) { return catalog.product(id); }

@@ -1,13 +1,16 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import MarketPage from './MarketPage'
+import HealthPage from './HealthPage'
+import { ChoiceButtons } from './ChoiceButtons'
 import StockHealthComparisons from './StockHealthComparisons'
-import { useMutation } from '@tanstack/react-query'
-import { ArrowLeft, ChartNoAxesCombined, ChevronLeft, ChevronRight, FlaskConical, GitCompareArrows, Heart, Home as HomeIcon, Menu, Search as SearchIcon, Sparkles, X } from 'lucide-react'
+import StockProductPerformance from './StockProductPerformance'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { ArrowLeft, ChevronLeft, ChevronRight, Cookie, Droplets, Flame, FlaskConical, GitCompareArrows, Heart, Home as HomeIcon, Menu, Search as SearchIcon, Shield, Sparkles, X } from 'lucide-react'
 import { Link, NavLink, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { api, bases, categories, criteria, currency, formatFact, nutritionBasis, pathFor, percent, quoteStatus, quoteTime, relations, tone, useData, useMarketMode, useQuotes } from './api'
 import type { Candle, Category, Comparison, Criterion, Fact, Match, Product, Stock } from './api'
-import { Empty, ProductCard, ProductPhoto, productPhotoSource, Skeleton, Source, StockMark, StockRow, Wait } from './ui'
+import { Empty, ProductCard, ProductIcon, ProductPhoto, productPhotoSource, Skeleton, Source, StockMark, StockRow, Wait } from './ui'
 import wordmark from './assets/brand/wordmark.png'
 import lockup from './assets/brand/lockup.png'
 import watchlist from './assets/brand/watchlist.png'
@@ -15,18 +18,24 @@ import discovery from './assets/brand/discovery.png'
 
 const Chart = lazy(() => import('./Chart'))
 
-const defaultStock = 'KR:KOSPI:004370'
-const stockTabs = [['price', '현재가'], ['chart', '차트'], ['company', '기업정보'], ['products', '판매상품']] as const
+const stockTabs = [['chart', '차트'], ['company', '기업정보'], ['products', '판매상품']] as const
 const chartRanges = [['1D', '1일'], ['1W', '1주'], ['1M', '1개월'], ['3M', '3개월'], ['1Y', '1년']] as const
 const prompts = ['나트륨이 낮은 라면', 'PTFE 없는 프라이팬', '당류가 낮은 콜라']
+const scopeLabels = { OTHER_COMPANY: '다른 기업', SAME_COMPANY: '같은 기업', ALL_COMPANIES: '전체' }
+const criterionIcons: Record<Criterion, typeof FlaskConical> = {
+  SODIUM: Droplets, TOTAL_SUGAR: Cookie, ADDED_SUGAR: Cookie, SATURATED_FAT: Droplets, CALORIES: Flame,
+  AVOID_PTFE: Shield, AVOID_PFAS: Shield, AVOID_ASPARTAME: FlaskConical,
+}
+const criterionIcon = (criterion: Criterion) => {
+  const Icon = criterionIcons[criterion]
+  return <Icon size={20} strokeWidth={1.65} aria-hidden />
+}
 
 export default function App() {
   const location = useLocation()
   useEffect(() => { window.scrollTo(0, 0) }, [location.pathname])
-  const lastStock = readLastStock()
-  const stockPath = location.pathname.startsWith('/stocks/') ? location.pathname : pathFor(lastStock)
   const links = [['/', '홈', HomeIcon], ['/watchlist', '관심', Heart], ['/search', '검색', SearchIcon],
-    [stockPath + '?tab=price', '현재가', ChartNoAxesCombined], ['/menu', '메뉴', Menu]] as const
+    ['/menu', '메뉴', Menu]] as const
   return <>
     <header className="top"><div className="top-inner">
       <Link to="/" className="brand"><img src={wordmark} alt="V beyond" width={650} height={199} /></Link>
@@ -42,13 +51,14 @@ export default function App() {
       <div className="route-content" key={location.pathname}><Routes>
         <Route index element={<MarketPage />} />
         <Route path="search" element={<SearchPage />} />
+        <Route path="health" element={<HealthPage />} />
         <Route path="stocks/:id" element={<StockPage />} />
         <Route path="products/:id" element={<ProductPage />} />
         <Route path="products/:id/alternatives" element={<AlternativePage />} />
         <Route path="compare" element={<CompanyCompare />} />
         <Route path="ai" element={<Discovery />} />
         <Route path="watchlist" element={<Watchlist />} />
-        <Route path="menu" element={<MenuPage stockPath={pathFor(lastStock) + '?tab=price'} />} />
+        <Route path="menu" element={<MenuPage />} />
         <Route path="*" element={<Empty>페이지를 찾을 수 없습니다. <Link to="/">시장으로</Link></Empty>} />
       </Routes></div>
       <footer><img src={lockup} alt="V beyond" width={626} height={282} /></footer>
@@ -56,14 +66,10 @@ export default function App() {
   </>
 }
 
-function readLastStock() {
-  try { return localStorage.getItem('lens.lastStock') || defaultStock } catch { return defaultStock }
-}
-
-function MenuPage({ stockPath }: { stockPath: string }) {
+function MenuPage() {
   const groups = [
-    ['주식', [[stockPath, '현재가', ChartNoAxesCombined], ['/watchlist', '관심종목', Heart], ['/search', '통합 검색', SearchIcon]]],
-    ['상품', [['/ai', 'AI 상품 탐색', Sparkles], ['/compare', '기업 비교', GitCompareArrows]]],
+    ['주식', [['/watchlist', '관심종목', Heart], ['/search', '통합 검색', SearchIcon]]],
+    ['상품', [['/ai', 'AI 상품 탐색', Sparkles], ['/health', '건강 이슈 성분 탐색', FlaskConical], ['/compare', '기업 비교', GitCompareArrows]]],
   ] as const
   return <div className="page menu-page"><h1>전체 메뉴</h1>
     {groups.map(([group, items]) => <section className="panel menu-group" key={group} aria-label={group}>
@@ -146,10 +152,6 @@ function StockPage() {
   const bars = useData<Candle[]>('/market' + pathFor(id) + '/candles?interval=' + interval + '&range=' + range, tab === 'chart', mode === 'KIS_REST' ? (range === '1D' && quote?.session === 'REGULAR' ? 16_000 : 60_000) : undefined)
   const lastBar = bars.data?.at(-1)
   const [watch, setWatch] = useState(readWatchlist)
-  useEffect(() => {
-    if (!stock.data) return
-    try { localStorage.setItem('lens.lastStock', stock.data.id) } catch { /* 저장이 제한된 브라우저에서도 화면은 유지 */ }
-  }, [stock.data])
   const toggle = () => {
     const next = watch.includes(id) ? watch.filter(entry => entry !== id) : [...watch, id]
     localStorage.setItem('lens.watchlist', JSON.stringify(next))
@@ -158,7 +160,7 @@ function StockPage() {
   if (!stock.data) return <div className="page"><section className="panel"><Wait error={stock.error} kind="stock" /></section></div>
   const info = stock.data
   const quoteTimeLabel = time && new Date(time).toLocaleString('ko-KR', { timeZone: quote?.exchangeTimestamp && info.market === 'US' ? 'America/New_York' : 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-  const companySection = <section className="panel stock-company"><div className="section-heading"><h2>기업 소개</h2><Source href={info.source}>기업 웹사이트</Source></div><p>{info.overview}</p></section>
+  const companySection = <CompanyIntroduction stock={info} />
   const productSection = <section className="panel stock-products"><div className="section-heading"><h2>판매 상품</h2><Link className="plain-link" to={'/compare?first=' + encodeURIComponent(id)}>기업 비교 <ChevronRight size={15} aria-hidden /></Link></div>
     {products.data ? <div className="products">{products.data.map(product => <ProductCard key={product.id} product={product} />)}</div> : <Wait error={products.error} kind="products" />}</section>
   return <div className="page stock-page">
@@ -174,16 +176,9 @@ function StockPage() {
         <button key={value} aria-pressed={tab === value} onClick={() => setControl('tab', value)}>{label}</button>)}</div>
     </section>
 
-    {tab === 'price' && <section className="panel stock-detail"><h2>시세 정보</h2>
-      {quote?.price != null ? <dl className="fact-list">
-        <div className="fact-row"><dt>현재가</dt><dd>{currency(quote.price, quote.currency)}</dd></div>
-        {quote.change != null && <div className="fact-row"><dt>전일 대비</dt><dd>{currency(quote.change, quote.currency)}</dd></div>}
-        <div className="fact-row"><dt>거래량</dt><dd>{quote.cumulativeVolume.toLocaleString('ko-KR')}</dd></div>
-      </dl> : quote === undefined ? <Skeleton kind="rows" /> : <Empty>시세를 불러오지 못했습니다.</Empty>}
-    </section>}
     {tab === 'company' && companySection}
     {tab === 'products' && productSection}
-    {tab === 'chart' && <div className="stock-main"><section className="panel stock-detail">
+    {tab === 'chart' && <><section className="panel stock-detail">
       <div className="chart-controls">
         <div className="segmented" role="group" aria-label="차트 조회 구간">{chartRanges.map(([value, label]) => <button className={range === value ? 'selected' : ''} aria-pressed={range === value} key={value} onClick={() => setControl('range', value)}>{label}</button>)}</div>
         {range === '1D' && <div className="segmented" role="group" aria-label="차트 표시 방식">{[['line', '선'], ['1m', '1분 봉'], ['5m', '5분 봉']].map(([value, label]) => <button key={value} className={(params.get('interval') ?? 'line') === value ? 'selected' : ''} aria-pressed={(params.get('interval') ?? 'line') === value} onClick={() => setControl('interval', value)}>{label}</button>)}</div>}
@@ -199,9 +194,21 @@ function StockPage() {
         {([['시가', lastBar.open], ['고가', lastBar.high], ['저가', lastBar.low], ['종가', lastBar.close]] as const).map(([label, price]) =>
           <div key={label}><dt>{label}</dt><dd>{currency(price, info.currency)}</dd></div>)}
       </dl>}
-    </section><StockHealthComparisons stock={info} /></div>}
-    {(tab === 'chart' || tab === 'price') && <aside className="stock-side" aria-label="기업과 판매 상품">{companySection}{productSection}</aside>}
+    </section><aside className="stock-side" aria-label="기업과 판매 상품">{companySection}{productSection}</aside>
+    <StockProductPerformance stock={info} /><StockHealthComparisons stock={info} /></>}
   </div>
+}
+
+function CompanyIntroduction({ stock }: { stock: Stock }) {
+  const path = pathFor(stock.id) + '/product-overview'
+  const summary = useQuery({ queryKey: [path], queryFn: ({ signal }) => api<{ text: string; status: 'AI' | 'PENDING' | 'FALLBACK' }>(path, { signal }),
+    refetchInterval: query => query.state.data?.status === 'PENDING' ? 2500 : false })
+  return <section className="panel stock-company"><div className="section-heading"><div className="company-intro-heading"><h2>기업 소개</h2>
+    {summary.data?.status === 'AI' && <span className="status ai-label"><Sparkles size={13} aria-hidden /> AI 상품 요약</span>}</div>
+    <Source href={stock.source}>기업 웹사이트</Source></div>
+    <p>{summary.data?.text ?? stock.overview}</p>
+    {summary.data?.status === 'AI' && <small>등록된 상품 자료를 바탕으로 요약했습니다.</small>}
+  </section>
 }
 
 function ProductPage() {
@@ -241,8 +248,11 @@ function AlternativePage() {
   if (!item) return <div className="page"><section className="panel"><Wait error={origin.error} kind="product" /></section></div>
   return <div className="page"><Link className="back" to={'/products/' + item.id}><ArrowLeft size={16} /> {item.name}</Link><h1>대안 상품 탐색</h1>
     <section className="panel"><div className="section-heading"><div><h2>{item.name}</h2><p>{item.prep}</p></div><ProductPhoto product={item} /></div>
-      <div className="fields"><label>비교 기준<select value={criterion} onChange={event => setParams({ criterion: event.target.value, scope })}>{Object.entries(criteria).map(([key, label]) => <option value={key} key={key}>{label}</option>)}</select></label>
-      <label>기업 관계<select value={scope} onChange={event => setParams({ criterion, scope: event.target.value })}><option value="OTHER_COMPANY">다른 기업</option><option value="SAME_COMPANY">같은 기업</option><option value="ALL_COMPANIES">전체</option></select></label></div>
+      <ChoiceButtons label="비교 기준" choices={criteria} value={criterion} icon={criterionIcon}
+        onSelect={value => setParams({ criterion: value, scope })} />
+      <div className="segmented" role="group" aria-label="기업 관계">{Object.entries(scopeLabels).map(([value, name]) =>
+        <button key={value} type="button" aria-pressed={scope === value} className={scope === value ? 'selected' : ''}
+          onClick={() => setParams({ criterion, scope: value })}>{name}</button>)}</div>
       {result.data?.baseline && <p className="baseline">기준 상품 {formatFact(result.data.baseline)} · {bases[result.data.baseline.basis]}</p>}
     </section>
     <section className="panel"><h2>비교 결과</h2>{result.data ? <>
@@ -277,7 +287,7 @@ function CompanyCompare() {
   </div>
 }
 
-type DiscoverResult = { filters: { category: Category; criterion: Criterion } | null; results: Match[]; method: string; message: string }
+type DiscoverResult = { filters: { category: Category; criterion: Criterion } | null; results: Match[]; method: string; message: string; explanation?: string }
 function Discovery() {
   const [params, setParams] = useSearchParams()
   const [question, setQuestion] = useState('')
@@ -300,17 +310,21 @@ function Discovery() {
       <textarea id="question" rows={3} value={question} maxLength={240} placeholder="예: 나트륨이 낮은 라면을 찾고 싶어요." onChange={event => setQuestion(event.target.value)} />
       <div className="tags">{prompts.map(prompt => <button type="button" key={prompt} disabled={natural.isPending} onClick={() => run(prompt)}>{prompt}</button>)}</div>
       <button className="primary" disabled={natural.isPending || !question.trim()} type="submit"><Sparkles size={17} /> {natural.isPending ? '상품을 찾고 있습니다…' : '상품 찾아보기'}</button></form></section>
-    <section className="panel"><h2>탐색 조건</h2><div className="fields"><label>상품군<select value={category || result?.filters?.category || ''} onChange={event => filter('category', event.target.value)}>
-      <option value="">상품군 선택</option>{Object.entries(categories).map(([key, label]) => <option value={key} key={key}>{label}</option>)}</select></label>
-      <label>비교 기준<select value={criterion || result?.filters?.criterion || ''} onChange={event => filter('criterion', event.target.value)}>
-      <option value="">비교 기준 선택</option>{Object.entries(criteria).map(([key, label]) => <option value={key} key={key}>{label}</option>)}</select></label></div>
+    <section className="panel"><h2>탐색 조건</h2>
+      <ChoiceButtons label="상품군" choices={categories} value={category || result?.filters?.category || ''}
+        icon={value => <ProductIcon category={value} />} onSelect={value => filter('category', value)} />
+      <ChoiceButtons label="비교 기준" choices={criteria} value={criterion || result?.filters?.criterion || ''}
+        icon={criterionIcon} onSelect={value => filter('criterion', value)} />
       {natural.error && <Empty>{natural.error.message} 조건을 직접 선택해 다시 찾아보실 수 있습니다.</Empty>}
     </section>
     {(natural.isPending || (manual.isFetching && !result)) && <section className="panel"><h2>탐색 결과</h2><Skeleton kind="products" label="상품을 찾고 있습니다" /></section>}
     {manual.error && !natural.data && <section className="panel"><Wait error={manual.error} /></section>}
-    {result && <section className="panel discovery-result"><h2>탐색 결과</h2><p>{result.message}</p>{result.results.map(row => <article className="match" key={row.product.id}>
+    {result && <><section className="panel discovery-summary" aria-label={result.explanation ? 'AI 탐색 설명' : '탐색 안내'}>
+      <h2>{result.explanation && <Sparkles size={17} aria-hidden />}{result.explanation ? 'AI 탐색 설명' : '탐색 안내'}</h2>
+      <p>{result.explanation ?? result.message}</p></section>
+    <section className="panel discovery-result"><h2>탐색 결과</h2>{result.results.map(row => <article className="match" key={row.product.id}>
       <ProductCard product={row.product} /><div className="match-meta"><strong>{formatFact(row.fact)} · {bases[row.fact.basis]}</strong><Source href={row.fact.source} /></div>
-      <Link className="plain-link" to={pathFor(row.stock.id)}>{row.stock.name} · {row.stock.symbol}</Link></article>)}</section>}
+      <Link className="plain-link" to={pathFor(row.stock.id)}>{row.stock.name} · {row.stock.symbol}</Link></article>)}</section></>}
   </div>
 }
 
