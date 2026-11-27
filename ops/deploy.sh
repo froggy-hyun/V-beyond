@@ -16,6 +16,7 @@ chmod 700 "$work/askpass"
 export SSH_ASKPASS="$work/askpass" SSH_ASKPASS_REQUIRE=force DISPLAY=:0
 ssh_opts=(-i "$work/key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$work/known_hosts" -o ConnectTimeout=12 -o NumberOfPasswordPrompts=1)
 cp Caddyfile compose.public.yaml compose.yaml ops/activate.sh "$work/bundle/"
+chmod 644 "$work/bundle/Caddyfile"
 python3 - "$work/bundle/.env" <<'PY'
 import os, sys
 from pathlib import Path

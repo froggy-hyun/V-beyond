@@ -1,7 +1,7 @@
 services:
   edge:
     image: caddy:2.11.9-alpine@sha256:003a97808e781aa9f7e75cc2f43d34d461099031faf5e20faefb9f61126836f0
-    ports: ["80:8080", "443:8443", "443:8443/udp"]
+    ports: ["80:8080", "443:8443"]
     environment:
       SITE_HOST: ${SITE_HOST:?SITE_HOST required}
     volumes:

@@ -4,6 +4,9 @@
 	https_port 8443
 	default_sni {$SITE_HOST}
 	auto_https disable_redirects
+	servers {
+		protocols h1 h2
+	}
 }
 
 http://{$SITE_HOST} {
