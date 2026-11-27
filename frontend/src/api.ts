@@ -27,17 +27,27 @@ export type Candle = { startAt: string; open: number; high: number; low: number;
 export type Comparison = { stock: Stock; products: Product[] }
 export type Match = { product: Product; stock: Stock; fact: Fact; reductionPercent?: number | null }
 
+class ApiError extends Error {
+  constructor(message: string, readonly status: number) { super(message) }
+}
+
 export async function api<T>(path: string, options?: RequestInit): Promise<T> {
   const result = await fetch('/api/v1' + path, options)
   if (!result.ok) {
     const error = await result.json().catch(() => null)
-    throw new Error(error?.message || '데이터를 불러올 수 없습니다.')
+    throw new ApiError(error?.message || '데이터를 불러올 수 없습니다.', result.status)
   }
   return result.json()
 }
 export const pathFor = (id: string) => '/stocks/' + encodeURIComponent(id)
 export function useData<T>(path: string, enabled = true, refetchInterval?: number) {
-  return useQuery({ queryKey: [path], queryFn: ({ signal }) => api<T>(path, { signal }), enabled, refetchInterval })
+  const isChart = path.startsWith('/market/stocks/')
+  return useQuery({
+    queryKey: [path], queryFn: ({ signal }) => api<T>(path, { signal }), enabled, refetchInterval,
+    retry: isChart ? (failures, error) =>
+      failures < (error instanceof ApiError && [429, 502, 503, 504].includes(error.status) ? 3 : 1) : 1,
+    retryDelay: isChart ? attempt => Math.min(1000 * 2 ** attempt, 4000) : undefined,
+  })
 }
 export function useMarketMode() {
   return useData<{ feedMode: string }>('/market/mode').data?.feedMode

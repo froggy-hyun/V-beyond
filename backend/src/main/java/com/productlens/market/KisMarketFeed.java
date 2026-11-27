@@ -169,24 +169,27 @@ class KisMarketFeed implements MarketFeed {
         var ttl = range.equals("1D") ? Duration.ofSeconds(trading ? 12 : 50)
                 : Duration.ofSeconds(trading ? 55 : 180);
         if (fresh(cached, ttl)) return interval(cached.bars(), interval);
-        if (!chartSlots.tryAcquire()) {
-            if (cached != null) return interval(cached.bars(), interval);
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "시세 조회 중입니다. 잠시 뒤 다시 시도하세요.");
-        }
         try {
             var chart = charts.compute(key, (ignored, current) -> {
                 if (fresh(current, ttl)) return current;
                 var recent = trading && range.equals("1D") && current != null ? current.bars() : List.<Candle>of();
-                List<Candle> result = range.equals("1D") ? intraday(stock, recent) : daily(stock, range);
-                return new Chart(result, Instant.now());
+                if (!chartSlots.tryAcquire()) {
+                    if (current != null) return current;
+                    throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "시세 조회 중입니다. 잠시 뒤 다시 시도하세요.");
+                }
+                try {
+                    // 같은 종목과 기간의 동시 요청은 하나의 공급자 조회 결과를 공유
+                    List<Candle> result = range.equals("1D") ? intraday(stock, recent) : daily(stock, range);
+                    return new Chart(result, Instant.now());
+                } finally {
+                    chartSlots.release();
+                }
             });
             return interval(chart.bars(), interval);
         } catch (KisClient.Unavailable | IllegalArgumentException | DateTimeException error) {
             log.debug("KIS 차트 조회 실패 {} {} {}", stock.id(), range, error.getClass().getSimpleName());
             if (cached != null) return interval(cached.bars(), interval);
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "KIS 차트를 일시적으로 불러올 수 없습니다.");
-        } finally {
-            chartSlots.release();
         }
     }
 
