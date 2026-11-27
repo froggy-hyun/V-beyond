@@ -33,7 +33,7 @@ export function ProductPhoto({ product, detail = false }: { product: Pick<Produc
     : <span className="product-icon"><Package aria-hidden /></span>
   return <div className="product-photo"><img src={photo} alt={detail ? `${product.name} 제품 사진` : ''} loading={detail ? 'eager' : 'lazy'} decoding="async" /></div>
 }
-export function StockMark({ stock }: { stock: Stock }) {
+export function StockMark({ stock }: { stock: Pick<Stock, 'symbol'> }) {
   const logo = issuerImages[`./assets/issuers/${stock.symbol}.png`]
   return <span className="stock-mark" aria-hidden>{logo ? <img src={logo} alt="" decoding="async" /> : <Building2 size={17} />}</span>
 }

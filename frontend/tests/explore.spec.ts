@@ -108,7 +108,12 @@ test('종목 차트 아래 건강 이슈 비교와 대안 종목 이동', async 
 })
 
 test('종목 비교에서 소재와 성분 기준별 검증 결과 표시', async ({ request, page }) => {
-  const soup = await request.get('/api/v1/stocks/US:NASDAQ:CPB/health-comparisons')
+  const soupPath = '/api/v1/stocks/US:NASDAQ:CPB/health-comparisons'
+  let soup = await request.get(soupPath)
+  if (soup.status() === 429) await expect.poll(async () => {
+    soup = await request.get(soupPath)
+    return soup.status()
+  }).toBe(200)
   expect(soup.ok()).toBe(true)
   expect(await soup.json()).toEqual(expect.arrayContaining([
     expect.objectContaining({ product: expect.objectContaining({ id: 'campbell-original' }), issues: [
@@ -164,8 +169,18 @@ test('브랜드 판매액과 분기 점유율, 공시 매출 및 AI 상품 소�
   await expect(retail.getByRole('heading', { name: '2026년 1분기 판매액 점유율' })).toBeVisible({ timeout: 12_000 })
   await expect(retail.locator('.performance-donut')).toBeVisible()
   await expect(retail.getByText(/992\.87억 원/).first()).toBeVisible()
-  await retail.getByLabel('비교 브랜드').selectOption({ label: '불닭볶음면' })
-  await expect(retail.getByRole('link', { name: '불닭볶음면', exact: true })).toBeVisible()
+  await expect(retail.getByLabel('비교 브랜드')).toHaveCount(0)
+  const peers = retail.locator('.performance-brand[data-own="false"]')
+  await expect(peers).toHaveCount(2)
+  await expect(retail.getByRole('link', { name: '불닭볶음면 종목 상세' })).toHaveAttribute('href', '/stocks/KR%3AKOSPI%3A003230')
+  const ownPhoto = retail.locator('.performance-brand[data-own="true"] .product-photo')
+  expect((await ownPhoto.boundingBox())!.width).toBeGreaterThan((await peers.first().locator('.product-photo').boundingBox())!.width)
+  await expect(peers.first().locator('.stock-mark img')).toBeVisible()
+  const connectors = retail.locator('.performance-connectors path')
+  await expect(connectors).toHaveCount(3)
+  await expect(connectors.first()).toHaveCSS('stroke-dasharray', '3px, 3px')
+  await expect(retail.locator('.performance-bars .performance-bar-group').last().locator('.performance-bar-name')).toHaveText(['신라면', '진라면', '불닭볶음면'])
+  await expect(retail.locator('.performance-bars .performance-bar-row').first()).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   await retail.getByLabel('시장점유율 분기').selectOption({ label: '2025년 4분기' })
   await expect(retail.getByRole('heading', { name: '2025년 4분기 판매액 점유율' })).toBeVisible()
   await retail.getByRole('button', { name: '점유율', exact: true }).click()
@@ -193,22 +208,45 @@ test('판매 점유율이 채워진 뒤 분기별 막대가 순차적으로 나�
   await expect(bars.locator('.bar-fill').first()).toHaveCSS('width', '0px')
   await bars.evaluate(element => element.addEventListener('transitionstart', () => {
     const ring = element.closest('.performance-grid')!.querySelector('.performance-donut')!
-    element.dataset.firstBarRing ??= getComputedStyle(ring).getPropertyValue('--donut-main')
+    element.dataset.firstBarRing ??= getComputedStyle(ring).getPropertyValue('--donut-progress')
   }))
-  const angle = () => donut.evaluate(element => Number.parseFloat(getComputedStyle(element).getPropertyValue('--donut-main')))
-  expect(await angle()).toBe(0)
+  const progress = () => donut.evaluate(element => Number.parseFloat(getComputedStyle(element).getPropertyValue('--donut-progress')))
+  expect(await progress()).toBe(0)
   await donut.scrollIntoViewIfNeeded()
   await expect(donut).toHaveAttribute('data-visible', 'true')
   await expect.poll(async () => {
-    const current = await angle()
-    return current > 0 && current < 25
+    const current = await progress()
+    return current > 0 && current < 1
   }, { intervals: [15, 30, 50] }).toBe(true)
-  await expect.poll(angle).toBeCloseTo(25.92, 1)
+  await expect.poll(progress).toBe(1)
   await bars.scrollIntoViewIfNeeded()
   await expect(bars).toHaveAttribute('data-visible', 'true')
-  await expect.poll(async () => Number.parseFloat((await bars.getAttribute('data-first-bar-ring')) ?? '0')).toBeCloseTo(25.92, 1)
+  await expect.poll(async () => Number.parseFloat((await bars.getAttribute('data-first-bar-ring')) ?? '0')).toBe(1)
   await expect.poll(() => bars.locator('.bar-fill').first().evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(0)
   await expect(bars.locator('.performance-bar-group').last().locator('.bar-fill').first()).toHaveCSS('transition-delay', '0.26s')
+})
+
+test('시장 자료가 있는 브랜드를 함께 표시하고 타사 종목으로 이동', async ({ page }) => {
+  await page.route('**/*004370/revenue-segments', async route => {
+    const response = await route.fetch()
+    if (!response.ok()) return route.fulfill({ response })
+    const data = await response.json()
+    const jin = data.markets[0]?.brands.find((brand: { name: string }) => brand.name === '진라면')
+    if (jin) jin.amounts[4] = null
+    await route.fulfill({ response, json: data })
+  })
+  await page.goto('/stocks/KR:KOSPI:004370')
+  const retail = page.getByRole('article', { name: '국내 라면 소매시장' })
+  await expect(retail.getByRole('heading', { name: '2026년 1분기 판매액 점유율' })).toBeVisible()
+  await expect(retail.locator('.performance-bars .performance-bar-group').last().locator('.performance-bar-name')).toHaveText(['신라면', '불닭볶음면'])
+  await expect(retail.getByRole('link', { name: '진라면 종목 상세' })).toHaveCount(0)
+  await retail.getByLabel('시장점유율 분기').selectOption({ label: '2025년 4분기' })
+  const ottogi = retail.getByRole('link', { name: '진라면 종목 상세' })
+  await expect(ottogi.locator('.product-photo img')).toBeVisible()
+  await expect(ottogi.locator('.stock-mark img')).toBeVisible()
+  await ottogi.click()
+  await expect(page.getByRole('heading', { name: '오뚜기', exact: true })).toBeVisible()
+  await expect(page.locator('.performance-brand[data-own="true"]')).toContainText('진라면')
 })
 
 test('검색, 관심종목 및 자연어 조건 수정', async ({ page }) => {

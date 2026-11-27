@@ -231,6 +231,7 @@
         {
           "name": "신라면",
           "stockId": "KR:KOSPI:004370",
+          "productId": "shin-original",
           "amounts": [
             104447000000,
             96288000000,
@@ -242,6 +243,7 @@
         {
           "name": "진라면",
           "stockId": "KR:KOSPI:007310",
+          "productId": "jin-spicy",
           "amounts": [
             49216000000,
             47342000000,
@@ -253,6 +255,7 @@
         {
           "name": "불닭볶음면",
           "stockId": "KR:KOSPI:003230",
+          "productId": "buldak-original",
           "amounts": [
             42726000000,
             44052000000,

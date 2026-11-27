@@ -193,44 +193,76 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .stock-wide { grid-column: 1 / -1; min-width: 0 }
 .company-intro-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 7px }
 .ai-label { display: inline-flex; align-items: center; gap: 3px; color: var(--accent); background: var(--accent-tint) }
-.performance-card { --peer: var(--fall); --chart-track: var(--line); border-top: 1px solid var(--line); margin-top: 14px; padding-top: 13px }
+.performance-card { --chart-track: #e9edf1; border-top: 1px solid var(--line); margin-top: 14px; padding-top: 13px }
 .performance-controls { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 12px 0 }
 .performance-controls label { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-size: .84rem }
 .performance-controls select { min-height: 34px; max-width: 100%; padding: 4px 7px; background: var(--surface); border-radius: 6px; color: #202329 }
-.performance-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr); gap: 18px }
-.performance-grid > div { min-width: 0; border: 1px solid var(--line); border-radius: 9px; padding: 14px }
+.performance-grid { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); align-items: start; gap: 14px }
+.performance-grid > div { min-width: 0; border: 1px solid var(--line); border-radius: 10px; padding: 14px }
 .performance-grid h4 { font-size: .91rem; font-weight: 730; margin: 0 }
-.performance-share { display: grid; gap: 14px; justify-items: center; align-content: start }
-.performance-share h4 { justify-self: start }
-@property --donut-main { syntax: '<percentage>'; inherits: false; initial-value: 0% }
-@property --donut-end { syntax: '<percentage>'; inherits: false; initial-value: 0% }
+.performance-share { align-content: start; display: grid; gap: 14px }
+.performance-share-visual { position: relative; display: grid; grid-template-columns: minmax(0, .86fr) minmax(134px, 1fr); align-items: center; gap: clamp(12px, 3vw, 30px) }
+@property --donut-progress { syntax: '<number>'; inherits: false; initial-value: 0 }
 .performance-donut {
-  --donut-main: 0%;
-  --donut-end: 0%;
+  --donut-progress: 0;
   display: grid;
   place-items: center;
-  width: min(148px, 100%);
+  justify-self: end;
+  width: min(190px, 100%);
   aspect-ratio: 1;
   border-radius: 50%;
-  background: conic-gradient(var(--accent) 0 var(--donut-main), var(--peer) var(--donut-main) var(--donut-end), var(--chart-track) var(--donut-end) 100%);
-  transition: --donut-main 780ms cubic-bezier(.2, .7, .3, 1), --donut-end 780ms cubic-bezier(.2, .7, .3, 1);
+  background-color: var(--chart-track);
+  transition: --donut-progress 780ms cubic-bezier(.2, .7, .3, 1);
 }
-.performance-donut[data-visible="true"] { --donut-main: var(--focus-share); --donut-end: var(--combined-share) }
-.performance-donut > span { display: grid; place-content: center; text-align: center; width: 73%; height: 73%; border-radius: 50%; background: #fff; font-size: .82rem }
-.performance-legend { width: 100%; max-width: 250px; display: grid; gap: 4px; font-size: .83rem }
-.performance-legend div { display: flex; align-items: center; justify-content: space-between; gap: 5px }
-.performance-legend dt::before { content: ""; display: inline-block; vertical-align: middle; width: 8px; height: 8px; margin-right: 6px; border-radius: 2px; background: var(--accent) }
-.performance-legend div:nth-child(2) dt::before { background: var(--peer) }
-.performance-legend div:nth-child(3) dt::before { background: var(--chart-track) }
-.performance-legend dd, .performance-bar-row { font-variant-numeric: tabular-nums }
-.performance-legend a:hover { color: var(--accent) }
+.performance-donut[data-visible="true"] { --donut-progress: 1 }
+.performance-market-total {
+  display: grid;
+  place-content: center;
+  gap: 2px;
+  text-align: center;
+  width: 76%;
+  height: 76%;
+  border-radius: 50%;
+  background: #fff;
+  padding-inline: 3px;
+  font-size: clamp(.66rem, 1.5vw, .93rem);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.performance-market-total small { font-size: .68rem }
+.performance-connectors { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; opacity: 0; transition: opacity var(--motion) }
+.performance-connectors[data-visible="true"] { opacity: .72 }
+.performance-connectors path { fill: none; stroke-width: 1; stroke-dasharray: 3 3 }
+.performance-callouts { position: relative; min-width: 0; display: grid; gap: 6px }
+.performance-brand-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 6px;
+  transition: background-color var(--motion), border-color var(--motion);
+}
+.performance-brand[data-own="true"] .performance-brand-card { background: var(--accent-tint); border-color: transparent }
+a.performance-brand-card:hover { background: var(--surface); border-color: var(--brand-color) }
+.performance-brand .product-photo { width: 33px; height: 33px; background: #fff; border-radius: 7px }
+.performance-brand[data-own="true"] .product-photo { width: 57px; height: 57px }
+.performance-brand-label { min-width: 0; display: grid; gap: 2px }
+.performance-brand-name { display: flex; align-items: center; gap: 4px; font-size: .77rem; word-break: keep-all }
+.performance-brand-name .stock-mark { flex: none; width: 16px; height: 16px; border-radius: 4px; padding: 1px }
+.performance-brand-share { font-size: .9rem; font-weight: 740; font-variant-numeric: tabular-nums; line-height: 1.1 }
+.performance-brand[data-own="true"] .performance-brand-share { font-size: 1.19rem; color: var(--brand-color) }
+.performance-brand-label > small { font-size: .72rem; font-variant-numeric: tabular-nums; word-break: keep-all }
 .performance-bars, .performance-segments { display: grid; gap: 8px; margin-top: 10px }
 .performance-segments { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px }
 .performance-bar-group { display: grid; gap: 4px; align-content: start }
-.performance-bar-row { position: relative; isolation: isolate; min-height: 22px; display: flex; align-items: center; justify-content: flex-end; padding: 2px 6px; white-space: nowrap; font-size: .8rem; background: var(--surface); border-radius: 4px; overflow: hidden }
+.performance-bar-row { position: relative; isolation: isolate; min-height: 22px; display: flex; align-items: center; justify-content: flex-end; padding: 2px 6px; white-space: nowrap; font-size: .8rem; background: var(--surface); border-radius: 4px; overflow: hidden; font-variant-numeric: tabular-nums }
 .bar-fill { position: absolute; z-index: -1; inset: 0 auto 0 0; background: #cdebe4; border-radius: 4px; transition: width var(--motion) }
-.bar-peer { background: #dae4fe }
-.performance-bars .bar-fill { width: 0; transition: width 440ms cubic-bezier(.2, .7, .3, 1) var(--bar-delay) }
+.performance-bars .performance-bar-row { justify-content: space-between; gap: 6px; background: transparent }
+.performance-bar-name { overflow: hidden; text-overflow: ellipsis }
+.performance-bars .bar-fill { width: 0; background: color-mix(in srgb, var(--brand-color) 24%, white); transition: width 440ms cubic-bezier(.2, .7, .3, 1) var(--bar-delay) }
 .performance-bars[data-visible="true"] .bar-fill { width: var(--bar-width) }
 .health-item { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 13px }
 .health-criteria { flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-bottom: 12px }
@@ -454,9 +486,16 @@ footer p { margin: 0; color: var(--muted); font-size: .75rem; line-height: 1.5; 
   .index-cell { grid-template-columns: minmax(0, 1fr) 37px }
 }
 
+@media (max-width: 420px) {
+  .performance-grid > div { padding: 10px }
+  .performance-brand-card { gap: 5px; padding: 5px }
+  .performance-brand .product-photo { width: 28px; height: 28px }
+  .performance-brand[data-own="true"] .product-photo { width: 43px; height: 43px }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .route-content, .skeleton i::after, .comparison-card[data-winner="true"] { animation: none }
-  .performance-donut { --donut-main: var(--focus-share); --donut-end: var(--combined-share); transition: none }
+  .performance-donut { --donut-progress: 1; transition: none }
   .performance-bars .bar-fill { width: var(--bar-width); transition: none }
   :root { --motion: 0ms }
 }

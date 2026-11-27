@@ -12,7 +12,7 @@ class ProductMarketData {
     record QuarterSales(String quarter, String periodEnd, long amount, String source, String note) {}
     record Segment(String name, String scope, String currency, List<QuarterSales> quarters) {}
     record MarketQuarter(String quarter, long total) {}
-    record Brand(String name, String stockId, List<Long> amounts) {}
+    record Brand(String name, String stockId, String productId, List<Long> amounts) {}
     record RetailMarket(String name, String region, Catalog.Category category, String scope, String source,
                         List<MarketQuarter> quarters, List<Brand> brands) {}
     record Book(Map<String, List<Segment>> segments, List<RetailMarket> markets) {}
