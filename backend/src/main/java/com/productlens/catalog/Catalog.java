@@ -82,7 +82,7 @@ public class Catalog {
                 .orElseThrow(() -> missing("상품을 찾을 수 없습니다."));
     }
 
-    List<Product> verifiedProducts() {
+    public List<Product> verifiedProducts() {
         return db.sql("SELECT details FROM products WHERE status='VERIFIED' ORDER BY name, id")
                 .query((row, index) -> decode(row.getString(1))).list();
     }

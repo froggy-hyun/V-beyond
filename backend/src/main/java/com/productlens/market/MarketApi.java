@@ -5,6 +5,7 @@ import com.productlens.catalog.Catalog.Stock;
 import jakarta.annotation.PreDestroy;
 import jakarta.validation.constraints.Pattern;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RestController
 @RequestMapping("/api/v1/market")
 class MarketApi {
+    record Session(String market, LocalDate date, String session, String timezone, String feedMode, Instant openAt, Instant closeAt) {}
     private final Catalog catalog;
     private final MarketFeed data;
     private final Semaphore connections = new Semaphore(96);
@@ -58,9 +60,9 @@ class MarketApi {
     }
 
     @GetMapping("/sessions")
-    Map<String, String> session(@RequestParam @Pattern(regexp = "KR|US") String market, @RequestParam LocalDate date) {
-        return Map.of("market", market, "date", date.toString(), "session", "UNKNOWN",
-                "timezone", market.equals("KR") ? "Asia/Seoul" : "America/New_York", "feedMode", data.mode());
+    Session session(@RequestParam @Pattern(regexp = "KR|US") String market, @RequestParam LocalDate date) {
+        var day = data.schedule(market, date);
+        return new Session(market, date, day.session(), MarketHours.zone(market).getId(), data.mode(), day.openAt(), day.closeAt());
     }
 
     @GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

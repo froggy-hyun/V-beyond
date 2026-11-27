@@ -203,10 +203,12 @@ function CompanyIntroduction({ stock }: { stock: Stock }) {
   const path = pathFor(stock.id) + '/product-overview'
   const summary = useQuery({ queryKey: [path], queryFn: ({ signal }) => api<{ text: string; status: 'AI' | 'PENDING' | 'FALLBACK' }>(path, { signal }),
     refetchInterval: query => query.state.data?.status === 'PENDING' ? 2500 : false })
+  const loading = summary.isPending || (!summary.isError && summary.data?.status === 'PENDING')
   return <section className="panel stock-company"><div className="section-heading"><div className="company-intro-heading"><h2>기업 소개</h2>
     {summary.data?.status === 'AI' && <span className="status ai-label"><Sparkles size={13} aria-hidden /> AI 상품 요약</span>}</div>
     <Source href={stock.source}>기업 웹사이트</Source></div>
-    <p>{summary.data?.text ?? stock.overview}</p>
+    {loading ? <Skeleton kind="text" label="AI 기업 소개를 불러오고 있습니다" />
+      : <p>{summary.data?.text ?? stock.overview}</p>}
     {summary.data?.status === 'AI' && <small>등록된 상품 자료를 바탕으로 요약했습니다.</small>}
   </section>
 }
@@ -291,16 +293,20 @@ type DiscoverResult = { filters: { category: Category; criterion: Criterion } | 
 function Discovery() {
   const [params, setParams] = useSearchParams()
   const [question, setQuestion] = useState('')
-  const category = params.get('category') ?? ''
-  const criterion = params.get('criterion') ?? ''
   const natural = useMutation({ mutationFn: (value: string) => api<DiscoverResult>('/ai/discover', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: value }) }) })
-  const manual = useData<DiscoverResult>('/ai/discover?' + new URLSearchParams({ category, criterion }), Boolean(category && criterion))
+  const options = useData<Partial<Record<Category, Criterion[]>>>('/ai/discovery-options')
+  const categoryValue = params.get('category') ?? natural.data?.filters?.category
+  const category = categoryValue && Object.hasOwn(categories, categoryValue) ? categoryValue as Category : undefined
+  const allowed = category ? options.data?.[category] ?? [] : []
+  const criterionValue = params.get('criterion') ?? natural.data?.filters?.criterion
+  const criterion = allowed.find(value => value === criterionValue)
+  const manual = useData<DiscoverResult>('/ai/discover?' + new URLSearchParams({ category: category ?? '', criterion: criterion ?? '' }),
+    Boolean(category && criterion && !natural.data))
   const run = (value: string) => { setQuestion(value); setParams({}); natural.mutate(value) }
   const submit = (event: FormEvent) => { event.preventDefault(); if (question.trim()) run(question) }
-  const filter = (key: string, value: string) => {
-    const next = new URLSearchParams(params)
-    if (natural.data?.filters) for (const [name, entry] of Object.entries(natural.data.filters)) if (!next.has(name)) next.set(name, entry)
-    next.set(key, value)
+  const filter = (nextCategory: Category, nextCriterion?: Criterion) => {
+    const next = new URLSearchParams({ category: nextCategory })
+    if (nextCriterion && options.data?.[nextCategory]?.includes(nextCriterion)) next.set('criterion', nextCriterion)
     natural.reset()
     setParams(next)
   }
@@ -311,10 +317,13 @@ function Discovery() {
       <div className="tags">{prompts.map(prompt => <button type="button" key={prompt} disabled={natural.isPending} onClick={() => run(prompt)}>{prompt}</button>)}</div>
       <button className="primary" disabled={natural.isPending || !question.trim()} type="submit"><Sparkles size={17} /> {natural.isPending ? '상품을 찾고 있습니다…' : '상품 찾아보기'}</button></form></section>
     <section className="panel"><h2>탐색 조건</h2>
-      <ChoiceButtons label="상품군" choices={categories} value={category || result?.filters?.category || ''}
-        icon={value => <ProductIcon category={value} />} onSelect={value => filter('category', value)} />
-      <ChoiceButtons label="비교 기준" choices={criteria} value={criterion || result?.filters?.criterion || ''}
-        icon={criterionIcon} onSelect={value => filter('criterion', value)} />
+      <ChoiceButtons label="상품군" choices={categories} value={category ?? ''}
+        icon={value => <ProductIcon category={value} />} onSelect={value => filter(value, criterion)} />
+      {category ? options.data ? allowed.length > 0
+        ? <ChoiceButtons label="비교 기준" choices={criteria} visibleChoices={allowed} value={criterion ?? ''}
+          icon={criterionIcon} onSelect={value => filter(category, value)} />
+        : <p>이 상품군은 공개 자료로 비교할 수 있는 항목이 없습니다.</p>
+        : <Wait error={options.error} /> : <p>상품군을 고르면 선택할 수 있는 비교 기준이 표시됩니다.</p>}
       {natural.error && <Empty>{natural.error.message} 조건을 직접 선택해 다시 찾아보실 수 있습니다.</Empty>}
     </section>
     {(natural.isPending || (manual.isFetching && !result)) && <section className="panel"><h2>탐색 결과</h2><Skeleton kind="products" label="상품을 찾고 있습니다" /></section>}

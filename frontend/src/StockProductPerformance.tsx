@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { pathFor, useData } from './api'
 import type { Stock } from './api'
 import { Empty, Source, Wait } from './ui'
-import marketCharacter from './assets/brand/market.png'
 
 type QuarterSales = { quarter: string; periodEnd: string; amount: number; source: string; note?: string }
 type Segment = { name: string; scope: string; currency: string; quarters: QuarterSales[] }
@@ -16,14 +16,13 @@ const quarterLabel = (value: string) => value.replace(/^FY\s*/, '회계 ').repla
 const amounts = (amount: number | null | undefined, currency = 'KRW') => amount == null ? '자료 없음'
   : currency === 'KRW' ? number.format(amount / 100_000_000) + '억 원' : number.format(amount / 1_000_000) + '백만 달러'
 const share = (amount: number, total: number) => total > 0 ? amount / total * 100 : 0
+const revealThreshold = .4
 
 export default function StockProductPerformance({ stock }: { stock: Stock }) {
   const result = useData<Overview>(pathFor(stock.id) + '/revenue-segments')
   return <section className="panel stock-wide" aria-labelledby="product-finance-heading">
-    <div className="section-heading compare-heading"><div><h2 id="product-finance-heading">상품 매출 · 시장점유율</h2>
-      <p>상품이 속한 브랜드의 소매 판매액과 공시 사업군 실적을 확인할 수 있습니다.</p></div>
-      <img src={marketCharacter} alt="" width={350} height={275} />
-    </div>
+    <header><h2 id="product-finance-heading">상품 매출 · 시장점유율</h2>
+      <p>상품이 속한 브랜드의 소매 판매액과 공시 사업군 실적을 확인할 수 있습니다.</p></header>
     {result.data ? <>
       {result.data.markets.map(market => <RetailComparison key={market.name} market={market} stockId={stock.id} />)}
       {result.data.segments.map(segment => <ReportedSegment key={segment.name} segment={segment} />)}
@@ -61,9 +60,7 @@ function RetailComparison({ market, stockId }: { market: Market; stockId: string
     <div className="performance-grid">
       <div className="performance-share">
         <h4>{quarterLabel(quarter.quarter)} 판매액 점유율</h4>
-        <div className="performance-donut" aria-hidden style={{ background: `conic-gradient(var(--accent) 0 ${focusShare}%, var(--peer) ${focusShare}% ${focusShare + peerShare}%, var(--surface) 0)` }}>
-          <span><small>시장 전체</small><strong>{amounts(quarter.total)}</strong></span>
-        </div>
+        <MarketShareChart total={quarter.total} focusShare={focusShare} peerShare={peerShare} />
         <dl className="performance-legend">
           <div><dt><Link to={pathFor(focus.stockId)}>{focus.name}</Link></dt><dd>{number.format(focusShare)}%</dd></div>
           <div><dt><Link to={pathFor(peer.stockId)}>{peer.name}</Link></dt><dd>{number.format(peerShare)}%</dd></div>
@@ -88,6 +85,23 @@ function RetailComparison({ market, stockId }: { market: Market; stockId: string
     </div>
     <p>판매액은 봉지와 용기를 합친 브랜드 집계입니다. 점유율은 공개된 소매 조사 전체 판매액을 기준으로 계산합니다.</p>
   </article>
+}
+
+function MarketShareChart({ total, focusShare, peerShare }: { total: number; focusShare: number; peerShare: number }) {
+  const chart = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(() => !('IntersectionObserver' in window))
+  useEffect(() => {
+    if (!chart.current || visible) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.intersectionRatio >= revealThreshold) setVisible(true)
+    }, { threshold: revealThreshold })
+    observer.observe(chart.current)
+    return () => observer.disconnect()
+  }, [visible])
+  const slices = { '--focus-share': focusShare + '%', '--combined-share': (focusShare + peerShare) + '%' } as CSSProperties
+  return <div ref={chart} className="performance-donut" data-visible={visible} style={slices}>
+    <span><small>시장 전체</small><strong>{amounts(total)}</strong></span>
+  </div>
 }
 
 function ReportedSegment({ segment }: { segment: Segment }) {

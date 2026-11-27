@@ -108,14 +108,6 @@ export default function MarketPage() {
       {mode === 'REPLAY' && <span className="market-feed">시연용 시세입니다</span>}
     </div>
 
-    <section className="market-health" aria-label="건강 이슈 성분 탐색">
-      <Link to="/health" className="health-shortcut"><span><FlaskConical size={20} aria-hidden /></span>
-        <h2>건강 이슈 성분으로 종목 찾기</h2><ChevronRight size={17} aria-hidden /></Link>
-      <div className="health-shortcut-topics">
-        {[['sodium-nitrite', '아질산나트륨'], ['aspartame', '아스파탐'], ['ptfe', 'PTFE']].map(([id, name]) =>
-          <Link key={id} to={'/health?topic=' + id}>{name}</Link>)}
-      </div>
-    </section>
     <div className="dashboard">
       <section className="panel market-panel">
         <div className="section-heading market-list-heading">
@@ -148,7 +140,7 @@ export default function MarketPage() {
         {desktop && preview && <Preview stock={preview} quote={getQuote(preview.id)} />}
         {desktop && stocks.isPending && <section className="panel market-preview"><Skeleton kind="chart" /></section>}
         <section className="panel market-shortcuts">
-          <div className="shortcuts-heading"><h2>상품에서 종목 찾기</h2><img src={marketCharacter} alt="" width={350} height={275} /></div>
+          <div className="shortcuts-heading"><h2>상품으로 종목 찾기</h2><img src={marketCharacter} alt="" width={350} height={275} /></div>
           <div className="category-list">
             {(Object.keys(categories) as Category[]).map(category => <Link key={category} to={'/ai?category=' + category}>
               <ProductIcon category={category} /><strong>{categories[category]}</strong>
@@ -157,6 +149,14 @@ export default function MarketPage() {
           <div className="market-shortcut-links">
             <Link to="/ai"><ScanSearch size={17} aria-hidden /> 자연어로 탐색 <ChevronRight size={15} aria-hidden /></Link>
             <Link to="/watchlist"><Heart size={17} aria-hidden /> 관심종목 <ChevronRight size={15} aria-hidden /></Link>
+          </div>
+        </section>
+        <section className="panel market-health" aria-labelledby="market-health-heading">
+          <Link to="/health" className="health-shortcut"><span className="product-icon"><FlaskConical aria-hidden /></span>
+            <h2 id="market-health-heading">건강 이슈 성분으로 종목 찾기</h2><ChevronRight size={17} aria-hidden /></Link>
+          <div className="tags">
+            {[['sodium-nitrite', '아질산나트륨'], ['aspartame', '아스파탐'], ['ptfe', 'PTFE']].map(([id, name]) =>
+              <Link key={id} to={'/health?topic=' + id}>{name}</Link>)}
           </div>
         </section>
       </aside>

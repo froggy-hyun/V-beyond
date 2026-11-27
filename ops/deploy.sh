@@ -29,9 +29,9 @@ with Path(sys.argv[1]).open('w') as env:
     print('COMPOSE_FILE=compose.yaml:compose.public.yaml', file=env)
     print(f'SITE_HOST={site}', file=env)
     print(f'SITE_IP={site_ip}', file=env)
-    mode = os.environ.get('MARKET_DATA_MODE') or 'REPLAY'
-    if mode not in ('REPLAY', 'KIS'):
-        raise ValueError('MARKET_DATA_MODE는 REPLAY 또는 KIS')
+    mode = os.environ.get('MARKET_DATA_MODE') or 'KIS'
+    if mode != 'KIS':
+        raise ValueError('운영 배포에는 KIS 시세 모드 필요')
     print('MARKET_DATA_MODE=' + mode, file=env)
     for key in keys:
         value = os.environ[key]

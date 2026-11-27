@@ -18,7 +18,6 @@ verify_market() {
   local tls=(--resolve "$ip:443:127.0.0.1")
   curl -fsS --retry 8 --retry-all-errors --retry-delay 3 --max-time 5 \
     "${tls[@]}" "$url/stocks?market=KR" >/dev/null || return 1
-  if ! grep -qx 'MARKET_DATA_MODE=KIS' .env; then return 0; fi
   for attempt in {1..26}; do
     if curl -fsS --max-time 5 "${tls[@]}" "$url/market/quotes?ids=KR%3AKOSPI%3A004370,US%3ANYSE%3AKO" |
       python3 -c 'import json,sys; rows=json.load(sys.stdin); sys.exit(not (len(rows)==2 and all(r["feedMode"]=="KIS_REST" and r["freshness"]=="FRESH" and r["price"] for r in rows)))'; then

@@ -55,8 +55,7 @@ class KisMarketFeed implements MarketFeed {
     private final Map<ChartKey, Instant> chartAttempts = new HashMap<>();
     private List<Stock> chartUniverse = List.of();
     private final Map<String, IndexRefresh> indexRefresh = new HashMap<>();
-    private volatile LocalDate krCalendarDate;
-    private volatile boolean krTradingDay;
+    private volatile KrCalendar krCalendar;
     private Instant nextCalendarAttempt = Instant.EPOCH;
     private volatile Instant refreshUntil = Instant.now().plusSeconds(90);
     private final java.util.concurrent.ScheduledExecutorService poller = Executors.newScheduledThreadPool(3);
@@ -66,6 +65,7 @@ class KisMarketFeed implements MarketFeed {
     private record ChartTarget(ChartKey key, Stock stock, Instant due, boolean active, boolean trading) {}
     private record Index(String code, String symbol) {}
     private record IndexRefresh(Instant due, boolean trading) {}
+    private record KrCalendar(LocalDate date, boolean open) {}
     private static final Map<String, List<Index>> INDICES = Map.of(
             "KR", List.of(new Index("KOSPI", "0001"), new Index("KOSDAQ", "1001")),
             "US", List.of(new Index("SPX", "SPX"), new Index("COMP", "COMP")));
@@ -106,6 +106,12 @@ class KisMarketFeed implements MarketFeed {
     @PreDestroy void stop() { poller.shutdownNow(); }
 
     @Override public String mode() { return "KIS_REST"; }
+
+    @Override public MarketHours.Schedule schedule(String market, LocalDate date) {
+        var calendar = krCalendar;
+        return MarketHours.schedule(market, date,
+                market.equals("KR") && calendar != null && date.equals(calendar.date()) ? calendar.open() : null);
+    }
 
     @Override public Quote quote(Stock stock) {
         refreshUntil = Instant.now().plusSeconds(90);
@@ -167,15 +173,16 @@ class KisMarketFeed implements MarketFeed {
     private void refreshKoreanHoliday() {
         var now = Instant.now();
         var date = now.atZone(SEOUL).toLocalDate();
-        if (date.equals(krCalendarDate) || now.isBefore(nextCalendarAttempt)) return;
+        var calendar = krCalendar;
+        if ((calendar != null && date.equals(calendar.date())) || now.isBefore(nextCalendarAttempt)) return;
         nextCalendarAttempt = now.plusSeconds(90);
         try {
             var data = kis.query(KisClient.DOMESTIC + "chk-holiday", "CTCA0903R",
                     Map.of("BASS_DT", DATE.format(date), "CTX_AREA_FK", "", "CTX_AREA_NK", ""));
             for (var day : data.path("output")) {
                 if (DATE.format(date).equals(day.path("bass_dt").asText())) {
-                    krTradingDay = day.path("opnd_yn").asText().equals("Y");
-                    krCalendarDate = date;
+                    var isOpen = day.path("opnd_yn").asText();
+                    if (isOpen.equals("Y") || isOpen.equals("N")) krCalendar = new KrCalendar(date, isOpen.equals("Y"));
                     break;
                 }
             }
@@ -188,11 +195,7 @@ class KisMarketFeed implements MarketFeed {
         var date = now.atZone(MarketHours.zone(market)).toLocalDate();
         var window = MarketHours.window(market, date);
         if (window == null || !window.trading(now)) return "CLOSED";
-        if (market.equals("KR")) {
-            if (!date.equals(krCalendarDate)) return "UNKNOWN";
-            return krTradingDay ? "REGULAR" : "CLOSED";
-        }
-        return MarketHours.knownUsSchedule(date) ? "REGULAR" : "UNKNOWN";
+        return schedule(market, date).session();
     }
 
     private Quote fetchQuote(Stock stock) {

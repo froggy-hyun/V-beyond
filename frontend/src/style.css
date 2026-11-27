@@ -60,7 +60,7 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .route-content { animation: page-in var(--motion) both }
 @keyframes page-in { from { opacity: .8; transform: translateY(3px) } to { opacity: 1; transform: none } }
 .top nav a, .market-tabs button, .density-toggle button, .stock-preview-action,
-.stock-row, .product-card, .tags button, .segmented button, .primary, .icon-btn,
+.stock-row, .product-card, .tags :is(button, a), .segmented button, .primary, .icon-btn,
 .header-search, .market-search, .search-field, .search-tabs button, .menu-group a {
   transition: background-color var(--motion), color var(--motion), border-color var(--motion);
 }
@@ -105,7 +105,7 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .index-cell .skeleton-quote .skeleton-content { justify-content: flex-start }
 .market-toolbar { margin-bottom: 9px }
 .market-tabs, .density-toggle { display: inline-flex; align-items: center; gap: 6px }
-.market-tabs button, .density-toggle button, .tags button {
+.market-tabs button, .density-toggle button, .tags :is(button, a) {
   border-radius: 20px;
   background: var(--surface);
   color: var(--muted);
@@ -191,24 +191,37 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .stock-tabs { margin-top: 6px }
 .stock-detail { padding-top: 10px }
 .stock-wide { grid-column: 1 / -1; min-width: 0 }
-.compare-heading img { width: 66px; height: auto; flex: none }
 .company-intro-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 7px }
 .ai-label { display: inline-flex; align-items: center; gap: 3px; color: var(--accent); background: var(--accent-tint) }
-.performance-card { --peer: #4671d9; border-top: 1px solid var(--line); margin-top: 14px; padding-top: 13px }
+.performance-card { --peer: var(--fall); --chart-track: var(--line); border-top: 1px solid var(--line); margin-top: 14px; padding-top: 13px }
 .performance-controls { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 12px 0 }
 .performance-controls label { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-size: .84rem }
 .performance-controls select { min-height: 34px; max-width: 100%; padding: 4px 7px; background: var(--surface); border-radius: 6px; color: #202329 }
 .performance-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr); gap: 18px }
-.performance-grid > div { min-width: 0; border: 1px solid var(--line); border-radius: 9px; padding: 12px }
+.performance-grid > div { min-width: 0; border: 1px solid var(--line); border-radius: 9px; padding: 14px }
 .performance-grid h4 { font-size: .91rem; font-weight: 730; margin: 0 }
-.performance-share { display: grid; gap: 9px; justify-items: center }
-.performance-donut { display: grid; place-items: center; width: min(134px, 100%); aspect-ratio: 1; border-radius: 50% }
+.performance-share { display: grid; gap: 14px; justify-items: center; align-content: start }
+.performance-share h4 { justify-self: start }
+@property --donut-main { syntax: '<percentage>'; inherits: false; initial-value: 0% }
+@property --donut-end { syntax: '<percentage>'; inherits: false; initial-value: 0% }
+.performance-donut {
+  --donut-main: 0%;
+  --donut-end: 0%;
+  display: grid;
+  place-items: center;
+  width: min(148px, 100%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent) 0 var(--donut-main), var(--peer) var(--donut-main) var(--donut-end), var(--chart-track) var(--donut-end) 100%);
+  transition: --donut-main 780ms cubic-bezier(.2, .7, .3, 1), --donut-end 780ms cubic-bezier(.2, .7, .3, 1);
+}
+.performance-donut[data-visible="true"] { --donut-main: var(--focus-share); --donut-end: var(--combined-share) }
 .performance-donut > span { display: grid; place-content: center; text-align: center; width: 73%; height: 73%; border-radius: 50%; background: #fff; font-size: .82rem }
 .performance-legend { width: 100%; max-width: 250px; display: grid; gap: 4px; font-size: .83rem }
 .performance-legend div { display: flex; align-items: center; justify-content: space-between; gap: 5px }
 .performance-legend dt::before { content: ""; display: inline-block; vertical-align: middle; width: 8px; height: 8px; margin-right: 6px; border-radius: 2px; background: var(--accent) }
 .performance-legend div:nth-child(2) dt::before { background: var(--peer) }
-.performance-legend div:nth-child(3) dt::before { background: #dce1e5 }
+.performance-legend div:nth-child(3) dt::before { background: var(--chart-track) }
 .performance-legend dd, .performance-bar-row { font-variant-numeric: tabular-nums }
 .performance-legend a:hover { color: var(--accent) }
 .performance-bars, .performance-segments { display: grid; gap: 8px; margin-top: 10px }
@@ -217,27 +230,51 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .performance-bar-row { position: relative; isolation: isolate; min-height: 22px; display: flex; align-items: center; justify-content: flex-end; padding: 2px 6px; white-space: nowrap; font-size: .8rem; background: var(--surface); border-radius: 4px; overflow: hidden }
 .bar-fill { position: absolute; z-index: -1; inset: 0 auto 0 0; background: #cdebe4; border-radius: 4px; transition: width var(--motion) }
 .bar-peer { background: #dae4fe }
-.health-item { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px }
-.health-criteria { flex-wrap: wrap; align-items: flex-start; gap: 6px 12px; margin-bottom: 9px }
-.health-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px }
-.health-pair[data-count="1"] { grid-template-columns: minmax(0, 1fr) }
-.health-side[data-winner="true"] { border-color: #87c2ae; background: #f2faf7 }
-.health-side { min-width: 0; border: 1px solid var(--line); border-radius: 8px; padding: 9px; overflow-wrap: anywhere }
-.health-side > small:first-child { font-weight: 690 }
-.health-product { display: flex; align-items: center; gap: 6px; margin-block: 6px }
-.health-product .product-photo, .health-product .product-icon { width: 36px; height: 36px }
+.health-item { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 13px }
+.health-criteria { flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-bottom: 12px }
+.health-pair, .health-peers { display: grid; gap: 8px; min-width: 0 }
+.health-pair:not([data-peers="0"]) { grid-template-columns: minmax(0, 1fr) 34px minmax(0, var(--peer-width, 1fr)) }
+.health-pair[data-peers="2"] { --peer-width: 2fr; --peer-count: 2 }
+.health-pair[data-peers="3"] { --peer-width: 3fr; --peer-count: 3 }
+.health-peers { grid-template-columns: repeat(var(--peer-count, 1), minmax(0, 1fr)) }
+.health-divider { display: grid; place-items: center }
+.vs-badge { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: #24272d; font-size: .71rem; font-weight: 800 }
+.health-side { position: relative; min-width: 0; border: 1px solid var(--line); border-radius: 9px; padding: 12px; overflow-wrap: anywhere }
+.health-pair:has(.winner-sticker) { margin-top: 24px }
+.health-pair:has(.winner-sticker) .health-side { padding-top: 18px }
+.health-side[data-winner="true"] { border-color: #86bfb2; box-shadow: 0 3px 12px #00857313; background: #f7fbfa; animation: winner-float 4s ease-in-out infinite }
+.health-side[data-winner="true"]:is(:hover, :focus-within) { animation-play-state: paused }
+.winner-sticker {
+  position: absolute;
+  top: -13px;
+  left: 7px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border: 2px solid #fff;
+  border-radius: 7px;
+  padding: 1px 6px 1px 3px;
+  background: var(--accent-tint);
+  box-shadow: 0 1px 3px #00605446;
+  color: #005b4f;
+  font-size: .66rem;
+  font-weight: 850;
+  letter-spacing: .02em;
+  transform: rotate(-7deg);
+}
+.winner-sticker img { width: auto; height: 21px }
+.winner-reason { display: block; margin-top: 4px; color: #006857; font-size: .78rem; font-weight: 750 }
+@keyframes winner-float { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-5px) } }
+.health-side > small:first-of-type { font-weight: 690 }
+.health-product { display: flex; align-items: center; gap: 8px; margin-block: 6px }
+.health-product .product-photo, .health-product .product-icon { width: 38px; height: 38px }
 .health-product a:hover { color: var(--accent) }
 .health-value, .health-links { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin-top: 5px }
 .health-value .status { color: var(--accent); background: var(--accent-tint) }
 .health-links a { white-space: normal; min-height: 28px; width: auto }
 .health-comparisons .health-context { font-size: .8rem; margin-top: 7px }
 .health-context .source { margin-left: 3px }
-.vs-badge, .winner-badge { display: inline-flex; align-items: center; gap: 5px; font-size: .75rem; font-weight: 670; line-height: 1.25; padding: 4px 7px; border-radius: 6px }
-.vs-badge { margin-left: auto; background: #24272d; color: #fff; font-weight: 800; animation: comparison-float 3.8s ease-in-out infinite }
-.winner-badge { margin-top: 5px; background: var(--accent-tint); color: #006857; animation: winner-rise 240ms ease-out both }
-.comparison-mascot { animation: comparison-float 4.6s ease-in-out infinite }
-@keyframes comparison-float { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-3px) } }
-@keyframes winner-rise { from { opacity: .5; transform: translateY(3px) } to { opacity: 1; transform: none } }
 .chart-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 8px }
 .segmented { display: flex; width: max-content; max-width: 100%; gap: 1px; padding: 3px; border-radius: 7px; background: var(--surface) }
 .segmented button { min-width: 43px; padding: 6px 8px; border-radius: 5px; color: var(--muted); font-size: .8rem; font-weight: 650; white-space: nowrap }
@@ -291,8 +328,8 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
   color: #24272d;
 }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px }
-.tags button { padding: 5px 10px; font-size: .81rem }
-.tags button:hover { background: var(--accent-tint); color: var(--accent) }
+.tags :is(button, a) { padding: 5px 10px; font-size: .81rem }
+.tags :is(button, a):hover { background: var(--accent-tint); color: var(--accent) }
 .primary { display: inline-flex; justify-content: center; align-items: center; gap: 7px; min-height: 41px; padding: 8px 13px; margin-top: 12px; border-radius: 7px; background: var(--accent); color: #fff; font-size: .87rem; font-weight: 700 }
 .primary:hover:not(:disabled) { background: #006f60 }
 .match, .compare-product { margin: 10px 0; border-top: 1px solid var(--line); padding-top: 7px }
@@ -330,24 +367,29 @@ footer img { width: 95px; height: auto }
 .skeleton-quote .skeleton-content { display: flex; align-items: center; justify-content: flex-end; gap: 6px; min-height: 20px }
 .skeleton-quote i:first-child { width: 56px }
 .skeleton-quote i:nth-child(2) { width: 42px; height: 15px }
+.skeleton-text .skeleton-content { display: grid; gap: 9px; margin-top: 10px; padding-bottom: 5px }
+.skeleton-text i:first-child { width: 91% }
+.skeleton-text i:nth-child(2) { width: 64% }
 .detail-price .skeleton-quote, .preview-price .skeleton-quote { min-height: 30px; align-content: center }
 .skeleton-chart .skeleton-content { display: grid; align-content: end; gap: 11px; height: var(--chart-height); padding: 10px 6px; border-radius: 8px; background: repeating-linear-gradient(#fff 0 39px, #eef1f3 39px 40px) }
 .skeleton-chart i:first-child { height: calc(var(--chart-height) * .32); clip-path: polygon(0 68%, 12% 59%, 22% 65%, 33% 39%, 45% 53%, 58% 27%, 66% 35%, 76% 24%, 89% 28%, 100% 2%, 100% 100%, 0 100%) }
 .skeleton-chart i:nth-child(2) { width: 72%; height: 8px }
 
 @media (min-width: 840px) {
-  .health-pair[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)) }
-  .health-pair[data-count="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)) }
   .market-aside, .stock-side { border-left: 1px solid var(--line); padding-left: 22px }
   .market-aside > :first-child, .stock-side > :first-child { border-top: 0; padding-top: 4px }
   .stock-page:has(.stock-side) { grid-template-columns: minmax(0, 1.65fr) minmax(292px, 1fr); column-gap: 26px; align-items: start }
   .stock-summary { grid-column: 1 / -1 }
   .stock-side .products { grid-template-columns: minmax(0, 1fr) }
-  .search-page, .watchlist-page, .menu-page { max-width: 820px }
 }
 
 @media (max-width: 839px) {
   .performance-grid, .performance-segments { grid-template-columns: minmax(0, 1fr) }
+  .health-pair:not([data-peers="0"]) { grid-template-columns: minmax(0, 1fr) }
+  .health-pair[data-peers="3"] { --peer-count: 2 }
+  .health-peers { row-gap: 18px }
+  .health-divider { position: relative; isolation: isolate; margin-block: 3px 7px }
+  .health-divider::before { content: ""; position: absolute; inset-inline: 0; top: 50%; height: 1px; background: var(--line); z-index: -1 }
   :root { --chart-height: 286px }
   .top-inner, .shell { width: calc(100% - 32px) }
   .top-inner { height: 51px }
@@ -393,26 +435,22 @@ footer img { width: 95px; height: auto }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .route-content, .skeleton i::after, .vs-badge, .winner-badge, .comparison-mascot { animation: none }
+  .route-content, .skeleton i::after, .health-side[data-winner="true"] { animation: none }
+  .performance-donut { --donut-main: var(--focus-share); --donut-end: var(--combined-share); transition: none }
   :root { --motion: 0ms }
 }
 
-.market-health { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin: 0 0 14px; padding: 9px 14px; border: 1px solid #d9eee8; border-radius: 10px; background: #f1faf7 }
-.health-shortcut { display: inline-flex; align-items: center; gap: 9px; min-height: 40px; color: #174f45 }
-.health-shortcut h2 { font-size: .97rem }
-.health-shortcut > span { display: grid; place-items: center; color: var(--accent) }
-.health-shortcut-topics, .topic-links { display: flex; flex-wrap: wrap; gap: 6px 12px }
-.health-shortcut-topics a { padding: 6px 10px; border: 1px solid #cce7de; border-radius: 20px; background: #fff; color: #176456; font-size: .8rem; font-weight: 650 }
-.health-shortcut:hover, .health-shortcut-topics a:hover, .topic-stock:hover, .topic-product a:hover { color: var(--accent) }
+.health-shortcut { display: flex; align-items: center; gap: 8px; min-height: 40px }
+.health-shortcut > svg { flex: none; margin-inline-start: auto; color: var(--muted) }
+.health-shortcut:hover, .topic-stock:hover, .topic-product a:hover { color: var(--accent) }
 .health-page > header p { margin-top: 7px; color: var(--muted); font-size: .91rem }
 .topic-choices, .icon-choices > div { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 135px), 1fr)); gap: 8px; margin-top: 12px }
 .topic-choices button, .icon-choices button { display: flex; align-items: center; gap: 7px; padding: 8px; min-height: 48px; max-width: 100%; border: 1px solid var(--line); border-radius: 9px; text-align: left; font-weight: 650; font-size: .83rem; transition: background-color var(--motion), border-color var(--motion), color var(--motion) }
 .topic-choices button > svg, .icon-choices button > svg { flex: none; color: var(--accent) }
 .topic-choices button:hover, .icon-choices button:hover { background: var(--surface) }
-.topic-choices button[aria-pressed="true"], .icon-choices button[aria-pressed="true"] { border-color: #66b7a4; background: var(--accent-tint); color: #126858 }
-.topic-assessment { border-color: #d9eee8; background: #f4faf8 }
+.topic-choices button[aria-pressed="true"], .icon-choices button[aria-pressed="true"] { border-color: #25282f; background: var(--surface); color: #202329 }
 .topic-assessment p { margin-top: 6px }
-.topic-links { margin-top: 8px }
+.topic-links { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 8px }
 .health-topic-detail { margin-top: 7px; padding: 0 9px; border: 1px solid var(--line); border-radius: 7px; font-size: .82rem }
 .health-topic-detail summary { padding-block: 8px; cursor: pointer; font-weight: 700 }
 .health-topic-detail summary small { display: inline; margin-left: 4px }
@@ -428,11 +466,10 @@ footer img { width: 95px; height: auto }
 .icon-choices > div { margin-top: 2px }
 .icon-choices button .product-icon { width: 30px; height: 30px; flex: none }
 .icon-choices button .product-icon svg { width: 19px; height: 19px }
-.discovery-summary { border-color: #d9eee8; background: #f1faf7 }
-.discovery-summary h2 { display: flex; align-items: center; gap: 6px; color: #14594d }
+.discovery-summary h2 { display: flex; align-items: center; gap: 6px }
+.discovery-summary h2 svg { color: var(--accent) }
 .discovery-summary p { margin-top: 7px }
 @media (max-width: 460px) {
-  .market-health { padding: 7px 10px }
   .topic-product { flex-wrap: wrap }
   .topic-product > div { flex: 1 1 100% }
   .icon-choices > div, .topic-choices { grid-template-columns: repeat(2, minmax(0, 1fr)) }

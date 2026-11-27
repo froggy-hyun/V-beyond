@@ -33,7 +33,22 @@ test('종목 차트 아래 건강 이슈 비교와 대안 종목 이동', async 
   await expect(red.getByText('2,080 mg')).toBeVisible()
   await expect(red.getByText('1,560 mg')).toBeVisible()
   await expect(red.getByText('25% 낮음')).toBeVisible()
-  await expect(red.getByText('WINNER', { exact: true })).toBeVisible()
+  const winner = red.locator('.health-side[data-winner="true"]')
+  const sticker = winner.locator('.winner-sticker')
+  await expect(sticker).toHaveText('WINNER')
+  await expect(sticker.locator('img')).toBeVisible()
+  await expect(winner.locator('.winner-reason')).toHaveText('나트륨 낮음')
+  await expect(winner).toHaveCSS('animation-name', 'winner-float')
+  const ownBox = (await red.locator('.health-pair > .health-side').boundingBox())!
+  const versusBox = (await red.locator('.vs-badge').boundingBox())!
+  const peerBox = (await red.getByRole('group', { name: '타 기업 비교 상품' }).boundingBox())!
+  if (page.viewportSize()!.width >= 840) {
+    expect(ownBox.x + ownBox.width).toBeLessThan(versusBox.x)
+    expect(versusBox.x + versusBox.width).toBeLessThan(peerBox.x)
+  } else {
+    expect(ownBox.y + ownBox.height).toBeLessThan(versusBox.y)
+    expect(versusBox.y + versusBox.height).toBeLessThan(peerBox.y)
+  }
   await expect(red.getByRole('link', { name: /종목 바로가기/ })).toHaveCount(3)
   await expect(red.getByText(/심혈관질환/)).toBeVisible()
   await expect(red.getByRole('link', { name: '기관 근거' })).toHaveAttribute('href', /who\.int/)
@@ -48,7 +63,14 @@ test('종목 차트 아래 건강 이슈 비교와 대안 종목 이동', async 
   await expect(page.getByRole('heading', { name: '판매 상품', exact: true })).toBeVisible()
   await expect(comparison).toHaveCount(0)
   await tabs.getByRole('button', { name: '차트', exact: true }).click()
-  await red.getByRole('link', { name: '풀무원 종목 바로가기' }).first().click()
+  const jump = red.getByRole('link', { name: '풀무원 종목 바로가기' }).first()
+  if (page.viewportSize()!.width >= 840) {
+    await jump.hover({ force: true })
+    await expect(winner).toHaveCSS('animation-play-state', 'paused')
+  } else {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+  }
+  await jump.click()
   await expect(page.getByRole('heading', { name: '풀무원', exact: true })).toBeVisible()
   await expect(chart).toBeVisible()
 })
@@ -86,8 +108,10 @@ test('종목 비교에서 소재와 성분 기준별 검증 결과 표시', asyn
 })
 
 test('브랜드 판매액과 분기 점유율, 공시 매출 및 AI 상품 소개', async ({ page }) => {
+  let overviewReady = false
   await page.route('**/api/v1/stocks/*/product-overview', route => route.fulfill({ json: {
-    status: 'AI', text: '농심은 신라면과 신라면 건면을 제조하고 누들핏 컵면을 유통합니다.',
+    status: overviewReady ? 'AI' : 'PENDING',
+    text: overviewReady ? '농심은 신라면과 신라면 건면을 제조하고 누들핏 컵면을 유통합니다.' : '농심의 등록 상품으로는 신라면 등이 있습니다.',
   } }))
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/stocks/KR:KOSPI:004370')
@@ -104,10 +128,31 @@ test('브랜드 판매액과 분기 점유율, 공시 매출 및 AI 상품 소�
   await expect(retail.getByRole('button', { name: '점유율', exact: true })).toHaveAttribute('aria-pressed', 'true')
   const reported = performance.getByRole('article', { name: '라면 제품군 분기 공시 매출' })
   await expect(reported.getByRole('link', { name: '분기 원문' })).toHaveCount(3)
-  await expect(page.locator('.comparison-mascot')).toHaveCSS('animation-name', 'none')
+  await expect(page.locator('.health-side[data-winner="true"]').first()).toHaveCSS('animation-name', 'none')
+  await expect(retail.locator('.performance-donut')).toHaveCSS('transition-duration', '0s')
   await page.getByRole('group', { name: '종목 상세 탭' }).getByRole('button', { name: '기업정보' }).click()
-  await expect(page.getByText('AI 상품 요약', { exact: true })).toBeVisible()
+  const loadingOverview = page.getByRole('status', { name: 'AI 기업 소개를 불러오고 있습니다' })
+  await expect(loadingOverview).toBeVisible()
+  await expect(page.getByText(/농심의 등록 상품으로는|라면·스낵 제조사입니다/)).toHaveCount(0)
+  overviewReady = true
+  await expect(page.getByText('AI 상품 요약', { exact: true })).toBeVisible({ timeout: 10_000 })
+  await expect(loadingOverview).toHaveCount(0)
   await expect(page.getByText(/누들핏 컵면을 유통합니다/)).toBeVisible()
+})
+
+test('판매 점유율 그래프가 처음 화면에 들어올 때 0부터 채워짐', async ({ page }) => {
+  await page.goto('/stocks/KR:KOSPI:004370')
+  const donut = page.locator('.performance-donut')
+  await expect(donut).toHaveAttribute('data-visible', 'false', { timeout: 12_000 })
+  const angle = () => donut.evaluate(element => Number.parseFloat(getComputedStyle(element).getPropertyValue('--donut-main')))
+  expect(await angle()).toBe(0)
+  await donut.scrollIntoViewIfNeeded()
+  await expect(donut).toHaveAttribute('data-visible', 'true')
+  await expect.poll(async () => {
+    const current = await angle()
+    return current > 0 && current < 25
+  }, { intervals: [15, 30, 50] }).toBe(true)
+  await expect.poll(angle).toBeCloseTo(25.92, 1)
 })
 
 test('검색, 관심종목 및 자연어 조건 수정', async ({ page }) => {
@@ -136,13 +181,24 @@ test('검색, 관심종목 및 자연어 조건 수정', async ({ page }) => {
   await expect(page.getByRole('group', { name: '상품군' }).getByRole('button', { name: '즉석 라면' })).toHaveAttribute('aria-pressed', 'true')
   const criteria = page.getByRole('group', { name: '비교 기준' })
   await expect(criteria.getByRole('button', { name: '나트륨' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(criteria.getByRole('button', { name: 'PTFE 미사용' })).toHaveCount(0)
   await criteria.getByRole('button', { name: '열량' }).click()
   await expect(criteria.getByRole('button', { name: '열량' })).toHaveAttribute('aria-pressed', 'true')
   await expect(results).toBeVisible()
+  await page.getByRole('group', { name: '상품군' }).getByRole('button', { name: '프라이팬' }).click()
+  await expect(criteria.getByRole('button', { name: 'PTFE 미사용' })).toBeVisible()
+  await expect(criteria.getByRole('button', { name: '나트륨' })).toHaveCount(0)
+  await expect(results).toHaveCount(0)
+  expect(new URL(page.url()).searchParams.has('criterion')).toBe(false)
 })
 
 test('홈 성분 탐색에서 제조사 표시와 기관 평가를 확인하고 관련 종목 이동', async ({ page }) => {
   await page.goto('/')
+  const productDiscovery = page.getByRole('heading', { name: '상품으로 종목 찾기' })
+  const ingredientDiscovery = page.getByRole('link', { name: '건강 이슈 성분으로 종목 찾기' })
+  await expect(productDiscovery).toBeVisible()
+  await expect(ingredientDiscovery).toBeVisible()
+  expect((await productDiscovery.boundingBox())!.y).toBeLessThan((await ingredientDiscovery.boundingBox())!.y)
   await page.getByRole('link', { name: '건강 이슈 성분으로 종목 찾기' }).click()
   await page.getByRole('textbox', { name: '성분·소재 검색' }).fill('보존료')
   const choices = page.getByRole('group', { name: '건강 이슈 성분' })

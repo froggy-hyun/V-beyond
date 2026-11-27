@@ -24,6 +24,8 @@ final class MarketHours {
         boolean includesBar(Instant time) { return !time.isBefore(open) && !time.isAfter(close); }
     }
 
+    record Schedule(String session, Instant openAt, Instant closeAt) {}
+
     static ZoneId zone(String market) { return market.equals("KR") ? SEOUL : NEW_YORK; }
 
     static Window window(String market, LocalDate date) {
@@ -42,6 +44,13 @@ final class MarketHours {
 
     static boolean knownUsSchedule(LocalDate date) {
         return date.getYear() >= 2026 && date.getYear() <= 2028;
+    }
+
+    static Schedule schedule(String market, LocalDate date, Boolean krOpen) {
+        var window = window(market, date);
+        if (window == null || Boolean.FALSE.equals(krOpen)) return new Schedule("CLOSED", null, null);
+        if (market.equals("KR") ? krOpen == null : !knownUsSchedule(date)) return new Schedule("UNKNOWN", null, null);
+        return new Schedule("REGULAR", window.open(), window.close());
     }
 
     private static Window window(LocalDate date, ZoneId zone, LocalTime open, LocalTime close) {

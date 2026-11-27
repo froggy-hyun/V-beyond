@@ -1,10 +1,11 @@
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { bases, categories, criteria, formatFact, pathFor, relations, useData } from './api'
 import type { Criterion, Fact, HealthTopic, Match, Product, Stock } from './api'
 import { Empty, ProductPhoto, Source, Wait } from './ui'
-import marketCharacter from './assets/brand/market.png'
+import winnerCharacter from './assets/brand/winner.webp'
 
 type HealthIssue = { criterion: Criterion; baseline: Fact | null; alternative: Match | null; comparisons: Match[] }
 type ProductPeer = { product: Product; stock: Stock }
@@ -47,10 +48,8 @@ const issueLabel = (issue: HealthIssue) => contexts[issue.criterion]?.title ?? c
 export default function StockHealthComparisons({ stock }: { stock: Stock }) {
   const comparison = useData<HealthComparison[]>(pathFor(stock.id) + '/health-comparisons')
   return <section className="panel health-comparisons stock-wide" aria-labelledby="stock-health-heading">
-    <div className="section-heading compare-heading"><div><h2 id="stock-health-heading">판매 상품 건강 이슈 비교</h2>
-      <p>{stock.name} 판매 상품과 다른 상장사의 상품을 성분·소재별로 비교합니다.</p></div>
-      <img className="comparison-mascot" src={marketCharacter} alt="" width={350} height={275} />
-    </div>
+    <header><h2 id="stock-health-heading">판매 상품 건강 이슈 비교</h2>
+      <p>{stock.name} 판매 상품과 다른 상장사의 상품을 성분·소재별로 비교합니다.</p></header>
     {comparison.data ? comparison.data.length ? comparison.data.map(row => row.issues.length
       ? <ComparisonRow key={row.product.id} row={row} stock={stock} />
       : <ProductEvidence key={row.product.id} row={row} stock={stock} />
@@ -60,14 +59,21 @@ export default function StockHealthComparisons({ stock }: { stock: Stock }) {
 
 function ProductEvidence({ row, stock }: { row: HealthComparison; stock: Stock }) {
   return <article className="health-item" aria-label={row.product.name + ' 건강 이슈 자료'}>
-    <div className="section-heading health-criteria"><div><strong>{categories[row.product.category]}</strong><small>{row.product.prep}</small></div>
-      {row.peers.length > 0 && <span className="vs-badge" aria-label="사양 비교">VS</span>}</div>
-    <div className="health-pair" data-count={1 + row.peers.length}>
-      <EvidenceProduct product={row.product} stock={stock} />
-      {row.peers.map(peer => <EvidenceProduct key={peer.product.id} {...peer} competitor />)}
-    </div>
+    <div className="section-heading health-criteria"><div><strong>{categories[row.product.category]}</strong><small>{row.product.prep}</small></div></div>
+    <HealthMatchup origin={<EvidenceProduct product={row.product} stock={stock} />}
+      peers={row.peers.map(peer => <EvidenceProduct key={peer.product.id} {...peer} competitor />)} />
     {row.peers.length > 0 && <p className="health-context">제품별로 공개된 시험 조건과 사양을 확인할 수 있습니다.</p>}
   </article>
+}
+
+function HealthMatchup({ origin, peers }: { origin: ReactNode; peers: ReactNode[] }) {
+  return <div className="health-pair" data-peers={peers.length}>
+    {origin}
+    {peers.length > 0 && <>
+      <div className="health-divider"><span className="vs-badge" aria-hidden="true">VS</span></div>
+      <div className="health-peers" role="group" aria-label="타 기업 비교 상품">{peers}</div>
+    </>}
+  </div>
 }
 
 function EvidenceProduct({ product, stock, competitor = false }: ProductPeer & { competitor?: boolean }) {
@@ -97,17 +103,15 @@ function ComparisonRow({ row, stock }: { row: HealthComparison; stock: Stock }) 
     <div className="section-heading health-criteria">
       <div><strong>{issueLabel(issue)}</strong><small>{row.product.prep}
         {issue.baseline?.basis.startsWith('PER_100') && ' · ' + bases[issue.baseline.basis] + ' 기준'}</small></div>
-      {(comparisons.length > 0 || qualitative.length > 0) && <span className="vs-badge" aria-label="상품 비교">VS</span>}
       {row.issues.length > 1 && <div className="segmented" role="group" aria-label={row.product.name + ' 비교 항목'}>{row.issues.map(item =>
         <button key={item.criterion} type="button" className={item.criterion === selected ? 'selected' : ''} aria-pressed={item.criterion === selected}
           onClick={() => setSelected(item.criterion)}>{issueLabel(item)}</button>)}</div>}
     </div>
-    <div className="health-pair" data-count={1 + comparisons.length + qualitative.length}>
-      <HealthProduct product={row.product} stock={stock} fact={issue.baseline} criterion={issue.criterion} winner={winner(issue.baseline?.value)} />
-      {comparisons.map(item => <HealthProduct key={item.product.id} {...item} criterion={issue.criterion}
-        reduction={item.reductionPercent} winner={winner(item.fact.value)} competitor />)}
-      {qualitative.map(peer => <EvidenceProduct key={peer.product.id} {...peer} competitor />)}
-    </div>
+    <HealthMatchup origin={<HealthProduct product={row.product} stock={stock} fact={issue.baseline}
+      criterion={issue.criterion} winner={winner(issue.baseline?.value)} />}
+      peers={comparisons.length ? comparisons.map(item => <HealthProduct key={item.product.id} {...item} criterion={issue.criterion}
+        reduction={item.reductionPercent} winner={winner(item.fact.value)} competitor />)
+        : qualitative.map(peer => <EvidenceProduct key={peer.product.id} {...peer} competitor />)} />
     {context && <p className="health-context"><strong>건강 쟁점</strong> {context.text} {context.source && <Source href={context.source}>기관 근거</Source>}</p>}
     {row.topics?.map(topic => {
       const evidence = row.product.evidence.find(item => item.topic === topic.id)
@@ -140,11 +144,12 @@ function HealthProduct({ product, stock, fact, criterion, reduction, winner, com
     item.basis === (secondaryCriterion === 'TOTAL_SUGAR' ? 'PER_100ML' : 'INGREDIENTS'))
   const sodium = criterion === 'SODIUM' && fact?.unit === 'mg' ? Math.round(fact.value / sodiumLimit * 100) : null
   return <div className="health-side" data-winner={winner}>
+    {winner && <span className="winner-sticker"><img src={winnerCharacter} width={112} height={155} alt="" />WINNER</span>}
     <HealthProductTitle product={product} stock={stock} competitor={competitor} />
     <div className="health-value"><strong>{fact ? formatFact(fact) : '자료 없음'}</strong>
       {reduction != null && <span className="status">{reduction}% 낮음</span>}
     </div>
-    {winner && <span className="winner-badge"><strong>WINNER</strong> {criterion.startsWith('AVOID_') ? criteria[criterion] : criteria[criterion] + ' 낮음'}</span>}
+    {winner && <span className="winner-reason">{criterion.startsWith('AVOID_') ? criteria[criterion] : criteria[criterion] + ' 낮음'}</span>}
     {sodium != null && <small>WHO 성인 하루 기준의 {sodium}%</small>}
     {!fact && product.material && <small>{product.material}</small>}
     {secondary && <small>{secondary.criterion === 'TOTAL_SUGAR' ? '당류' : '아스파탐'} {formatFact(secondary)}

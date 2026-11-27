@@ -63,6 +63,19 @@ test('작은 모바일 화면의 좌우 넘침 방지', async ({ page }, info) =
   }
 })
 
+test('관심·검색·메뉴가 홈과 동일한 좌우 여백 사용', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: '주식', exact: true })).toBeVisible()
+  const home = (await page.locator('.market-page').boundingBox())!
+  for (const [path, title] of [['/watchlist', '관심종목'], ['/search', '통합 검색'], ['/menu', '전체 메뉴']]) {
+    await page.goto(path)
+    await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible()
+    const content = (await page.locator('.route-content > .page').boundingBox())!
+    expect(content.x).toBeCloseTo(home.x, 0)
+    expect(content.width).toBeCloseTo(home.width, 0)
+  }
+})
+
 test('홈 지수 그래프와 종목 화면 메뉴 전환', async ({ page }) => {
   const observedAt = '2026-11-27T06:30:00Z'
   await page.route('**/api/v1/market/mode', route => route.fulfill({ json: { feedMode: 'KIS_REST' } }))

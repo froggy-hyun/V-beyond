@@ -55,7 +55,7 @@ export function Source({ href, children = '원문 보기' }: { href: string; chi
   return <a className="source" href={href} target="_blank" rel="noreferrer">{children} <span aria-hidden>↗</span></a>
 }
 export function Empty({ children }: { children: ReactNode }) { return <p className="empty">{children}</p> }
-type LoadShape = 'rows' | 'products' | 'chart' | 'stock' | 'product' | 'quote'
+type LoadShape = 'rows' | 'products' | 'chart' | 'stock' | 'product' | 'quote' | 'text'
 
 function SkeletonRow() {
   return <span className="skeleton-row"><i /><span><i /><i /></span><i /></span>
