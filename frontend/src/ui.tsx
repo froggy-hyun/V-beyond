@@ -26,9 +26,11 @@ export function QuoteValue({ quote }: { quote?: Quote }) {
     <span className={'change ' + tone(quote.changePercent ?? 0)}>{quote.changePercent == null ? '–' : percent(quote.changePercent)}</span>
   </span> : <span className="muted">{quote ? '시세 확인 불가' : '시세 확인 중'}</span>
 }
-export function StockRow({ stock, quote }: { stock: Stock; quote?: Quote }) {
+export function StockRow({ stock, quote, showVolume = false }: { stock: Stock; quote?: Quote; showVolume?: boolean }) {
   return <Link className="stock-row" to={pathFor(stock.id)}>
-    <StockMark stock={stock} /><span className="stock-label"><strong>{stock.name}</strong><small>{stock.symbol} · {stock.exchange}</small></span>
+    <StockMark stock={stock} /><span className="stock-label"><strong>{stock.name}</strong><small>{stock.symbol} · {stock.exchange}</small>
+      {showVolume && quote?.price != null && <small>거래량 {quote.cumulativeVolume.toLocaleString('ko-KR')}</small>}
+    </span>
     <QuoteValue quote={quote} /><ChevronRight size={16} aria-hidden className="row-chevron muted" />
   </Link>
 }

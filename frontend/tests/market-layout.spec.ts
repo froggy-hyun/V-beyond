@@ -4,6 +4,9 @@ test('시장 구분, 종목 검색 및 화면별 차트 이동', async ({ page }
   await page.goto('/')
   await expect(page.getByRole('button', { name: '국내주식' })).toHaveAttribute('aria-pressed', 'true')
   await expect(page.locator('.market-list-row')).toHaveCount(4)
+  await page.getByRole('button', { name: '상세', exact: true }).click()
+  await expect(page.locator('.market-list-row').first().getByText(/^거래량/)).toBeVisible()
+  await page.getByRole('button', { name: '간편', exact: true }).click()
   await page.getByRole('button', { name: '미국주식' }).click()
   await expect(page.getByRole('button', { name: '미국주식' })).toHaveAttribute('aria-pressed', 'true')
   await expect(page.locator('.market-list-row')).toHaveCount(6)
@@ -26,6 +29,9 @@ test('시장 구분, 종목 검색 및 화면별 차트 이동', async ({ page }
   await page.getByRole('textbox', { name: '종목·브랜드 찾기' }).press('Enter')
   await expect(page.getByRole('heading', { name: '통합 검색' })).toBeVisible()
   await expect(page.locator('.stock-row').filter({ hasText: '뉴웰 브랜즈' })).toBeVisible()
+  await page.getByRole('button', { name: /^상품/ }).click()
+  await expect(page.locator('.product-card').first()).toBeVisible()
+  await expect(page.locator('.stock-row')).toHaveCount(0)
 })
 
 test('작은 모바일 화면의 좌우 넘침 방지', async ({ page }, info) => {

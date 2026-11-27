@@ -27,6 +27,20 @@ export default function MarketPage() {
   const [previewId, setPreviewId] = useState('')
   const navigate = useNavigate()
   const market = params.get('market') === 'US' ? 'US' : 'KR'
+  const detailed = params.get('view') === 'detail'
+  const selectMarket = (code: string) => {
+    setPreviewId('')
+    const next = new URLSearchParams(params)
+    if (code === 'US') next.set('market', code)
+    else next.delete('market')
+    setParams(next)
+  }
+  const selectView = (showDetails: boolean) => {
+    const next = new URLSearchParams(params)
+    if (showDetails) next.set('view', 'detail')
+    else next.delete('view')
+    setParams(next, { replace: true })
+  }
   const stocks = useData<Stock[]>('/stocks?market=' + market)
   const rows = stocks.data ?? []
   const quotes = new Map(useQuotes(rows.map(stock => stock.id)).map(quote => [quote.listingId, quote]))
@@ -60,10 +74,7 @@ export default function MarketPage() {
     </header>
     <div className="market-toolbar">
       <div className="market-tabs" role="group" aria-label="시장 선택">
-        {markets.map(([code, label]) => <button key={code} aria-pressed={market === code} onClick={() => {
-          setPreviewId('')
-          setParams(code === 'KR' ? {} : { market: code })
-        }}>{label}주식</button>)}
+        {markets.map(([code, label]) => <button key={code} aria-pressed={market === code} onClick={() => selectMarket(code)}>{label}주식</button>)}
       </div>
       <span className="market-feed">{mode === 'KIS_REST' ? delayed ? 'KIS 시세 · 갱신 지연' : '한국투자증권 시세' : mode === 'REPLAY' ? '데모 시세' : '시세 확인 중'}</span>
     </div>
@@ -75,18 +86,24 @@ export default function MarketPage() {
       <section className="panel market-panel">
         <div className="section-heading market-list-heading">
           <h2>{market === 'KR' ? '국내' : '미국'} 종목 <span>{rows.length || ''}</span></h2>
-          <label className="market-sort">
-            <ArrowDownUp size={14} aria-hidden />
-            <select aria-label="종목 정렬" value={sort} onChange={event => setSort(event.target.value as Sort)}>
-              <option value="name">종목명순</option>
-              <option value="change">상승률순</option>
-              <option value="volume">거래량순</option>
-            </select>
-          </label>
+          <div className="market-list-tools">
+            <div className="density-toggle" role="group" aria-label="시세 표시 방식">
+              <button aria-pressed={!detailed} onClick={() => selectView(false)}>간편</button>
+              <button aria-pressed={detailed} onClick={() => selectView(true)}>상세</button>
+            </div>
+            <label className="market-sort">
+              <ArrowDownUp size={14} aria-hidden />
+              <select aria-label="종목 정렬" value={sort} onChange={event => setSort(event.target.value as Sort)}>
+                <option value="name">종목명순</option>
+                <option value="change">상승률순</option>
+                <option value="volume">거래량순</option>
+              </select>
+            </label>
+          </div>
         </div>
         <div className="market-columns" aria-hidden><span>종목명</span><span>현재가</span><span>등락률</span><span className="preview-column">차트</span></div>
         {stocks.data ? ordered.map(stock => <div className="market-list-row" key={stock.id}>
-          <StockRow stock={stock} quote={quotes.get(stock.id)} />
+          <StockRow stock={stock} quote={quotes.get(stock.id)} showVolume={detailed} />
           <button type="button" className="stock-preview-action" aria-label={stock.name + ' 차트 미리보기'} aria-pressed={preview?.id === stock.id} onClick={() => setPreviewId(stock.id)}>
             <ChartNoAxesCombined size={18} aria-hidden />
           </button>

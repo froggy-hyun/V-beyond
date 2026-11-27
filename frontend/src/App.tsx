@@ -43,17 +43,38 @@ export default function App() {
   </>
 }
 
+const searchFilters = [['all', '전체'], ['stocks', '종목'], ['products', '상품']] as const
+
 function SearchPage() {
   const [params, setParams] = useSearchParams()
   const term = params.get('q') ?? ''
+  const filter = searchFilters.find(([value]) => value === params.get('type'))?.[0] ?? 'all'
   const rows = useData<{ stocks: Stock[]; products: Product[] }>('/search?q=' + encodeURIComponent(term), term.trim().length > 0)
-  const quotes = useQuotes((rows.data?.stocks ?? []).map(stock => stock.id))
-  return <div className="page"><h1>통합 검색</h1>
-    <label className="search-field"><SearchIcon size={20} /><input aria-label="기업·상품 검색" autoFocus value={term} maxLength={100} placeholder="기업명, 티커, 브랜드 또는 상품명" onChange={e => setParams(e.target.value ? { q: e.target.value } : {}, { replace: true })} /></label>
-    {!term.trim() ? <div className="tags">{['농심', 'Calphalon', 'CPB', '펩시'].map(example => <button key={example} onClick={() => setParams({ q: example })}>{example}</button>)}</div>
+  const quotes = useQuotes(filter === 'products' ? [] : (rows.data?.stocks ?? []).map(stock => stock.id))
+  const editQuery = (q: string) => {
+    const next = new URLSearchParams(params)
+    if (q) next.set('q', q)
+    else next.delete('q')
+    setParams(next, { replace: true })
+  }
+  return <div className="page search-page"><h1>통합 검색</h1>
+    <label className="search-field"><SearchIcon size={20} /><input aria-label="기업·상품 검색" autoFocus value={term} maxLength={100} placeholder="기업명, 티커, 브랜드 또는 상품명" onChange={event => editQuery(event.target.value)} /></label>
+    {term.trim() && <div className="search-tabs" role="group" aria-label="검색 결과 분류">
+      {searchFilters.map(([value, label]) => <button key={value} aria-pressed={filter === value} onClick={() => {
+        const next = new URLSearchParams(params)
+        if (value === 'all') next.delete('type')
+        else next.set('type', value)
+        setParams(next, { replace: true })
+      }}>{label}{value !== 'all' && rows.data ? <span>{rows.data[value].length}</span> : null}</button>)}
+    </div>}
+    {!term.trim() ? <div className="tags">{['농심', 'Calphalon', 'CPB', '펩시'].map(example => <button key={example} onClick={() => editQuery(example)}>{example}</button>)}</div>
       : rows.data ? <>
-        <section className="panel"><h2>종목 <small>{rows.data.stocks.length}</small></h2>{rows.data.stocks.length ? rows.data.stocks.map(stock => <StockRow key={stock.id} stock={stock} quote={quotes.find(q => q.listingId === stock.id)} />) : <Empty>검색된 종목이 없습니다.</Empty>}</section>
-        <section className="panel"><h2>상품 <small>{rows.data.products.length}</small></h2>{rows.data.products.length ? <div className="products">{rows.data.products.map(product => <ProductCard key={product.id} product={product} />)}</div> : <Empty>검색된 상품이 없습니다.</Empty>}</section>
+        {filter !== 'products' && <section className="panel search-result"><h2>종목</h2>{rows.data.stocks.length
+          ? rows.data.stocks.map(stock => <StockRow key={stock.id} stock={stock} quote={quotes.find(q => q.listingId === stock.id)} />)
+          : <Empty>검색된 종목이 없습니다.</Empty>}</section>}
+        {filter !== 'stocks' && <section className="panel search-result"><h2>상품</h2>{rows.data.products.length
+          ? <div className="products">{rows.data.products.map(product => <ProductCard key={product.id} product={product} />)}</div>
+          : <Empty>검색된 상품이 없습니다.</Empty>}</section>}
       </> : <Wait error={rows.error} />}
   </div>
 }
@@ -76,6 +97,7 @@ function StockPage() {
   const range = chartRanges.find(([value]) => value === params.get('range'))?.[0] ?? '1D'
   const interval = range !== '1D' ? '1d' : params.get('interval') === '5m' ? '5m' : '1m'
   const bars = useData<Candle[]>('/market' + pathFor(id) + '/candles?interval=' + interval + '&range=' + range, true, mode === 'KIS_REST' ? (range === '1D' && quote?.session === 'REGULAR' ? 16_000 : 60_000) : undefined)
+  const lastBar = bars.data?.at(-1)
   const [watch, setWatch] = useState(readWatchlist)
   const toggle = () => {
     const next = watch.includes(id) ? watch.filter(entry => entry !== id) : [...watch, id]
@@ -99,13 +121,17 @@ function StockPage() {
         <div className="segmented" role="group" aria-label="차트 조회 구간">{chartRanges.map(([value, label]) => <button className={range === value ? 'selected' : ''} aria-pressed={range === value} key={value} onClick={() => setParams({ range: value })}>{label}</button>)}</div>
         {range === '1D' && <div className="segmented">{[['line', '선'], ['1m', '1분 봉'], ['5m', '5분 봉']].map(([value, label]) => <button key={value} className={(params.get('interval') ?? 'line') === value ? 'selected' : ''} onClick={() => setParams({ range, interval: value })}>{label}</button>)}</div>}
       </div>
-      {mode === 'KIS_REST' && bars.data?.length ? <p className="chart-session">
-        {range === '1D' ? '정규장' : '기간 일봉'} · 마지막 봉 {new Date(bars.data.at(-1)!.startAt).toLocaleString('ko-KR', {
+      {mode === 'KIS_REST' && lastBar ? <p className="chart-session">
+        {range === '1D' ? '정규장' : '기간 일봉'} · 마지막 봉 {new Date(lastBar.startAt).toLocaleString('ko-KR', {
           timeZone: range !== '1D' ? 'UTC' : info.market === 'KR' ? 'Asia/Seoul' : 'America/New_York',
           month: 'numeric', day: 'numeric', ...(range === '1D' ? { hour: '2-digit', minute: '2-digit' } as const : {}),
         })}
       </p> : null}
       {bars.data?.length ? <Suspense fallback={<Wait error={null} />}><Chart key={id + range + interval} bars={bars.data} market={info.market} daily={range !== '1D'} candle={range !== '1D' || ['1m', '5m'].includes(params.get('interval') ?? '')} /></Suspense> : bars.data ? <Empty>표시할 시세가 없습니다.</Empty> : <Wait error={bars.error} />}
+      {lastBar && <dl className="last-bar-summary" aria-label="마지막 봉 가격">
+        {([['시가', lastBar.open], ['고가', lastBar.high], ['저가', lastBar.low], ['종가', lastBar.close]] as const).map(([label, price]) =>
+          <div key={label}><dt>{label}</dt><dd>{currency(price, info.currency)}</dd></div>)}
+      </dl>}
     </section>
     <aside className="stock-side" aria-label="기업과 판매 상품">
       <section className="panel"><div className="section-heading"><h2>기업 소개</h2><Source href={info.source}>기업 웹사이트</Source></div><p>{info.overview}</p></section>
