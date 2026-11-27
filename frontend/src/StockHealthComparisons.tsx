@@ -10,6 +10,17 @@ type HealthComparison = { product: Product; issues: HealthIssue[] }
 type ComparisonQuote = Quote | null | undefined
 
 const issueLabel = (issue: HealthIssue) => issue.criterion === 'ADDED_SUGAR' ? criteria.ADDED_SUGAR : issue.topic.name
+const differenceNumber = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 1 })
+
+function differenceLabel(fact: Fact, baseline: number) {
+  if (fact.criterion.startsWith('AVOID_')) return null
+  const delta = fact.value - baseline
+  if (delta === 0) return '동일'
+  if (baseline === 0) return formatFact({ ...fact, value: delta }) + ' 높음'
+  const ratio = Math.abs(delta / baseline * 100)
+  const percent = ratio < 0.1 ? '0.1% 미만' : differenceNumber.format(ratio) + '%'
+  return percent + (delta < 0 ? ' 낮음' : ' 높음')
+}
 
 export default function StockHealthComparisons({ stock, quote }: { stock: Stock; quote?: Quote | null }) {
   const comparison = useData<HealthComparison[]>(pathFor(stock.id) + '/health-comparisons')
@@ -45,7 +56,7 @@ function ComparisonRow({ row, stock, quote, getQuote }: { row: HealthComparison;
       <div className="health-divider"><span className="vs-badge" aria-hidden="true">VS</span></div>
       <div className="health-peers" role="group" aria-label="타 기업 비교 상품">
         {issue.comparisons.map(item => <HealthProduct key={item.product.id} {...item} quote={getQuote(item.stock.id)}
-          winner={winner(item.fact.value)} competitor />)}
+          winner={winner(item.fact.value)} baseline={issue.baseline.value} />)}
       </div>
     </div>
     <section className="health-topic" aria-label={evidenceHeading}>
@@ -55,13 +66,14 @@ function ComparisonRow({ row, stock, quote, getQuote }: { row: HealthComparison;
   </article>
 }
 
-function HealthProduct({ product, stock, quote, fact, reductionPercent, winner, competitor = false }: {
-  product: Product; stock: Stock; quote?: Quote | null; fact: Fact; reductionPercent?: number | null; winner: boolean; competitor?: boolean
+function HealthProduct({ product, stock, quote, fact, baseline, winner }: {
+  product: Product; stock: Stock; quote?: Quote | null; fact: Fact; baseline?: number; winner: boolean
 }) {
   const { criterion } = fact
-  return <ProductComparisonCard product={product} stock={stock} quote={quote} winner={winner} label={competitor ? '타 기업 비교 상품' : '이 기업 상품'}>
+  const difference = baseline === undefined ? null : differenceLabel(fact, baseline)
+  return <ProductComparisonCard product={product} stock={stock} quote={quote} winner={winner} label={baseline === undefined ? '이 기업 상품' : '타 기업 비교 상품'}>
     <div className="comparison-value"><strong>{formatFact(fact)}</strong>
-      {reductionPercent != null && <span className="status">{reductionPercent}% 낮음</span>}
+      {difference && <span className="status" aria-label={'이 기업 상품 대비 ' + difference}>{difference}</span>}
     </div>
     {winner && <span className="winner-reason">{criterion.startsWith('AVOID_') ? criteria[criterion] : criteria[criterion] + ' 낮음'}</span>}
     <div className="comparison-links"><Source href={fact.source}>상품 자료</Source></div>

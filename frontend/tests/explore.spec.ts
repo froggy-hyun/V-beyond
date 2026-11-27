@@ -117,6 +117,8 @@ test('종목 차트 아래 건강 이슈 비교와 대안 종목 이동', async 
   await jump.click()
   await expect(page.getByRole('heading', { name: '풀무원', exact: true })).toBeVisible()
   await expect(chart).toBeVisible()
+  const jeong = comparison.getByRole('article', { name: '식물성지구식단 로스팅 정면 건강 이슈 비교' })
+  await expect(jeong.getByText('3.3% 높음', { exact: true })).toBeVisible()
 })
 
 test('종목 비교에서 소재와 성분 기준별 검증 결과 표시', async ({ request, page }) => {
@@ -161,6 +163,12 @@ test('종목 비교에서 소재와 성분 기준별 검증 결과 표시', asyn
     baseline: expect.objectContaining({ criterion: 'SODIUM', basis: 'PER_100G' }),
     alternative: expect.objectContaining({ stock: expect.objectContaining({ symbol: 'TSN' }), fact: expect.objectContaining({ basis: 'PER_100G' }) }),
   })] })]))
+
+  await page.goto('/stocks/US:NASDAQ:PEP')
+  const pepsi = page.getByRole('article', { name: '펩시 제로 슈거 건강 이슈 비교' })
+  await pepsi.getByRole('button', { name: '당류', exact: true }).click()
+  await expect(pepsi.getByText('10.99 g 높음', { exact: true })).toBeVisible()
+  await expect(pepsi.getByText('동일', { exact: true })).toHaveCount(2)
 })
 
 test('브랜드 판매액과 분기 점유율, 공시 매출 및 AI 상품 소개', async ({ page }) => {
