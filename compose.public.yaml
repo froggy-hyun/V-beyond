@@ -1,0 +1,18 @@
+services:
+  edge:
+    image: caddy:2.11.9-alpine@sha256:003a97808e781aa9f7e75cc2f43d34d461099031faf5e20faefb9f61126836f0
+    ports: ["80:8080", "443:8443", "443:8443/udp"]
+    environment:
+      SITE_HOST: ${SITE_HOST:?SITE_HOST required}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - certificates:/data
+      - edge_config:/config
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    tmpfs: [/tmp]
+    restart: unless-stopped
+volumes:
+  certificates:
+  edge_config:

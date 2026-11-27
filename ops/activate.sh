@@ -10,7 +10,7 @@ docker login ghcr.io -u "$(cat registry-user)" --password-stdin < registry-token
 rm -f registry-token registry-user
 previous=$(readlink -f "$base/current" || true)
 docker compose pull
-if docker compose up -d --wait --wait-timeout 150 && curl -fsS --retry 3 http://127.0.0.1:18081/api/v1/stocks?market=KR >/dev/null; then
+if docker compose up -d --wait --wait-timeout 150 && curl -fsS --retry 3 "https://$(sed -n 's/^SITE_HOST=//p' .env)/api/v1/stocks?market=KR" >/dev/null; then
   ln -s "$release" "$base/current.new"
   mv -Tf "$base/current.new" "$base/current"
 else

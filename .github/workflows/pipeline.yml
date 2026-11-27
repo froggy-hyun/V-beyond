@@ -21,7 +21,7 @@ jobs:
         id: scope
         run: |
           bash -n ops/deploy.sh && bash -n ops/activate.sh
-          docker compose --env-file .env.example config --quiet
+          SITE_HOST=example.org docker compose --env-file .env.example -f compose.yaml -f compose.public.yaml config --quiet
           if [[ ! -d backend && ! -d frontend ]]; then
             echo 'app=false' >> "$GITHUB_OUTPUT"
           else

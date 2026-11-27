@@ -15,12 +15,14 @@ ASK
 chmod 700 "$work/askpass"
 export SSH_ASKPASS="$work/askpass" SSH_ASKPASS_REQUIRE=force DISPLAY=:0
 ssh_opts=(-i "$work/key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$work/known_hosts" -o ConnectTimeout=12 -o NumberOfPasswordPrompts=1)
-cp compose.yaml ops/activate.sh "$work/bundle/"
+cp Caddyfile compose.public.yaml compose.yaml ops/activate.sh "$work/bundle/"
 python3 - "$work/bundle/.env" <<'PY'
 import os, sys
 from pathlib import Path
 keys = ('DB_PASSWORD', 'OPENAI_API_KEY', 'KIS_APP_KEY', 'KIS_APP_SECRET', 'BACKEND_IMAGE', 'FRONTEND_IMAGE')
 with Path(sys.argv[1]).open('w') as env:
+    print('COMPOSE_FILE=compose.yaml:compose.public.yaml', file=env)
+    print('SITE_HOST=' + os.environ['PROD_HOST'], file=env)
     for key in keys:
         value = os.environ[key]
         if not value or any(char in value for char in "\r\n'\\"):
