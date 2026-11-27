@@ -241,7 +241,7 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .health-peers { grid-template-columns: repeat(var(--peer-count, 1), minmax(0, 1fr)) }
 .health-divider { display: grid; place-items: center }
 .vs-badge { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: #24272d; font-size: .71rem; font-weight: 800 }
-.alternative-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: 10px; margin-top: 12px }
+.comparison-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: 10px; margin-top: 12px }
 .comparison-card { position: relative; display: flex; flex-direction: column; min-width: 0; border: 1px solid var(--line); border-radius: 9px; padding: 12px; overflow-wrap: anywhere; container-type: inline-size }
 .health-pair:has(.winner-sticker) { margin-top: 24px }
 .health-pair:has(.winner-sticker) .comparison-card { padding-top: 18px }
@@ -325,10 +325,10 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .product-card:hover, .menu-group a:hover { background: #f7faf9 }
 .product-card strong { display: block; overflow-wrap: anywhere; font-size: .91rem; font-weight: 690; line-height: 1.25; margin-block: 2px }
 .fact-list { margin-top: 6px }
-.fact-row, .match-meta { display: flex; align-items: center; justify-content: space-between; gap: 9px; padding: 10px 0; border-top: 1px solid #edf0f1; font-size: .89rem }
+.fact-row { display: flex; align-items: center; justify-content: space-between; gap: 9px; padding: 10px 0; border-top: 1px solid #edf0f1; font-size: .89rem }
 .fact-row:first-of-type { margin-top: 6px }
 .fact-row dd { font-variant-numeric: tabular-nums; font-weight: 680 }
-.fact-row > :first-child, .match-meta > :first-child { flex: 1; min-width: 0 }
+.fact-row > :first-child { flex: 1; min-width: 0 }
 .evidence { display: flex; gap: 10px; padding: 11px 0; border-top: 1px solid var(--line); margin-top: 8px }
 .evidence svg { flex: none; color: var(--accent); margin-top: 3px }
 .evidence p { margin: 4px 0 6px }
@@ -349,8 +349,8 @@ small { display: block; color: var(--muted); font-size: .75rem; font-weight: 490
 .tags :is(button, a):hover { background: var(--accent-tint); color: var(--accent) }
 .primary { display: inline-flex; justify-content: center; align-items: center; gap: 7px; min-height: 41px; padding: 8px 13px; margin-top: 12px; border-radius: 7px; background: var(--accent); color: #fff; font-size: .87rem; font-weight: 700 }
 .primary:hover:not(:disabled) { background: #006f60 }
-.match, .compare-product { margin: 10px 0; border-top: 1px solid var(--line); padding-top: 7px }
-.match .product-card, .compare-product .product-card { border-top: 0 }
+.compare-product { margin: 10px 0; border-top: 1px solid var(--line); padding-top: 7px }
+.compare-product .product-card { border-top: 0 }
 .discovery-heading img { width: 45px; height: auto }
 .watchlist-empty { display: grid; justify-items: center; text-align: center; padding: 26px 0 8px }
 .watchlist-empty img { width: 119px; height: auto }
@@ -402,7 +402,7 @@ footer img { width: 95px; height: auto }
 
 @media (max-width: 839px) {
   .performance-grid, .performance-segments { grid-template-columns: minmax(0, 1fr) }
-  .alternative-grid { grid-template-columns: repeat(auto-fill, minmax(min(138px, 100%), 1fr)) }
+  .comparison-card-grid { grid-template-columns: repeat(auto-fill, minmax(min(138px, 100%), 1fr)) }
   .health-pair:not([data-peers="0"]) { grid-template-columns: minmax(0, 1fr) }
   .health-pair[data-peers="3"] { --peer-count: 2 }
   .health-peers { row-gap: 18px }

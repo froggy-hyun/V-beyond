@@ -5,7 +5,7 @@ import HealthPage from './HealthPage'
 import { ChoiceButtons } from './ChoiceButtons'
 import StockHealthComparisons from './StockHealthComparisons'
 import StockProductPerformance from './StockProductPerformance'
-import ProductComparisonCard from './ProductComparisonCard'
+import { ProductMatchGrid } from './ProductComparisonCard'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { ArrowLeft, ChevronLeft, ChevronRight, Cookie, Droplets, Flame, FlaskConical, GitCompareArrows, Heart, Home as HomeIcon, Menu, Search as SearchIcon, Shield, Sparkles, X } from 'lucide-react'
 import { Link, NavLink, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom'
@@ -247,7 +247,6 @@ function AlternativePage() {
   const basis = item && !criterion.startsWith('AVOID_') ? nutritionBasis(item.category) : ''
   const result = useData<{ baseline: Fact | null; matches: Match[]; excluded: number }>(
     '/products/' + id + '/alternatives?' + new URLSearchParams({ criterion, basis, scope }), Boolean(item))
-  const { getQuote } = useQuotes([...new Set(result.data?.matches.map(row => row.stock.id) ?? [])])
   if (!item) return <div className="page"><section className="panel"><Wait error={origin.error} kind="product" /></section></div>
   return <div className="page"><Link className="back" to={'/products/' + item.id}><ArrowLeft size={16} /> {item.name}</Link><h1>대안 상품 탐색</h1>
     <section className="panel"><div className="section-heading"><div><h2>{item.name}</h2><p>{item.prep}</p></div><ProductPhoto product={item} /></div>
@@ -259,13 +258,8 @@ function AlternativePage() {
       {result.data?.baseline && <p className="baseline">기준 상품 {formatFact(result.data.baseline)} · {bases[result.data.baseline.basis]}</p>}
     </section>
     <section className="panel"><h2>비교 결과</h2>{result.data ? <>
-      {result.data.matches.length ? <div className="alternative-grid">{result.data.matches.map(match =>
-        <ProductComparisonCard key={match.product.id} product={match.product} stock={match.stock} quote={getQuote(match.stock.id)}>
-          <div className="comparison-value"><strong>{formatFact(match.fact)}</strong>
-            {match.reductionPercent != null && <span className="status">{match.reductionPercent}% 낮음</span>}</div>
-          <small>{bases[match.fact.basis]}</small>
-          <div className="comparison-links"><Source href={match.fact.source}>상품 자료</Source></div>
-        </ProductComparisonCard>)}</div> : <Empty>동일 기준으로 확인된 대안 상품이 없습니다.</Empty>}
+      {result.data.matches.length ? <ProductMatchGrid matches={result.data.matches} />
+        : <Empty>동일 기준으로 확인된 대안 상품이 없습니다.</Empty>}
       {result.data.excluded > 0 && <p className="muted">비교 기준이 다르거나 조건에 맞지 않는 상품은 결과에서 제외했습니다.</p>}
     </> : <Wait error={result.error} kind="products" />}</section>
   </div>
@@ -336,9 +330,8 @@ function Discovery() {
     {result && <><section className="panel discovery-summary" aria-label={result.explanation ? 'AI 탐색 설명' : '탐색 안내'}>
       <h2>{result.explanation && <Sparkles size={17} aria-hidden />}{result.explanation ? 'AI 탐색 설명' : '탐색 안내'}</h2>
       <p>{result.explanation ?? result.message}</p></section>
-    <section className="panel discovery-result"><h2>탐색 결과</h2>{result.results.map(row => <article className="match" key={row.product.id}>
-      <ProductCard product={row.product} /><div className="match-meta"><strong>{formatFact(row.fact)} · {bases[row.fact.basis]}</strong><Source href={row.fact.source} /></div>
-      <Link className="plain-link" to={pathFor(row.stock.id)}>{row.stock.name} · {row.stock.symbol}</Link></article>)}</section></>}
+    <section className="panel" aria-labelledby="discovery-results-heading"><h2 id="discovery-results-heading">탐색 결과</h2>
+      {result.results.length > 0 && <ProductMatchGrid matches={result.results} />}</section></>}
   </div>
 }
 
