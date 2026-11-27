@@ -1,0 +1,142 @@
+package com.productlens.catalog;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+@Service
+public class Catalog {
+    public enum Category { RAMEN, FRYING_PAN, CHICKEN_NOODLE_SOUP, COLA }
+    public enum Criterion {
+        SODIUM, TOTAL_SUGAR, ADDED_SUGAR, SATURATED_FAT, CALORIES,
+        AVOID_PTFE, AVOID_PFAS, AVOID_ASPARTAME;
+
+        public boolean absence() { return name().startsWith("AVOID_"); }
+    }
+    public enum Scope { ALL_COMPANIES, SAME_COMPANY, OTHER_COMPANY }
+    public record Stock(String id, String symbol, String name, String english, String market, String exchange,
+                        String currency, String overview, String source) {}
+    public record Fact(Criterion criterion, BigDecimal value, String unit, String basis, String source) {}
+    public record Evidence(String title, String summary, String source) {}
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record Product(String id, String symbol, String name, String brand, Category category, String market,
+                          String relation, String size, String prep, String source, List<Fact> facts,
+                          List<Evidence> evidence, String material, String description) {}
+    public record Search(List<Stock> stocks, List<Product> products) {}
+    public record Alternative(Product product, Stock stock, Fact fact, BigDecimal reductionPercent) {}
+    public record Comparison(Stock stock, List<Product> products) {}
+    public record Alternatives(Fact baseline, List<Alternative> matches, int excluded) {}
+    private final JdbcClient db;
+    private final ObjectMapper json;
+
+    Catalog(JdbcClient db, ObjectMapper json) {
+        this.db = db;
+        this.json = json;
+    }
+
+    public List<Stock> stocks(String market) {
+        return db.sql("SELECT * FROM listings WHERE (:market = '' OR market = :market) ORDER BY market, id")
+                .param("market", market).query(Stock.class).list();
+    }
+
+    public Stock stock(String id) {
+        return db.sql("SELECT * FROM listings WHERE id=:id").param("id", id).query(Stock.class).optional()
+                .orElseThrow(() -> missing("종목을 찾을 수 없습니다."));
+    }
+
+    public List<Product> products(String listing) {
+        stock(listing);
+        return db.sql("SELECT details FROM products WHERE status='VERIFIED' AND listing_id=:id ORDER BY id")
+                .param("id", listing).query((row, index) -> decode(row.getString(1))).list();
+    }
+
+    public Product product(String id) {
+        return db.sql("SELECT details FROM products WHERE status='VERIFIED' AND id=:id")
+                .param("id", id).query((row, index) -> decode(row.getString(1))).optional()
+                .orElseThrow(() -> missing("상품을 찾을 수 없습니다."));
+    }
+
+    public Stock stockFor(Product product) {
+        return db.sql("SELECT * FROM listings WHERE symbol=:symbol AND market=:market")
+                .param("symbol", product.symbol()).param("market", product.market()).query(Stock.class).single();
+    }
+
+    public Search search(String query) {
+        var term = query.strip().toLowerCase(Locale.ROOT);
+        if (term.isEmpty()) return new Search(List.of(), List.of());
+        var products = db.sql("""
+                SELECT details FROM products WHERE status='VERIFIED'
+                 AND strpos(lower(name || ' ' || brand), :term) > 0 ORDER BY id
+                """).param("term", term).query((row, index) -> decode(row.getString(1))).list();
+        var stocks = stocks("").stream().filter(stock ->
+                (stock.name() + " " + stock.english() + " " + stock.symbol()).toLowerCase(Locale.ROOT).contains(term)
+                || products.stream().anyMatch(item -> item.symbol().equals(stock.symbol()) && item.market().equals(stock.market())))
+                .toList();
+        return new Search(stocks, products);
+    }
+
+    public List<Product> group(Category category, String market) {
+        return db.sql("""
+                SELECT details FROM products WHERE status='VERIFIED' AND category=:category
+                 AND (:market='' OR market=:market) ORDER BY id
+                """).param("category", category.name()).param("market", market)
+                .query((row, index) -> decode(row.getString(1))).list();
+    }
+
+    public List<Stock> competitors(String id) {
+        return products(id).stream().flatMap(p -> group(p.category(), p.market()).stream())
+                .map(this::stockFor).filter(s -> !s.id().equals(id)).distinct().toList();
+    }
+
+    public Alternatives alternatives(String id, Criterion criterion, String basis, Scope scope) {
+        Product origin = product(id);
+        var candidates = group(origin.category(), origin.market()).stream()
+                .filter(p -> !p.id().equals(id))
+                .filter(p -> scope == Scope.ALL_COMPANIES
+                        || (scope == Scope.SAME_COMPANY) == p.symbol().equals(origin.symbol()))
+                .toList();
+        Fact baseline = origin.facts().stream()
+                .filter(f -> f.criterion() == criterion && (basis.isBlank() || f.basis().equals(basis)))
+                .findFirst().orElse(null);
+        if (baseline == null && !criterion.absence()) return new Alternatives(null, List.of(), candidates.size());
+        var matches = candidates.stream().flatMap(p -> p.facts().stream()
+                .filter(f -> f.criterion() == criterion)
+                .filter(f -> criterion.absence() ? f.value().signum() == 0 : comparable(origin, p, baseline, f))
+                .limit(1).map(f -> new Alternative(p, stockFor(p), f, reduction(baseline, f, criterion))))
+                .sorted(Comparator.comparing(row -> row.fact().value())).toList();
+        return new Alternatives(baseline, matches, candidates.size() - matches.size());
+    }
+
+    private static boolean comparable(Product origin, Product candidate, Fact baseline, Fact fact) {
+        // 농축·완제품이나 식사·간식처럼 섭취 기준이 다른 제품 제외
+        return origin.prep().equals(candidate.prep()) && baseline.basis().equals(fact.basis())
+                && baseline.unit().equals(fact.unit()) && fact.value().compareTo(baseline.value()) < 0;
+    }
+
+    private static BigDecimal reduction(Fact baseline, Fact fact, Criterion criterion) {
+        if (criterion.absence() || baseline == null || baseline.value().signum() <= 0) return null;
+        return baseline.value().subtract(fact.value()).movePointRight(2)
+                .divide(baseline.value(), 1, RoundingMode.HALF_UP);
+    }
+
+    private Product decode(String value) {
+        try {
+            return json.readValue(value, Product.class);
+        } catch (JsonProcessingException error) {
+            throw new IllegalStateException("상품 데이터 형식 오류", error);
+        }
+    }
+
+    private static ResponseStatusException missing(String message) {
+        return new ResponseStatusException(HttpStatus.NOT_FOUND, message);
+    }
+}

@@ -9,3 +9,20 @@
 배포 환경은 GitHub Actions의 `production`. SSH 호스트 키 고정, 키와 비밀번호 인증, 작업별 단기 레지스트리 토큰 사용. 필수 secret 이름은 워크플로의 deploy 단계 참조. 실제 등록값은 이 컴퓨터의 Git 제외 파일 `.local/GITHUB_SECRETS.md`에 보관.
 
 서버 배포 경로는 `~/product-lens`. 운영은 Caddy가 80·443 포트를 점유하고 HTTP를 HTTPS로 전환. 공개 IP용 단기 ACME 인증서 자동 갱신. 로컬 Compose 웹은 `127.0.0.1:18081`에서 접근. 헬스체크 실패 시 이전 이미지 구성으로 복귀. DB 마이그레이션은 이전 앱 버전과 호환되는 변경으로 작성.
+
+## 로컬 실행
+
+```sh
+docker build -t product-lens-backend:local backend
+docker build -t product-lens-frontend:local frontend
+docker compose --env-file .env.example up -d --wait
+```
+
+브라우저에서 `http://127.0.0.1:18081` 접속. 키 없이 상품 비교 및 규칙 기반 탐색 사용 가능. 운영 설정값과 로컬 실행 예시값 분리. 종목별 관심 등록은 브라우저 Local Storage 사용.
+
+## 데이터와 확인 범위
+
+- 국내 4개·미국 6개 종목 및 30개 상품의 시드와 제품별 원문 링크는 `data/`에 포함. 삼양·풀무원의 판매 확인이 부족한 후보는 시드에 포함된 확인 상품으로 교체. 제품 사진은 권리 확인 전 카테고리 아이콘 사용.
+- 제품 단위 비교는 동일 판매 시장과 조리 상태, 단위 및 제공 기준 적용. 미확인 소재는 미사용 검색에서 제외. 기업 비교는 표본 상품과 공개 영양·소재 자료 제공.
+- 국내 및 미국 현재가 REST와 WebSocket 접속키 발급은 `ops/check-kis.py`로 점검. 공개 배포는 합성 시세 및 차트 사용. 실제 장중 WebSocket 체결 구독·재배포 계약 및 거래소 휴장 일정 연동은 후속 작업.
+- UI는 원큐스탁 공개 소개의 종목 탐색 흐름을 참고한 Product Lens 디자인. 회원 관리와 계좌·주문 기능은 MVP 범위에서 제외.
