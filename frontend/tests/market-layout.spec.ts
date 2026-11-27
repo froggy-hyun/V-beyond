@@ -117,16 +117,16 @@ test('종목 차트 구간과 분봉 선택', async ({ page }) => {
   await page.goto('/stocks/KR:KOSPI:004370')
   await expect(page.getByRole('heading', { name: '농심' })).toBeVisible()
   for (const [label, range] of [['1주', '1W'], ['1개월', '1M'], ['3개월', '3M'], ['1년', '1Y']]) {
-    const response = page.waitForResponse(result => result.url().includes('/candles?') && result.url().includes('range=' + range))
+    const response = page.waitForResponse(result => result.ok() && result.url().includes('/candles?') && result.url().includes('range=' + range))
     await page.getByRole('button', { name: label, exact: true }).click()
-    expect((await response).ok()).toBe(true)
+    await response
     await expect(page.getByRole('button', { name: label, exact: true })).toHaveAttribute('aria-pressed', 'true')
     await expect(page.getByRole('img', { name: '시세 및 거래량 차트' })).toBeVisible()
   }
   await page.getByRole('button', { name: '1일', exact: true }).click()
-  const response = page.waitForResponse(result => result.url().includes('/candles?interval=5m'))
+  const response = page.waitForResponse(result => result.ok() && result.url().includes('/candles?interval=5m'))
   await page.getByRole('button', { name: '5분 봉', exact: true }).click()
-  expect((await response).ok()).toBe(true)
+  await response
 })
 
 test('장중 새 봉이 들어와도 선택한 차트 유지', async ({ page }) => {

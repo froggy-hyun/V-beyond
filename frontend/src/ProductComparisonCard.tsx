@@ -6,8 +6,8 @@ import { ProductPhoto, Source, StockRow } from './ui'
 import winnerCharacter from './assets/brand/winner.webp'
 
 export default function ProductComparisonCard({ product, stock, quote, label, winner, children }: {
-  product: Product
-  stock: Stock
+  product: Pick<Product, 'id' | 'name'> & Partial<Pick<Product, 'category' | 'brand' | 'relation'>>
+  stock?: Stock
   quote?: Quote | null
   label?: string
   winner?: boolean
@@ -18,10 +18,10 @@ export default function ProductComparisonCard({ product, stock, quote, label, wi
     {label && <small className="comparison-label">{label}</small>}
     <div className="comparison-product"><ProductPhoto product={product} /><div>
       <h3><Link to={'/products/' + product.id}>{product.name}</Link></h3>
-      <small>{product.brand} · {relations[product.relation]}</small>
+      {product.brand && product.relation && <small>{product.brand} · {relations[product.relation]}</small>}
     </div></div>
     <div className="comparison-data">{children}</div>
-    <StockRow stock={stock} quote={quote} compact />
+    {stock && <StockRow stock={stock} quote={quote} compact />}
   </article>
 }
 

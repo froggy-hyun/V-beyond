@@ -2,6 +2,7 @@ import { ChevronRight, FlaskConical, Search } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { bases, formatFact, pathFor, useData } from './api'
 import type { Fact, HealthTopic, Stock } from './api'
+import ProductComparisonCard from './ProductComparisonCard'
 import { Empty, Source, StockMark, Wait } from './ui'
 
 type Match = { stock: Stock; productId: string; productName: string; market: string; detail: string | null; source: string; fact: Fact | null }
@@ -50,12 +51,12 @@ function TopicResults({ selection: { topic, matches } }: { selection: Result }) 
         const { stock } = products[0]
         return <article className="topic-company" key={id}>
           <Link className="topic-stock" to={pathFor(id)}><StockMark stock={stock} /><span><strong>{stock.name}</strong><small>{stock.symbol} · {stock.exchange}</small></span><ChevronRight size={17} aria-hidden /></Link>
-          {products.map(product => <div className="topic-product" key={product.productId}>
-            <div><Link to={'/products/' + product.productId}>{product.productName}</Link>
+          <div className="comparison-card-grid">{products.map(product =>
+            <ProductComparisonCard key={product.productId} product={{ id: product.productId, name: product.productName }}>
               <small>{product.market === 'KR' ? '국내' : '미국'} 판매 · {product.detail
-                ?? (product.fact ? `${formatFact(product.fact)} · ${bases[product.fact.basis]}` : '')}</small></div>
-            <Source href={product.source}>상품 근거</Source>
-          </div>)}
+                ?? (product.fact ? `${formatFact(product.fact)} · ${bases[product.fact.basis]}` : '')}</small>
+              <div className="comparison-links"><Source href={product.source}>상품 근거</Source></div>
+            </ProductComparisonCard>)}</div>
         </article>
       }) : <Empty>공개 자료로 확인한 등록 상품이 없습니다.</Empty>}
     </section>

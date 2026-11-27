@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Building2, CookingPot, CupSoda, Soup, Utensils, ChevronRight, Droplet, Wind, Drumstick, Sandwich, Beef } from 'lucide-react'
+import { Building2, CookingPot, CupSoda, Soup, Utensils, ChevronRight, Droplet, Wind, Drumstick, Sandwich, Beef, Package } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { categories, currency, pathFor, percent, relations, tone } from './api'
 import type { Category, Product, Quote, Stock } from './api'
@@ -26,9 +26,10 @@ export function ProductCard({ product }: { product: Product }) {
     <ChevronRight aria-hidden size={17} className="muted" />
   </Link>
 }
-export function ProductPhoto({ product, detail = false }: { product: Product; detail?: boolean }) {
+export function ProductPhoto({ product, detail = false }: { product: Pick<Product, 'id' | 'name'> & Partial<Pick<Product, 'category'>>; detail?: boolean }) {
   const photo = productImages[`./assets/products/${product.id}.webp`]
-  if (!photo) return <ProductIcon category={product.category} />
+  if (!photo) return product.category ? <ProductIcon category={product.category} />
+    : <span className="product-icon"><Package aria-hidden /></span>
   return <div className="product-photo"><img src={photo} alt={detail ? `${product.name} 제품 사진` : ''} loading={detail ? 'eager' : 'lazy'} decoding="async" /></div>
 }
 export function StockMark({ stock }: { stock: Stock }) {
