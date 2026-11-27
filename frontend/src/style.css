@@ -514,7 +514,6 @@ footer p { margin: 0; color: var(--muted); font-size: .75rem; line-height: 1.5; 
 .disease-evidence ul { display: grid; gap: 8px; padding: 8px 12px; margin: 8px 0; list-style: none; background: var(--surface); border-radius: 6px }
 .disease-evidence li p { margin: 0; font-size: .82rem }
 .disease-evidence li .source { margin-top: 2px }
-.health-topic > .plain-link { margin-top: 6px }
 .topic-company { padding: 10px 0; border-bottom: 1px solid var(--line) }
 .topic-company:last-child { border-bottom: 0 }
 .topic-stock { display: flex; align-items: center; gap: 8px; width: max-content; max-width: 100%; min-height: 44px }

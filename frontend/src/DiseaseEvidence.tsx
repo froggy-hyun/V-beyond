@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { bases, formatFact } from './api'
 import type { HealthAssessment, HealthTopic } from './api'
 import { Source } from './ui'
@@ -10,7 +9,6 @@ export function DiseaseEvidence({ topic }: { topic: HealthTopic }) {
     <ul aria-label="연구·기관 근거">{topic.sources.map(source => <li key={source.url}>
       <p>{source.finding}</p><Source href={source.url}>{source.title}</Source>
     </li>)}</ul>
-    <p><strong>해석 범위</strong> {topic.limits}</p>
   </div>
 }
 
@@ -21,6 +19,5 @@ export function ProductDiseaseEvidence({ assessment: { topic, support } }: { ass
     <p>{support.detail ?? (support.fact && [formatFact(support.fact), bases[support.fact.basis]].join(' · '))}
       {' '}<Source href={support.source}>상품 근거</Source></p>
     <DiseaseEvidence topic={topic} />
-    <Link className="plain-link" to={'/health?topic=' + topic.id}>관련 종목</Link>
   </section>
 }

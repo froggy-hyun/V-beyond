@@ -1,4 +1,15 @@
 import { expect, test } from '@playwright/test'
+import type { APIRequestContext } from '@playwright/test'
+
+async function getAfterRateLimit(request: APIRequestContext, path: string) {
+  let response = await request.get(path)
+  if (response.status() === 429) await expect.poll(async () => {
+    await response.dispose()
+    response = await request.get(path)
+    return response.status()
+  }).not.toBe(429)
+  return response
+}
 
 const scenarios = [
   { product: 'shin-red', competitor: '오뚜기', alternative: '진라면' },
@@ -11,6 +22,7 @@ for (const scenario of scenarios) {
   test(scenario.product + ' 근거부터 대안 기업 차트까지', async ({ page }) => {
     await page.goto('/products/' + scenario.product)
     await expect(page.getByRole('heading', { name: '건강 관련 근거' })).toBeVisible()
+    await expect(page.getByRole('link', { name: '관련 종목', exact: true })).toHaveCount(0)
     await expect.poll(() => page.getByRole('img', { name: /제품 사진$/ }).evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0)
     await expect(page.getByRole('link', { name: '사진 출처' })).toHaveAttribute('href', /^https:\/\//)
     await expect(page.locator('.evidence .source').first()).toBeVisible()
@@ -108,12 +120,7 @@ test('종목 차트 아래 건강 이슈 비교와 대안 종목 이동', async 
 })
 
 test('종목 비교에서 소재와 성분 기준별 검증 결과 표시', async ({ request, page }) => {
-  const soupPath = '/api/v1/stocks/US:NASDAQ:CPB/health-comparisons'
-  let soup = await request.get(soupPath)
-  if (soup.status() === 429) await expect.poll(async () => {
-    soup = await request.get(soupPath)
-    return soup.status()
-  }).toBe(200)
+  const soup = await getAfterRateLimit(request, '/api/v1/stocks/US:NASDAQ:CPB/health-comparisons')
   expect(soup.ok()).toBe(true)
   expect(await soup.json()).toEqual(expect.arrayContaining([
     expect.objectContaining({ product: expect.objectContaining({ id: 'campbell-original' }), issues: [
@@ -148,7 +155,7 @@ test('종목 비교에서 소재와 성분 기준별 검증 결과 표시', asyn
   await expect(zero.getByText('간세포암 가능성 · 페닐케톤뇨증')).toBeVisible()
   await expect(zero.locator('details')).toHaveCount(0)
 
-  const nuggets = await request.get('/api/v1/stocks/US:NYSE:CAG/health-comparisons')
+  const nuggets = await getAfterRateLimit(request, '/api/v1/stocks/US:NYSE:CAG/health-comparisons')
   expect(nuggets.ok()).toBe(true)
   expect(await nuggets.json()).toEqual(expect.arrayContaining([expect.objectContaining({ product: expect.objectContaining({ id: 'banquet-original-nuggets' }), issues: [expect.objectContaining({
     baseline: expect.objectContaining({ criterion: 'SODIUM', basis: 'PER_100G' }),
@@ -335,7 +342,7 @@ test('홈 성분 탐색에서 제조사 표시와 기관 평가를 확인하고 
   await expect(issue).toContainText('발암 추정(2A군)')
   await expect(issue.getByRole('link', { name: /IARC/ })).toHaveAttribute('href', /ncbi\.nlm\.nih\.gov/)
   await expect(issue.getByRole('list', { name: '연구·기관 근거' }).getByText(/인체 관찰 연구, 동물실험/)).toBeVisible()
-  await expect(issue.getByText(/잔류량, 생성된 니트로사민 양/)).toBeVisible()
+  await expect(issue.getByText('해석 범위', { exact: true })).toHaveCount(0)
   const stocks = page.getByRole('region', { name: '관련 종목' })
   await expect(stocks.getByRole('link', { name: '오스카 마이어 클래식 비프 프랭크' })).toBeVisible()
   await expect(stocks.getByRole('link', { name: '애플게이트 유기농 소고기 핫도그' })).toHaveCount(0)
@@ -358,17 +365,17 @@ test('홈 성분 탐색에서 제조사 표시와 기관 평가를 확인하고 
 })
 
 test('근거가 빠진 비교 항목과 타사 매출 대체 표시 제외', async ({ request, page }) => {
-  const response = await request.get('/api/v1/stocks/US:NASDAQ:NWL/health-comparisons')
+  const response = await getAfterRateLimit(request, '/api/v1/stocks/US:NASDAQ:NWL/health-comparisons')
   expect(response.ok()).toBe(true)
   const comparisons = await response.json()
   expect(comparisons.length).toBeGreaterThan(0)
   expect(comparisons.some((row: { product: { id: string } }) => row.product.id === 'calphalon-steel')).toBe(false)
 
-  const alternative = await request.get('/api/v1/products/calphalon-steel/alternatives?criterion=AVOID_PTFE')
+  const alternative = await getAfterRateLimit(request, '/api/v1/products/calphalon-steel/alternatives?criterion=AVOID_PTFE')
   expect(alternative.ok()).toBe(true)
   expect(await alternative.json()).toMatchObject({ baseline: null, matches: [] })
 
-  const market = await request.get('/api/v1/stocks/KR:KOSPI:017810/revenue-segments')
+  const market = await getAfterRateLimit(request, '/api/v1/stocks/KR:KOSPI:017810/revenue-segments')
   expect(market.ok()).toBe(true)
   expect(await market.json()).toMatchObject({ markets: [] })
   await page.goto('/stocks/US:NASDAQ:NWL')
