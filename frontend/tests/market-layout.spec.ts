@@ -38,3 +38,45 @@ test('작은 모바일 화면의 좌우 넘침 방지', async ({ page }, info) =
     await expect(page.getByRole('navigation', { name: '주 메뉴' })).toBeVisible()
   }
 })
+
+test('종목 차트 구간과 분봉 선택', async ({ page }) => {
+  await page.goto('/stocks/KR:KOSPI:004370')
+  await expect(page.getByRole('heading', { name: '농심' })).toBeVisible()
+  for (const [label, range] of [['1주', '1W'], ['1개월', '1M'], ['3개월', '3M'], ['1년', '1Y']]) {
+    const response = page.waitForResponse(result => result.url().includes('/candles?') && result.url().includes('range=' + range))
+    await page.getByRole('button', { name: label, exact: true }).click()
+    expect((await response).ok()).toBe(true)
+    await expect(page.getByRole('button', { name: label, exact: true })).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByRole('img', { name: '시세 및 거래량 차트' })).toBeVisible()
+  }
+  await page.getByRole('button', { name: '1일', exact: true }).click()
+  const response = page.waitForResponse(result => result.url().includes('/candles?interval=5m'))
+  await page.getByRole('button', { name: '5분 봉', exact: true }).click()
+  expect((await response).ok()).toBe(true)
+})
+
+test('장중 새 봉이 들어와도 선택한 차트 유지', async ({ page }) => {
+  const observedAt = '2026-11-27T00:02:30Z'
+  await page.clock.install({ time: new Date(observedAt) })
+  await page.route('**/api/v1/market/mode', route => route.fulfill({ json: { feedMode: 'KIS_REST' } }))
+  await page.route('**/api/v1/market/quotes?**', route => route.fulfill({ json: [{
+    listingId: 'KR:KOSPI:004370', price: 100, change: 0, changePercent: 0, cumulativeVolume: 10, currency: 'KRW',
+    receivedAt: observedAt, exchangeTimestamp: null, feedMode: 'KIS_REST', freshness: 'FRESH', session: 'REGULAR',
+  }] }))
+  await page.route('**/api/v1/market/stream?**', route => route.fulfill({ status: 204 }))
+  let refreshes = 0
+  await page.route('**/api/v1/market/stocks/*/candles?**', route => {
+    const times = refreshes++ ? ['00:01', '00:02', '00:03'] : ['00:01', '00:02']
+    return route.fulfill({ json: times.map((time, index) => ({
+      startAt: '2026-11-27T' + time + ':00Z', open: 100 + index, high: 102 + index, low: 99 + index, close: 101 + index, volume: 10,
+    })) })
+  })
+  await page.goto('/stocks/KR:KOSPI:004370?range=1D&interval=1m')
+  await expect(page.getByText(/마지막 봉.*9:02/)).toBeVisible()
+  const canvas = page.locator('.price-chart canvas').first()
+  await canvas.evaluate(element => element.setAttribute('data-before-update', 'true'))
+  await page.clock.fastForward(17_000)
+  await expect(page.getByText(/마지막 봉.*9:03/)).toBeVisible()
+  await expect(canvas).toHaveAttribute('data-before-update', 'true')
+  await expect(page.getByRole('button', { name: '1분 봉', exact: true })).toHaveClass('selected')
+})

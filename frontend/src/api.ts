@@ -46,7 +46,9 @@ export const quoteTime = (quote: Quote) => quote.exchangeTimestamp ?? quote.rece
 export function quoteStatus(quote: Quote) {
   if (quote.feedMode === 'REPLAY') return '데모 · 장 마감'
   if (quote.freshness === 'UNAVAILABLE') return '시세 확인 불가'
-  return quote.freshness === 'STALE' ? '갱신 지연' : 'KIS 조회'
+  if (quote.freshness === 'STALE') return '갱신 지연'
+  if (quote.session === 'REGULAR') return '정규장 · 주기 갱신'
+  return quote.session === 'CLOSED' ? '정규장 마감' : 'KIS 조회'
 }
 export function useQuotes(ids: string[]) {
   const queryClient = useQueryClient()

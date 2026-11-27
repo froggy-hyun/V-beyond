@@ -64,7 +64,7 @@ class MarketData implements MarketFeed {
     }
 
     private List<Candle> daily(Stock stock, double opening, String range) {
-        int count = switch (range) { case "1M" -> 22; case "3M" -> 66; default -> 260; };
+        int count = switch (range) { case "1W" -> 5; case "1M" -> 22; case "3M" -> 66; default -> 260; };
         var intraday = candles(stock, "1m", "1D");
         var days = new ArrayList<Candle>();
         days.add(new Candle(DAY, intraday.getFirst().open(),

@@ -121,7 +121,7 @@ function Highlight({ stock, quote }: { stock: Stock; quote?: Quote }) {
 
 function Preview({ stock, quote }: { stock: Stock; quote?: Quote }) {
   const live = useMarketMode() === 'KIS_REST'
-  const candles = useData<Candle[]>('/market' + pathFor(stock.id) + '/candles?interval=5m&range=1D', true, live ? 60_000 : undefined)
+  const candles = useData<Candle[]>('/market' + pathFor(stock.id) + '/candles?interval=5m&range=1D', true, live ? (quote?.session === 'REGULAR' ? 20_000 : 60_000) : undefined)
   const data = candles.data
   return <section className="panel market-preview" aria-label="종목 차트 미리보기">
     <div className="section-heading">
@@ -133,7 +133,7 @@ function Preview({ stock, quote }: { stock: Stock; quote?: Quote }) {
       {quote.changePercent != null && <span className={'change ' + tone(quote.changePercent)}>{percent(quote.changePercent)}</span>}
     </div>}
     <div className="preview-chart">
-      {data?.length ? <Suspense fallback={<Wait error={null} />}><Chart bars={data} market={stock.market} candle={false} /></Suspense>
+      {data?.length ? <Suspense fallback={<Wait error={null} />}><Chart key={stock.id} bars={data} market={stock.market} candle={false} /></Suspense>
         : data ? <Empty>표시할 시세가 없습니다.</Empty> : <Wait error={candles.error} />}
     </div>
   </section>

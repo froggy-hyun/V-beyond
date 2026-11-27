@@ -104,7 +104,7 @@ class KisClient {
         // 방문자와 시세 작업이 하나의 호출 한도를 공유
         var wait = Duration.between(Instant.now(), nextRequest);
         if (wait.isPositive()) Thread.sleep(wait);
-        nextRequest = Instant.now().plusMillis(750);
+        nextRequest = Instant.now().plusMillis(1050);
     }
 
     static class Unavailable extends RuntimeException {}

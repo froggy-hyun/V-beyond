@@ -36,8 +36,8 @@ import org.springframework.web.server.ResponseStatusException;
 @ConditionalOnProperty(name = "lens.market.mode", havingValue = "KIS")
 class KisMarketFeed implements MarketFeed {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(KisMarketFeed.class);
-    static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
-    static final ZoneId NEW_YORK = ZoneId.of("America/New_York");
+    static final ZoneId SEOUL = MarketHours.SEOUL;
+    static final ZoneId NEW_YORK = MarketHours.NEW_YORK;
     static final DateTimeFormatter DATE = DateTimeFormatter.BASIC_ISO_DATE;
     static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HHmmss");
     static final DateTimeFormatter CURSOR = DateTimeFormatter.ofPattern("uuuuMMddHHmmss");
@@ -45,6 +45,9 @@ class KisMarketFeed implements MarketFeed {
     private final KisClient kis;
     private final Map<String, Quote> quotes = new ConcurrentHashMap<>();
     private final Map<ChartKey, Chart> charts = new ConcurrentHashMap<>();
+    private volatile LocalDate krCalendarDate;
+    private volatile boolean krTradingDay;
+    private Instant nextCalendarAttempt = Instant.EPOCH;
     private volatile Instant refreshUntil = Instant.now().plusSeconds(90);
     private final Semaphore chartSlots = new Semaphore(2);
     private final java.util.concurrent.ScheduledExecutorService poller = Executors.newSingleThreadScheduledExecutor();
@@ -74,18 +77,20 @@ class KisMarketFeed implements MarketFeed {
     @Override public Quote quote(Stock stock) {
         refreshUntil = Instant.now().plusSeconds(90);
         var quote = quotes.get(stock.id());
+        var session = session(stock.market(), Instant.now());
         if (quote == null) {
             return new Quote(stock.id(), null, null, null, null, 0, stock.currency(),
-                    null, null, mode(), "UNAVAILABLE", "UNKNOWN", "한국투자증권");
+                    null, null, mode(), "UNAVAILABLE", session, "한국투자증권");
         }
-        if (quote.receivedAt().isAfter(Instant.now().minusSeconds(50))) return quote;
+        var freshness = quote.receivedAt().isAfter(Instant.now().minusSeconds(55)) ? "FRESH" : "STALE";
         return new Quote(quote.listingId(), quote.price(), quote.previousClose(), quote.change(), quote.changePercent(),
-                quote.cumulativeVolume(), quote.currency(), null, quote.receivedAt(), mode(), "STALE", "UNKNOWN", quote.source());
+                quote.cumulativeVolume(), quote.currency(), null, quote.receivedAt(), mode(), freshness, session, quote.source());
     }
 
     private void refreshQuotes() {
         if (Instant.now().isAfter(refreshUntil)) return;
         try {
+            refreshKoreanHoliday();
             for (var stock : catalog.stocks("")) {
                 try { quotes.put(stock.id(), fetchQuote(stock)); }
                 catch (KisClient.Unavailable | IllegalArgumentException error) {
@@ -95,6 +100,37 @@ class KisMarketFeed implements MarketFeed {
         } catch (org.springframework.dao.DataAccessException ignored) {
             // 카탈로그 연결이 회복되면 다음 조회 주기에서 재시도
         }
+    }
+
+    private void refreshKoreanHoliday() {
+        var now = Instant.now();
+        var date = now.atZone(SEOUL).toLocalDate();
+        if (date.equals(krCalendarDate) || now.isBefore(nextCalendarAttempt)) return;
+        nextCalendarAttempt = now.plusSeconds(90);
+        try {
+            var data = kis.query(KisClient.DOMESTIC + "chk-holiday", "CTCA0903R",
+                    Map.of("BASS_DT", DATE.format(date), "CTX_AREA_FK", "", "CTX_AREA_NK", ""));
+            for (var day : data.path("output")) {
+                if (DATE.format(date).equals(day.path("bass_dt").asText())) {
+                    krTradingDay = day.path("opnd_yn").asText().equals("Y");
+                    krCalendarDate = date;
+                    break;
+                }
+            }
+        } catch (KisClient.Unavailable error) {
+            log.debug("KIS 국내 개장일 조회 실패");
+        }
+    }
+
+    String session(String market, Instant now) {
+        var date = now.atZone(MarketHours.zone(market)).toLocalDate();
+        var window = MarketHours.window(market, date);
+        if (window == null || !window.trading(now)) return "CLOSED";
+        if (market.equals("KR")) {
+            if (!date.equals(krCalendarDate)) return "UNKNOWN";
+            return krTradingDay ? "REGULAR" : "CLOSED";
+        }
+        return MarketHours.knownUsSchedule(date) ? "REGULAR" : "UNKNOWN";
     }
 
     private Quote fetchQuote(Stock stock) {
@@ -129,7 +165,9 @@ class KisMarketFeed implements MarketFeed {
     @Override public List<Candle> candles(Stock stock, String interval, String range) {
         var key = new ChartKey(stock.id(), range);
         var cached = charts.get(key);
-        var ttl = range.equals("1D") ? Duration.ofSeconds(55) : Duration.ofMinutes(10);
+        var trading = session(stock.market(), Instant.now()).equals("REGULAR");
+        var ttl = range.equals("1D") ? Duration.ofSeconds(trading ? 12 : 50)
+                : Duration.ofSeconds(trading ? 55 : 180);
         if (fresh(cached, ttl)) return interval(cached.bars(), interval);
         if (!chartSlots.tryAcquire()) {
             if (cached != null) return interval(cached.bars(), interval);
@@ -138,7 +176,8 @@ class KisMarketFeed implements MarketFeed {
         try {
             var chart = charts.compute(key, (ignored, current) -> {
                 if (fresh(current, ttl)) return current;
-                List<Candle> result = range.equals("1D") ? intraday(stock) : daily(stock, range);
+                var recent = trading && range.equals("1D") && current != null ? current.bars() : List.<Candle>of();
+                List<Candle> result = range.equals("1D") ? intraday(stock, recent) : daily(stock, range);
                 return new Chart(result, Instant.now());
             });
             return interval(chart.bars(), interval);
@@ -159,61 +198,110 @@ class KisMarketFeed implements MarketFeed {
         return interval.equals("5m") ? MarketData.fiveMinuteBars(bars) : bars;
     }
 
-    private List<Candle> intraday(Stock stock) {
-        return stock.market().equals("KR") ? domesticIntraday(stock) : overseasIntraday(stock);
+    private List<Candle> intraday(Stock stock, List<Candle> prior) {
+        return stock.market().equals("KR") ? domesticIntraday(stock, prior) : overseasIntraday(stock, prior);
     }
 
-    private List<Candle> domesticIntraday(Stock stock) {
+    private List<Candle> domesticIntraday(Stock stock, List<Candle> prior) {
         var now = LocalDateTime.now(SEOUL);
-        var recent = queryWith(domestic(stock), KisClient.DOMESTIC + "inquire-daily-itemchartprice", "FHKST03010100",
-                "FID_INPUT_DATE_1", DATE.format(now.minusDays(14)), "FID_INPUT_DATE_2", DATE.format(now),
-                "FID_PERIOD_DIV_CODE", "D", "FID_ORG_ADJ_PRC", "1").path("output2");
-        var date = java.util.stream.StreamSupport.stream(recent.spliterator(), false)
-                .map(row -> row.path(KR_DAILY.date()).asText()).filter(value -> !value.isBlank())
-                .map(value -> LocalDate.parse(value, DATE)).max(LocalDate::compareTo).orElse(null);
-        if (date == null) return List.of();
-        var cursor = date.equals(now.toLocalDate()) ? TIME.format(now) : "235959";
-        var bars = new TreeMap<Instant, Candle>();
-        for (int i = 0; i < 5; i++) {
-            var oldest = bars.isEmpty() ? Instant.MAX : bars.firstKey();
-            var page = queryWith(domestic(stock), KisClient.DOMESTIC + "inquire-time-dailychartprice", "FHKST03010230",
-                    "FID_INPUT_DATE_1", DATE.format(date), "FID_INPUT_HOUR_1", cursor,
-                    "FID_PW_DATA_INCU_YN", "N", "FID_FAKE_TICK_INCU_YN", "N").path("output2");
-            collect(bars, page, KR_MINUTE, SEOUL, date, date);
-            if (page.size() < 120 || bars.isEmpty() || !bars.firstKey().isBefore(oldest)) break;
-            var earlier = bars.firstKey().atZone(SEOUL).minusSeconds(1);
-            if (!earlier.toLocalDate().equals(date)) break;
-            cursor = TIME.format(earlier);
+        var today = now.toLocalDate();
+        var observed = now.atZone(SEOUL).toInstant();
+        var live = session("KR", observed).equals("REGULAR");
+        if (live && latestIsFrom(prior, today, SEOUL)) {
+            var bars = indexed(prior);
+            collect(bars, domesticPage(stock, today, TIME.format(now)), KR_MINUTE, SEOUL, today, today);
+            return List.copyOf(bars.values());
         }
-        return List.copyOf(bars.values());
+
+        var recent = queryWith(domestic(stock), KisClient.DOMESTIC + "inquire-daily-itemchartprice", "FHKST03010100",
+                "FID_INPUT_DATE_1", DATE.format(now.minusDays(14)), "FID_INPUT_DATE_2", DATE.format(today),
+                "FID_PERIOD_DIV_CODE", "D", "FID_ORG_ADJ_PRC", "1").path("output2");
+        var candidates = java.util.stream.StreamSupport.stream(recent.spliterator(), false)
+                .map(row -> row.path(KR_DAILY.date()).asText()).filter(value -> !value.isBlank())
+                .map(value -> LocalDate.parse(value, DATE)).filter(day -> {
+                    var window = MarketHours.window("KR", day);
+                    return window != null && !window.open().isAfter(observed);
+                }).distinct().sorted(java.util.Comparator.reverseOrder()).limit(2).toList();
+        for (var date : candidates) {
+            var window = MarketHours.window("KR", date);
+            var end = observed.isBefore(window.close()) ? observed : window.close();
+            var cursor = TIME.format(end.atZone(SEOUL));
+            var bars = new TreeMap<Instant, Candle>();
+            for (int i = 0; i < 5; i++) {
+                var oldest = bars.isEmpty() ? Instant.MAX : bars.firstKey();
+                var page = domesticPage(stock, date, cursor);
+                collect(bars, page, KR_MINUTE, SEOUL, date, date);
+                if (page.size() < 120 || bars.isEmpty() || !bars.firstKey().isBefore(oldest)
+                        || !bars.firstKey().isAfter(window.open())) break;
+                cursor = TIME.format(bars.firstKey().atZone(SEOUL).minusSeconds(1));
+            }
+            if (!bars.isEmpty()) return List.copyOf(bars.values());
+        }
+        return List.of();
     }
 
-    private List<Candle> overseasIntraday(Stock stock) {
-        var bars = new TreeMap<Instant, Candle>();
+    private JsonNode domesticPage(Stock stock, LocalDate date, String cursor) {
+        return queryWith(domestic(stock), KisClient.DOMESTIC + "inquire-time-dailychartprice", "FHKST03010230",
+                "FID_INPUT_DATE_1", DATE.format(date), "FID_INPUT_HOUR_1", cursor,
+                "FID_PW_DATA_INCU_YN", "N", "FID_FAKE_TICK_INCU_YN", "N").path("output2");
+    }
+
+    private List<Candle> overseasIntraday(Stock stock, List<Candle> prior) {
+        var today = LocalDate.now(NEW_YORK);
+        var incremental = latestIsFrom(prior, today, NEW_YORK);
+        var bars = indexed(incremental ? prior : List.of());
         var cursor = "";
-        LocalDate date = null;
-        for (int i = 0; i < 9; i++) {
+        LocalDate date = incremental ? today : null;
+        LocalDateTime lastPage = null;
+        for (int i = 0; i < 14; i++) {
             var reply = queryWith(overseas(stock), KisClient.OVERSEAS + "inquire-time-itemchartprice", "HHDFS76950200",
                     "NMIN", "1", "PINC", "1", "NREC", "120", "FILL", "", "NEXT", i == 0 ? "" : "1", "KEYB", cursor);
             var page = reply.path("output2");
             if (page.isEmpty()) break;
-            if (date == null) date = LocalDate.parse(page.get(0).path(US_MINUTE.date()).asText(), DATE);
-            var oldest = bars.isEmpty() ? Instant.MAX : bars.firstKey();
-            collect(bars, page, US_MINUTE, NEW_YORK, date, date);
-            if (bars.isEmpty() || !bars.firstKey().isBefore(oldest)) break;
-            var time = bars.firstKey().atZone(NEW_YORK).minusMinutes(1);
-            if (!time.toLocalDate().equals(date)
-                    || !date.equals(LocalDate.parse(page.get(page.size() - 1).path(US_MINUTE.date()).asText(), DATE))) break;
-            cursor = CURSOR.format(time);
+            if (date == null) {
+                for (var row : page) {
+                    var raw = minuteTime(row, US_MINUTE);
+                    var window = MarketHours.window("US", raw.toLocalDate());
+                    if (window != null && window.includesBar(raw.atZone(NEW_YORK).toInstant())) {
+                        date = raw.toLocalDate();
+                        break;
+                    }
+                }
+            }
+            if (date != null) collect(bars, page, US_MINUTE, NEW_YORK, date, date);
+            if (incremental) break;
+            var oldest = minuteTime(page.get(page.size() - 1), US_MINUTE);
+            if ((lastPage != null && !oldest.isBefore(lastPage)) || (date != null
+                    && !oldest.atZone(NEW_YORK).toInstant().isAfter(MarketHours.window("US", date).open()))) break;
+            lastPage = oldest;
+            cursor = CURSOR.format(oldest.minusMinutes(1));
         }
         return List.copyOf(bars.values());
+    }
+
+    private static boolean latestIsFrom(List<Candle> bars, LocalDate date, ZoneId zone) {
+        return !bars.isEmpty() && bars.getLast().startAt().atZone(zone).toLocalDate().equals(date);
+    }
+
+    private static TreeMap<Instant, Candle> indexed(List<Candle> bars) {
+        var result = new TreeMap<Instant, Candle>();
+        for (var bar : bars) result.put(bar.startAt(), bar);
+        return result;
+    }
+
+    private static LocalDateTime minuteTime(JsonNode row, Fields fields) {
+        return LocalDateTime.parse(row.path(fields.date()).asText() + row.path(fields.time()).asText(), CURSOR);
     }
 
     private List<Candle> daily(Stock stock, String range) {
         boolean domestic = stock.market().equals("KR");
         var zone = domestic ? SEOUL : NEW_YORK;
-        var end = LocalDate.now(zone);
-        var start = end.minusMonths(switch (range) { case "1M" -> 1; case "3M" -> 3; default -> 12; });
+        var now = Instant.now();
+        var end = now.atZone(zone).toLocalDate();
+        var window = MarketHours.window(stock.market(), end);
+        if (window == null || now.isBefore(window.open())) end = end.minusDays(1);
+        var start = range.equals("1W") ? end.minusWeeks(1)
+                : end.minusMonths(switch (range) { case "1M" -> 1; case "3M" -> 3; default -> 12; });
         var bars = new TreeMap<Instant, Candle>();
         for (int i = 0; i < 4 && !end.isBefore(start); i++) {
             var reply = domestic
@@ -237,8 +325,11 @@ class KisMarketFeed implements MarketFeed {
             if (sessionDate.isBlank() || row.path(fields.close()).asText().isBlank()) continue;
             var date = LocalDate.parse(sessionDate, DATE);
             if (date.isBefore(from) || date.isAfter(to)) continue;
+            var window = MarketHours.window(zone.equals(SEOUL) ? "KR" : "US", date);
+            if (window == null) continue;
             var time = fields.time().isEmpty() ? date.atStartOfDay(ZoneOffset.UTC).toInstant()
-                    : LocalDateTime.parse(sessionDate + row.path(fields.time()).asText(), CURSOR).atZone(zone).toInstant();
+                    : minuteTime(row, fields).atZone(zone).toInstant();
+            if (!fields.time().isEmpty() && !window.includesBar(time)) continue;
             var close = decimal(row, fields.close());
             if (close.signum() <= 0) continue;
             bars.put(time, new Candle(time, decimal(row, fields.open()), decimal(row, fields.high()),

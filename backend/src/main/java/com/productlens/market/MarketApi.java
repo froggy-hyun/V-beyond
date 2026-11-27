@@ -42,7 +42,7 @@ class MarketApi {
     @GetMapping("/stocks/{id}/candles")
     List<MarketData.Candle> candles(@PathVariable String id,
             @RequestParam(defaultValue = "1m") @Pattern(regexp = "1m|5m|1d") String interval,
-            @RequestParam(defaultValue = "1D") @Pattern(regexp = "1D|1M|3M|1Y") String range) {
+            @RequestParam(defaultValue = "1D") @Pattern(regexp = "1D|1W|1M|3M|1Y") String range) {
         if (interval.equals("1d") == range.equals("1D")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "조회 기간과 봉 단위를 확인하세요.");
         }

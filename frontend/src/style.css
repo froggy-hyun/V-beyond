@@ -184,6 +184,7 @@ small { display: block; color: var(--muted); font-size: .78rem; font-weight: 530
 .detail-price { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 16px }
 .detail-price > strong { font-size: clamp(1.7rem, 4vw, 2.12rem); letter-spacing: -.045em; font-variant-numeric: tabular-nums }
 .quote-meta { color: var(--muted); font-size: .84rem; margin-top: 4px }
+.stock-detail .chart-session { font-size: .76rem; margin: 6px 0 8px }
 .chart-controls { display: flex; align-items: center; justify-content: space-between; gap: 9px; flex-wrap: wrap; margin: 15px 0 9px }
 .segmented { display: flex; width: max-content; max-width: 100%; gap: 2px; border-radius: 8px; background: #edf0f4; padding: 3px }
 .segmented button { min-width: 48px; padding: 7px 10px; background: transparent; border: 0; border-radius: 6px; color: var(--muted); font-weight: 680; font-size: .83rem; white-space: nowrap }

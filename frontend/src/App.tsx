@@ -12,6 +12,7 @@ const Chart = lazy(() => import('./Chart'))
 
 const links = [['/', '시장', HomeIcon], ['/search', '검색', SearchIcon], ['/ai', 'AI 탐색', Sparkles],
   ['/compare', '기업 비교', GitCompareArrows], ['/watchlist', '관심종목', Star]] as const
+const chartRanges = [['1D', '1일'], ['1W', '1주'], ['1M', '1개월'], ['3M', '3개월'], ['1Y', '1년']] as const
 const prompts = ['나트륨이 낮은 라면', 'PTFE 없는 프라이팬', '당류가 낮은 콜라']
 
 export default function App() {
@@ -72,9 +73,9 @@ function StockPage() {
   const mode = useMarketMode()
   const quote = useQuotes([id])[0]
   const time = quote ? quoteTime(quote) : null
-  const range = ['1M', '3M', '1Y'].includes(params.get('range') ?? '') ? params.get('range')! : '1D'
+  const range = chartRanges.find(([value]) => value === params.get('range'))?.[0] ?? '1D'
   const interval = range !== '1D' ? '1d' : params.get('interval') === '5m' ? '5m' : '1m'
-  const bars = useData<Candle[]>('/market' + pathFor(id) + '/candles?interval=' + interval + '&range=' + range, true, mode === 'KIS_REST' && range === '1D' ? 60_000 : undefined)
+  const bars = useData<Candle[]>('/market' + pathFor(id) + '/candles?interval=' + interval + '&range=' + range, true, mode === 'KIS_REST' ? (range === '1D' && quote?.session === 'REGULAR' ? 16_000 : 60_000) : undefined)
   const [watch, setWatch] = useState(readWatchlist)
   const toggle = () => {
     const next = watch.includes(id) ? watch.filter(entry => entry !== id) : [...watch, id]
@@ -95,10 +96,16 @@ function StockPage() {
         {time && <> · {quote.exchangeTimestamp ? '기준' : '조회'} {new Date(time).toLocaleString('ko-KR', { timeZone: quote.exchangeTimestamp && info.market === 'US' ? 'America/New_York' : 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</>}
       </div>}
       <div className="chart-controls">
-        <div className="segmented">{['1D', '1M', '3M', '1Y'].map(value => <button className={range === value ? 'selected' : ''} key={value} onClick={() => setParams({ range: value })}>{value}</button>)}</div>
+        <div className="segmented" role="group" aria-label="차트 조회 구간">{chartRanges.map(([value, label]) => <button className={range === value ? 'selected' : ''} aria-pressed={range === value} key={value} onClick={() => setParams({ range: value })}>{label}</button>)}</div>
         {range === '1D' && <div className="segmented">{[['line', '선'], ['1m', '1분 봉'], ['5m', '5분 봉']].map(([value, label]) => <button key={value} className={(params.get('interval') ?? 'line') === value ? 'selected' : ''} onClick={() => setParams({ range, interval: value })}>{label}</button>)}</div>}
       </div>
-      {bars.data?.length ? <Suspense fallback={<Wait error={null} />}><Chart bars={bars.data} market={info.market} candle={range !== '1D' || ['1m', '5m'].includes(params.get('interval') ?? '')} /></Suspense> : bars.data ? <Empty>표시할 시세가 없습니다.</Empty> : <Wait error={bars.error} />}
+      {mode === 'KIS_REST' && bars.data?.length ? <p className="chart-session">
+        {range === '1D' ? '정규장' : '기간 일봉'} · 마지막 봉 {new Date(bars.data.at(-1)!.startAt).toLocaleString('ko-KR', {
+          timeZone: range !== '1D' ? 'UTC' : info.market === 'KR' ? 'Asia/Seoul' : 'America/New_York',
+          month: 'numeric', day: 'numeric', ...(range === '1D' ? { hour: '2-digit', minute: '2-digit' } as const : {}),
+        })}
+      </p> : null}
+      {bars.data?.length ? <Suspense fallback={<Wait error={null} />}><Chart key={id + range + interval} bars={bars.data} market={info.market} daily={range !== '1D'} candle={range !== '1D' || ['1m', '5m'].includes(params.get('interval') ?? '')} /></Suspense> : bars.data ? <Empty>표시할 시세가 없습니다.</Empty> : <Wait error={bars.error} />}
     </section>
     <aside className="stock-side" aria-label="기업과 판매 상품">
       <section className="panel"><div className="section-heading"><h2>기업 소개</h2><Source href={info.source}>기업 웹사이트</Source></div><p>{info.overview}</p></section>
